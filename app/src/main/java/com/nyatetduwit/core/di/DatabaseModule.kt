@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.nyatetduwit.data.local.NyatetDuwitDatabase
 import com.nyatetduwit.data.local.dao.AccountDao
 import com.nyatetduwit.data.local.dao.CategoryDao
+import com.nyatetduwit.data.local.dao.TransactionDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,5 +39,10 @@ object DatabaseModule {
     @Provides
     fun provideCategoryDao(database: NyatetDuwitDatabase): CategoryDao {
         return database.categoryDao()
+    }
+
+    @Provides
+    fun provideTransactionDao(database: NyatetDuwitDatabase): TransactionDao {
+        return database.transactionDao()
     }
 }

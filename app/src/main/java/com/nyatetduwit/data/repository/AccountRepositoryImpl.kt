@@ -1,6 +1,7 @@
 package com.nyatetduwit.data.repository
 
 import com.nyatetduwit.data.local.dao.AccountDao
+import com.nyatetduwit.data.local.dao.TransactionDao
 import com.nyatetduwit.data.local.entity.AccountEntity
 import com.nyatetduwit.domain.model.Account
 import com.nyatetduwit.domain.model.AccountType
@@ -12,6 +13,7 @@ import javax.inject.Inject
 
 class AccountRepositoryImpl @Inject constructor(
     private val accountDao: AccountDao,
+    private val transactionDao: TransactionDao,
 ) : AccountRepository {
 
     override fun getAllAccounts(): Flow<List<Account>> {
@@ -43,7 +45,7 @@ class AccountRepositoryImpl @Inject constructor(
     }
 
     override suspend fun hasTransactions(accountId: String): Boolean {
-        return accountDao.accountExists(accountId) > 0
+        return transactionDao.countTransactionsByAccount(accountId) > 0
     }
 
     private fun AccountEntity.toDomain(): Account {

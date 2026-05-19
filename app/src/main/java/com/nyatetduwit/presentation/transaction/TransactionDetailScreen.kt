@@ -1,0 +1,234 @@
+package com.nyatetduwit.presentation.transaction
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.nyatetduwit.domain.model.Account
+import com.nyatetduwit.domain.model.Category
+import com.nyatetduwit.domain.model.Transaction
+import com.nyatetduwit.domain.model.TransactionType
+import com.nyatetduwit.presentation.account.formatRupiah
+import java.text.SimpleDateFormat
+import java.util.*
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TransactionDetailScreen(
+    transactionId: String,
+    onNavigateBack: () -> Unit,
+    onEditTransaction: (String) -> Unit,
+    viewModel: TransactionDetailViewModel = hiltViewModel(),
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(transactionId) {
+        viewModel.loadTransaction(transactionId)
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Detail Transaksi") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { onEditTransaction(transactionId) }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit")
+                    }
+                    IconButton(onClick = {
+                        uiState.transaction?.let { viewModel.deleteTransaction(it) }
+                    }) {
+                        Icon(Icons.Default.Delete, contentDescription = "Delete")
+                    }
+                },
+            )
+        },
+    ) { paddingValues ->
+        when {
+            uiState.isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(paddingValues),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            uiState.transaction == null -> {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(paddingValues),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("Transaksi tidak ditemukan")
+                }
+            }
+            else -> {
+                TransactionDetailContent(
+                    transaction = uiState.transaction!!,
+                    account = uiState.account,
+                    toAccount = uiState.toAccount,
+                    category = uiState.category,
+                    modifier = Modifier.fillMaxSize().padding(paddingValues),
+                )
+            }
+        }
+    }
+
+    if (uiState.showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissDeleteDialog() },
+            title = { Text("Hapus Transaksi?") },
+            text = { Text("Transaksi yang dihapus bisa di-undo dalam 3 detik.") },
+            confirmButton = {
+                TextButton(onClick = { viewModel.confirmDelete() }) {
+                    Text("Hapus")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.dismissDeleteDialog() }) {
+                    Text("Batal")
+                }
+            },
+        )
+    }
+}
+
+@Composable
+fun TransactionDetailContent(
+    transaction: Transaction,
+    account: Account?,
+    toAccount: Account?,
+    category: Category?,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = when (transaction.type) {
+                    TransactionType.INCOME -> MaterialTheme.colorScheme.primaryContainer
+                    TransactionType.EXPENSE -> MaterialTheme.colorScheme.errorContainer
+                    TransactionType.TRANSFER -> MaterialTheme.colorScheme.surfaceVariant
+                },
+            ),
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = when (transaction.type) {
+                        TransactionType.INCOME -> "Pemasukan"
+                        TransactionType.EXPENSE -> "Pengeluaran"
+                        TransactionType.TRANSFER -> "Transfer"
+                    },
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = formatTransactionAmount(transaction),
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
+
+        DetailRow(
+            icon = Icons.Default.AccountBalanceWallet,
+            label = "Akun",
+            value = account?.name ?: "Unknown",
+        )
+
+        if (transaction.type == TransactionType.TRANSFER) {
+            DetailRow(
+                icon = Icons.Default.SwapHoriz,
+                label = "Ke Akun",
+                value = toAccount?.name ?: "Unknown",
+            )
+        }
+
+        if (transaction.type != TransactionType.TRANSFER) {
+            DetailRow(
+                icon = Icons.Default.Category,
+                label = "Kategori",
+                value = category?.name ?: "Tidak ada kategori",
+            )
+        }
+
+        transaction.notes?.let { notes ->
+            DetailRow(
+                icon = Icons.Default.Description,
+                label = "Catatan",
+                value = notes,
+            )
+        }
+
+        DetailRow(
+            icon = Icons.Default.Schedule,
+            label = "Tanggal & Waktu",
+            value = formatDateTime(transaction.dateTime),
+        )
+
+        DetailRow(
+            icon = Icons.Default.Info,
+            label = "Dibuat",
+            value = formatDateTime(transaction.createdAt),
+        )
+    }
+}
+
+@Composable
+fun DetailRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Column {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+    }
+}
+
+private fun formatTransactionAmount(transaction: Transaction): String {
+    return when (transaction.type) {
+        TransactionType.INCOME -> "+${formatRupiah(transaction.amount)}"
+        TransactionType.EXPENSE -> "-${formatRupiah(transaction.amount)}"
+        TransactionType.TRANSFER -> formatRupiah(transaction.amount)
+    }
+}
+
+private fun formatDateTime(timestamp: Long): String {
+    val sdf = SimpleDateFormat("d MMM yyyy, HH:mm", Locale("id"))
+    return sdf.format(Date(timestamp))
+}

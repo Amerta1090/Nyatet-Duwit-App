@@ -22,6 +22,14 @@ class GetCategoriesByTypeUseCase @Inject constructor(
     }
 }
 
+class GetCategoryByIdUseCase @Inject constructor(
+    private val repository: CategoryRepository
+) {
+    operator fun invoke(id: String): Flow<Category?> {
+        return repository.getCategoryById(id)
+    }
+}
+
 class AddCategoryUseCase @Inject constructor(
     private val repository: CategoryRepository
 ) {

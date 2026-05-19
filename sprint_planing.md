@@ -367,14 +367,6 @@
 - [ ] Animations smooth (no jank)
 - [ ] Typography readable di semua screen size
 
-### Business
-- [ ] Play Store listing ready
-- [ ] Privacy policy published
-- [ ] Terms of service (kalau perlu)
-- [ ] Support channel ready (email, GitHub issues)
-- [ ] Analytics setup (anonymous, privacy-first)
-- [ ] Crash reporting active
-
 ### Marketing
 - [ ] Screenshots (8 minimum)
 - [ ] Feature graphic

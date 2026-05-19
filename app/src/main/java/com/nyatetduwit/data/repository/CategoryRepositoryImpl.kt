@@ -27,6 +27,12 @@ class CategoryRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getCategoryById(id: String): Flow<Category?> {
+        return categoryDao.getAllCategories().map { entities ->
+            entities.find { it.id == id }?.toDomain()
+        }
+    }
+
     override suspend fun addCategory(category: Category) {
         categoryDao.insert(category.toEntity())
     }

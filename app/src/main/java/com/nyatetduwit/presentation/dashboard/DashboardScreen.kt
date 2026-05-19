@@ -18,6 +18,8 @@ import com.nyatetduwit.presentation.account.AccountViewModel
 fun DashboardScreen(
     onNavigateToAccounts: () -> Unit,
     onNavigateToCategories: () -> Unit,
+    onNavigateToTransactions: () -> Unit,
+    onNavigateToAddTransaction: () -> Unit,
     viewModel: AccountViewModel = hiltViewModel(),
 ) {
     val totalBalance by viewModel.totalBalance.collectAsState()
@@ -27,6 +29,13 @@ fun DashboardScreen(
             TopAppBar(
                 title = { Text("NyatetDuwit") },
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onNavigateToAddTransaction,
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Tambah Transaksi")
+            }
         },
     ) { paddingValues ->
         LazyColumn(
@@ -64,6 +73,15 @@ fun DashboardScreen(
                 Text(
                     text = "Menu",
                     style = MaterialTheme.typography.titleMedium,
+                )
+            }
+
+            item {
+                MenuCard(
+                    icon = Icons.Default.SwapHoriz,
+                    title = "Transaksi",
+                    description = "Lihat dan kelola semua transaksi",
+                    onClick = onNavigateToTransactions,
                 )
             }
 
