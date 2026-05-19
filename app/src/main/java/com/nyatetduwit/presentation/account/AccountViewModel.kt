@@ -179,6 +179,26 @@ class AccountViewModel @Inject constructor(
     fun clearSuccess() {
         _uiState.update { it.copy(isSuccess = false) }
     }
+
+    fun reorderAccount(fromIndex: Int, toIndex: Int) {
+        viewModelScope.launch {
+            try {
+                val currentAccounts = accounts.value.toMutableList()
+                if (fromIndex < 0 || fromIndex >= currentAccounts.size || toIndex < 0 || toIndex >= currentAccounts.size) return@launch
+
+                val movedItem = currentAccounts.removeAt(fromIndex)
+                currentAccounts.add(toIndex, movedItem)
+
+                currentAccounts.forEachIndexed { index, account ->
+                    if (account.orderIndex != index) {
+                        updateAccountUseCase(account.copy(orderIndex = index, updatedAt = System.currentTimeMillis()))
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.message) }
+            }
+        }
+    }
 }
 
 data class AccountUiState(

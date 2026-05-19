@@ -33,6 +33,9 @@ fun NyatetDuwitNavHost(
                 onNavigateToCategories = { navController.navigate(Screen.Categories.route) },
                 onNavigateToTransactions = { navController.navigate(Screen.Transactions.route) },
                 onNavigateToAddTransaction = { navController.navigate(Screen.TransactionForm.createRoute()) },
+                onNavigateToTransactionDetail = { transactionId ->
+                    navController.navigate(Screen.TransactionDetail.createRoute(transactionId))
+                },
             )
         }
 

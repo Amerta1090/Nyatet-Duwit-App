@@ -2,9 +2,11 @@ package com.nyatetduwit.core.di
 
 import com.nyatetduwit.data.repository.AccountRepositoryImpl
 import com.nyatetduwit.data.repository.CategoryRepositoryImpl
+import com.nyatetduwit.data.repository.SettingsRepositoryImpl
 import com.nyatetduwit.data.repository.TransactionRepositoryImpl
 import com.nyatetduwit.domain.repository.AccountRepository
 import com.nyatetduwit.domain.repository.CategoryRepository
+import com.nyatetduwit.domain.repository.SettingsRepository
 import com.nyatetduwit.domain.repository.TransactionRepository
 import dagger.Binds
 import dagger.Module
@@ -27,4 +29,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindTransactionRepository(impl: TransactionRepositoryImpl): TransactionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository
 }

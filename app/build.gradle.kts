@@ -97,7 +97,10 @@ dependencies {
 
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
+    implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
+
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.3.1")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))

@@ -1,9 +1,11 @@
 package com.nyatetduwit.presentation.account
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -17,12 +19,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nyatetduwit.domain.model.Account
 import com.nyatetduwit.domain.model.AccountType
+import org.burnoutcrew.reorderable.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
-    onNavigateToAccounts: () -> Unit = {},
-    onNavigateToCategories: () -> Unit = {},
     onNavigateBack: (() -> Unit)? = null,
     onAddAccount: () -> Unit = {},
     onEditAccount: (String) -> Unit = {},
@@ -31,6 +32,13 @@ fun AccountScreen(
     val accounts by viewModel.accounts.collectAsState()
     val totalBalance by viewModel.totalBalance.collectAsState()
     var showDeleteDialog by remember { mutableStateOf<Account?>(null) }
+
+    val state = rememberReorderableLazyListState(
+        lazyListState = rememberLazyListState(),
+        onMove = { from, to ->
+            viewModel.reorderAccount(from.index, to.index)
+        },
+    )
 
     Scaffold(
         topBar = {
@@ -58,7 +66,10 @@ fun AccountScreen(
             )
         } else {
             LazyColumn(
-                modifier = Modifier.padding(paddingValues),
+                state = state.listState,
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .reorderable(state),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
@@ -71,7 +82,16 @@ fun AccountScreen(
                         account = account,
                         onEdit = { onEditAccount(account.id) },
                         onDelete = { showDeleteDialog = account },
-                    )
+                        modifier = Modifier.reorderableItem(state, key = account.id),
+                    ) { isDragging ->
+                        val alpha = if (isDragging) 0.5f else 1f
+                        AccountItemContent(
+                            account = account,
+                            onEdit = { onEditAccount(account.id) },
+                            onDelete = { showDeleteDialog = account },
+                            modifier = Modifier.alpha(alpha),
+                        )
+                    }
                 }
             }
         }
@@ -101,40 +121,28 @@ fun AccountScreen(
 }
 
 @Composable
-private fun TotalBalanceCard(balance: Long) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = "Total Saldo",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = formatRupiah(balance),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-        }
-    }
-}
-
-@Composable
 private fun AccountItem(
     account: Account,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable (Boolean) -> Unit,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    Box(modifier = modifier) {
+        content(false)
+    }
+}
+
+@Composable
+private fun AccountItemContent(
+    account: Account,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onEdit() },
     ) {
@@ -145,10 +153,19 @@ private fun AccountItem(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
+                imageVector = Icons.Default.DragIndicator,
+                contentDescription = "Reorder",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp),
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Icon(
                 imageVector = getAccountTypeIcon(account.type),
                 contentDescription = null,
                 modifier = Modifier.size(32.dp),
-                tint = Color(account.color.substring(1).toLong(16) or 0xFF000000),
+                tint = runCatching {
+                    Color(account.color.substring(1).toLong(16) or 0xFF000000)
+                }.getOrElse { MaterialTheme.colorScheme.primary },
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -176,6 +193,33 @@ private fun AccountItem(
                     tint = MaterialTheme.colorScheme.error,
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun TotalBalanceCard(balance: Long) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = "Total Saldo",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = formatRupiah(balance),
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
         }
     }
 }
