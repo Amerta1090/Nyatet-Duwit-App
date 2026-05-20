@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
 }
@@ -44,16 +45,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        jvmToolchain(17)
     }
 
     buildFeatures {
         compose = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.15"
     }
 
     packaging {
@@ -64,16 +61,16 @@ android {
 }
 
 dependencies {
-    val composeBomVersion = "2024.06.00"
-    val lifecycleVersion = "2.8.3"
-    val navigationVersion = "2.7.7"
+    val composeBomVersion = "2024.12.01"
+    val lifecycleVersion = "2.8.7"
+    val navigationVersion = "2.8.5"
     val roomVersion = "2.6.1"
-    val hiltVersion = "2.51.1"
-    val coroutinesVersion = "1.8.1"
+    val hiltVersion = "2.52"
+    val coroutinesVersion = "1.9.0"
 
-    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
-    implementation("androidx.activity:activity-compose:1.9.0")
+    implementation("androidx.activity:activity-compose:1.9.3")
 
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.compose.ui:ui")
@@ -96,6 +93,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
 
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
+    implementation("androidx.hilt:hilt-work:1.2.0")
+    ksp("androidx.hilt:hilt-compiler:1.2.0")
 
     implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
 

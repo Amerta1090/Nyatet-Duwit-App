@@ -9,9 +9,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.nyatetduwit.presentation.account.AccountFormScreen
 import com.nyatetduwit.presentation.account.AccountScreen
+import com.nyatetduwit.presentation.budget.BudgetFormScreen
+import com.nyatetduwit.presentation.budget.BudgetScreen
 import com.nyatetduwit.presentation.category.CategoryFormScreen
 import com.nyatetduwit.presentation.category.CategoryScreen
 import com.nyatetduwit.presentation.dashboard.DashboardScreen
+import com.nyatetduwit.presentation.recurring.RecurringTransactionFormScreen
+import com.nyatetduwit.presentation.recurring.RecurringTransactionScreen
 import com.nyatetduwit.presentation.transaction.TransactionDetailScreen
 import com.nyatetduwit.presentation.transaction.TransactionFormScreen
 import com.nyatetduwit.presentation.transaction.TransactionListScreen
@@ -32,6 +36,8 @@ fun NyatetDuwitNavHost(
                 onNavigateToAccounts = { navController.navigate(Screen.Accounts.route) },
                 onNavigateToCategories = { navController.navigate(Screen.Categories.route) },
                 onNavigateToTransactions = { navController.navigate(Screen.Transactions.route) },
+                onNavigateToBudgets = { navController.navigate(Screen.Budgets.route) },
+                onNavigateToRecurring = { navController.navigate(Screen.Recurring.route) },
                 onNavigateToAddTransaction = { navController.navigate(Screen.TransactionForm.createRoute()) },
                 onNavigateToTransactionDetail = { transactionId ->
                     navController.navigate(Screen.TransactionDetail.createRoute(transactionId))
@@ -119,6 +125,45 @@ fun NyatetDuwitNavHost(
                 onEditTransaction = { id ->
                     navController.navigate(Screen.TransactionForm.createRoute(id))
                 },
+            )
+        }
+
+        composable(Screen.Budgets.route) {
+            BudgetScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onAddBudget = { navController.navigate(Screen.BudgetForm.createRoute()) },
+                onEditBudget = { budgetId ->
+                    navController.navigate(Screen.BudgetForm.createRoute(budgetId))
+                },
+            )
+        }
+
+        composable(
+            route = Screen.BudgetForm.route,
+            arguments = listOf(navArgument("budgetId") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val budgetId = backStackEntry.arguments?.getString("budgetId")
+            BudgetFormScreen(
+                budgetId = if (budgetId == "null") null else budgetId,
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(Screen.Recurring.route) {
+            RecurringTransactionScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onAddRecurring = { navController.navigate(Screen.RecurringForm.createRoute()) },
+            )
+        }
+
+        composable(
+            route = Screen.RecurringForm.route,
+            arguments = listOf(navArgument("recurringId") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val recurringId = backStackEntry.arguments?.getString("recurringId")
+            RecurringTransactionFormScreen(
+                recurringId = if (recurringId == "null") null else recurringId,
+                onNavigateBack = { navController.popBackStack() },
             )
         }
     }

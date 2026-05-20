@@ -39,22 +39,22 @@ class TransactionDetailViewModel @Inject constructor(
     fun loadTransaction(transactionId: String) {
         viewModelScope.launch {
             getTransactionByIdUseCase(transactionId).collect { transaction ->
-                transaction?.let {
-                    _uiState.update { it.copy(transaction = it, isLoading = false) }
+                transaction?.let { tx ->
+                    _uiState.update { it.copy(transaction = tx, isLoading = false) }
 
-                    getAccountByIdUseCase(it.accountId).collect { account ->
+                    getAccountByIdUseCase(tx.accountId).collect { account ->
                         _uiState.update { it.copy(account = account) }
                     }
 
-                    if (it.type == com.nyatetduwit.domain.model.TransactionType.TRANSFER) {
-                        it.toAccountId?.let { toId ->
+                    if (tx.type == com.nyatetduwit.domain.model.TransactionType.TRANSFER) {
+                        tx.toAccountId?.let { toId ->
                             getAccountByIdUseCase(toId).collect { toAccount ->
                                 _uiState.update { it.copy(toAccount = toAccount) }
                             }
                         }
                     }
 
-                    it.categoryId?.let { catId ->
+                    tx.categoryId?.let { catId ->
                         getCategoryByIdUseCase(catId).collect { category ->
                             _uiState.update { it.copy(category = category) }
                         }

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,42 +24,48 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun CustomNumpad(
-    onNumberClick: (String) -> Unit,
-    onBackspaceClick: () -> Unit,
-    onPresetClick: (Long) -> Unit,
+    onNumberClick: (String) -> Unit = {},
+    onBackspaceClick: () -> Unit = {},
+    onPresetClick: (Long) -> Unit = {},
+    onAmountConfirmed: (Long) -> Unit = {},
+    currentAmount: Long = 0L,
+    confirmLabel: String? = null,
     modifier: Modifier = Modifier,
     presets: List<Long> = listOf(5_000, 10_000, 20_000, 50_000, 100_000),
 ) {
     val haptic = LocalHapticFeedback.current
+    val showPresets = confirmLabel == null
 
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-        ) {
-            presets.forEach { preset ->
-                TextButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        onPresetClick(preset)
-                    },
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Text(formatRupiahShort(preset))
+        if (showPresets) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            ) {
+                presets.forEach { preset ->
+                    TextButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onPresetClick(preset)
+                        },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(formatRupiahShort(preset))
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
         val keys = listOf(
             listOf("1", "2", "3"),
             listOf("4", "5", "6"),
             listOf("7", "8", "9"),
-            listOf("000", "0", ""),
+            listOf("000", "0", if (confirmLabel != null) "confirm" else ""),
         )
 
         keys.forEach { row ->
@@ -69,32 +74,50 @@ fun CustomNumpad(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 row.forEach { key ->
-                    if (key.isEmpty()) {
-                        TextButton(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                onBackspaceClick()
-                            },
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Default.Backspace,
-                                contentDescription = "Backspace",
-                                modifier = Modifier.size(24.dp),
-                            )
+                    when {
+                        key == "confirm" -> {
+                            TextButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    onAmountConfirmed(currentAmount)
+                                },
+                                modifier = Modifier.weight(1f),
+                                enabled = currentAmount > 0,
+                            ) {
+                                Text(
+                                    text = confirmLabel ?: "",
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                            }
                         }
-                    } else {
-                        TextButton(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                onNumberClick(key)
-                            },
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            Text(
-                                text = key,
-                                style = MaterialTheme.typography.titleLarge,
-                            )
+                        key.isEmpty() -> {
+                            TextButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    onBackspaceClick()
+                                },
+                                modifier = Modifier.weight(1f),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Default.Backspace,
+                                    contentDescription = "Backspace",
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                        }
+                        else -> {
+                            TextButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    onNumberClick(key)
+                                },
+                                modifier = Modifier.weight(1f),
+                            ) {
+                                Text(
+                                    text = key,
+                                    style = MaterialTheme.typography.titleLarge,
+                                )
+                            }
                         }
                     }
                 }

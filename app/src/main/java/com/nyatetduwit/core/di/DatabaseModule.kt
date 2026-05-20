@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import com.nyatetduwit.data.local.NyatetDuwitDatabase
 import com.nyatetduwit.data.local.dao.AccountDao
+import com.nyatetduwit.data.local.dao.BudgetDao
 import com.nyatetduwit.data.local.dao.CategoryDao
+import com.nyatetduwit.data.local.dao.RecurringTransactionDao
 import com.nyatetduwit.data.local.dao.TransactionDao
 import dagger.Module
 import dagger.Provides
@@ -44,5 +46,15 @@ object DatabaseModule {
     @Provides
     fun provideTransactionDao(database: NyatetDuwitDatabase): TransactionDao {
         return database.transactionDao()
+    }
+
+    @Provides
+    fun provideBudgetDao(database: NyatetDuwitDatabase): BudgetDao {
+        return database.budgetDao()
+    }
+
+    @Provides
+    fun provideRecurringTransactionDao(database: NyatetDuwitDatabase): RecurringTransactionDao {
+        return database.recurringTransactionDao()
     }
 }

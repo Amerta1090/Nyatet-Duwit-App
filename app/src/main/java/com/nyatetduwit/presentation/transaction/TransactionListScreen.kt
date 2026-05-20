@@ -34,11 +34,12 @@ fun TransactionListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val showUndoSnackbar by viewModel.showUndoSnackbar.collectAsState()
-    val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val haptic = LocalHapticFeedback.current
 
     LaunchedEffect(showUndoSnackbar) {
         if (showUndoSnackbar) {
-            scaffoldState.snackbarHostState.showSnackbar(
+            snackbarHostState.showSnackbar(
                 message = "Transaksi dihapus",
                 actionLabel = "Undo",
                 duration = SnackbarDuration.Short,
@@ -66,14 +67,14 @@ fun TransactionListScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    LocalHapticFeedback.current.performHapticFeedback(HapticFeedbackType.LongPress)
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     onNavigateToAddTransaction()
                 },
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Transaction")
             }
         },
-        snackbarHost = { SnackbarHost(scaffoldState.snackbarHostState) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         when {
             uiState.isLoading -> {

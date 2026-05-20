@@ -4,7 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nyatetduwit.domain.model.Account
 import com.nyatetduwit.domain.model.AccountType
-import com.nyatetduwit.domain.usecase.account.*
+import com.nyatetduwit.domain.usecase.account.AddAccountUseCase
+import com.nyatetduwit.domain.usecase.account.CheckAccountTransactionsUseCase
+import com.nyatetduwit.domain.usecase.account.DeleteAccountUseCase
+import com.nyatetduwit.domain.usecase.account.GetAccountByIdUseCase
+import com.nyatetduwit.domain.usecase.account.GetAccountsUseCase
+import com.nyatetduwit.domain.usecase.account.GetTotalBalanceUseCase
+import com.nyatetduwit.domain.usecase.account.UpdateAccountUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -14,7 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AccountViewModel @Inject constructor(
     getAccountsUseCase: GetAccountsUseCase,
-    getAccountByIdUseCase: GetAccountByIdUseCase,
+    private val getAccountByIdUseCase: GetAccountByIdUseCase,
     getTotalBalanceUseCase: GetTotalBalanceUseCase,
     private val addAccountUseCase: AddAccountUseCase,
     private val updateAccountUseCase: UpdateAccountUseCase,

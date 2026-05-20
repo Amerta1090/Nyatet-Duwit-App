@@ -147,6 +147,32 @@ interface TransactionDao {
         endDate: Long,
         limit: Int = 3
     ): Flow<List<CategoryExpenseSummary>>
+
+    @Query(
+        """
+        SELECT COALESCE(SUM(amount), 0) FROM transactions 
+        WHERE category_id = :categoryId AND is_deleted = 0 
+        AND date_time >= :startDate AND date_time <= :endDate
+        """
+    )
+    suspend fun getSumByCategoryAndDateRange(
+        categoryId: String,
+        startDate: Long,
+        endDate: Long
+    ): Long
+
+    @Query(
+        """
+        SELECT COALESCE(SUM(amount), 0) FROM transactions 
+        WHERE type = :type AND is_deleted = 0 
+        AND date_time >= :startDate AND date_time <= :endDate
+        """
+    )
+    suspend fun getSumByTypeAndDateRangeSync(
+        type: String,
+        startDate: Long,
+        endDate: Long
+    ): Long
 }
 
 data class CategoryExpenseSummary(

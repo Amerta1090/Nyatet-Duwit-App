@@ -1,7 +1,10 @@
 package com.nyatetduwit.presentation.transaction
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -166,23 +169,26 @@ fun TransactionTypeSelector(
         modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        listOf(
-            TransactionType.EXPENSE to "Pengeluaran" to Icons.Default.ArrowDownward,
-            TransactionType.INCOME to "Pemasukan" to Icons.Default.ArrowUpward,
-            TransactionType.TRANSFER to "Transfer" to Icons.Default.SwapHoriz,
-        ).forEach { (type, label, icon) ->
+        val types = listOf(
+            Triple(TransactionType.EXPENSE, "Pengeluaran", Icons.Default.ArrowDownward),
+            Triple(TransactionType.INCOME, "Pemasukan", Icons.Default.ArrowUpward),
+            Triple(TransactionType.TRANSFER, "Transfer", Icons.Default.SwapHoriz),
+        )
+        types.forEach { (type, label, icon) ->
             val isSelected = type == selectedType
-            OutlinedCard(
+            Card(
                 modifier = Modifier.weight(1f).clickable {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     onTypeSelected(type)
                 },
-                colors = CardDefaults.outlinedCardColors(
+                colors = CardDefaults.cardColors(
                     containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
                 ),
                 border = if (isSelected) {
-                    androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-                } else null,
+                    BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+                } else {
+                    BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                },
             ) {
                 Column(
                     modifier = Modifier.padding(12.dp).fillMaxWidth(),

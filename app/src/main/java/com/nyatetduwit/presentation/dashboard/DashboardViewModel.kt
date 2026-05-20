@@ -102,13 +102,16 @@ class DashboardViewModel @Inject constructor(
                 totalBalanceFlow,
                 monthlyIncomeFlow,
                 monthlyExpenseFlow,
-                topCategoriesFlow,
-                recentTransactionsFlow,
-                categoriesFlow,
-            ) { totalBalance, monthlyIncome, monthlyExpense, topCategoriesRaw, recentTransactions, allCategories ->
+            ) { totalBalance, monthlyIncome, monthlyExpense ->
+                Triple(totalBalance, monthlyIncome, monthlyExpense)
+            }.combine(topCategoriesFlow) { (totalBalance, monthlyIncome, monthlyExpense), topCategoriesRaw ->
+                Quad(totalBalance, monthlyIncome, monthlyExpense, topCategoriesRaw)
+            }.combine(recentTransactionsFlow) { quad, recentTransactions ->
+                Quint(quad.totalBalance, quad.monthlyIncome, quad.monthlyExpense, quad.topCategoriesRaw, recentTransactions)
+            }.combine(categoriesFlow) { quint, allCategories ->
                 val categoryMap = allCategories.associateBy { it.id }
 
-                val topCategories = topCategoriesRaw.map { (categoryId, total) ->
+                val topCategories = quint.topCategoriesRaw.map { (categoryId, total) ->
                     val category = categoryMap[categoryId]
                     TopCategoryItem(
                         categoryId = categoryId,
@@ -120,11 +123,11 @@ class DashboardViewModel @Inject constructor(
                 }
 
                 DashboardUiState(
-                    totalBalance = totalBalance,
-                    monthlyIncome = monthlyIncome,
-                    monthlyExpense = monthlyExpense,
+                    totalBalance = quint.totalBalance,
+                    monthlyIncome = quint.monthlyIncome,
+                    monthlyExpense = quint.monthlyExpense,
                     topCategories = topCategories,
-                    recentTransactions = recentTransactions,
+                    recentTransactions = quint.recentTransactions,
                     isBalanceVisible = _uiState.value.isBalanceVisible,
                     isLoading = false,
                 )
@@ -135,6 +138,10 @@ class DashboardViewModel @Inject constructor(
             }
         }
     }
+
+    private data class Triple<A, B, C>(val a: A, val b: B, val c: C)
+    private data class Quad<A, B, C, D>(val totalBalance: A, val monthlyIncome: B, val monthlyExpense: C, val topCategoriesRaw: D)
+    private data class Quint<A, B, C, D, E>(val totalBalance: A, val monthlyIncome: B, val monthlyExpense: C, val topCategoriesRaw: D, val recentTransactions: E)
 
     fun toggleBalanceVisibility() {
         val newValue = !_uiState.value.isBalanceVisible

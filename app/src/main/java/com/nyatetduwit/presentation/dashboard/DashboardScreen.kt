@@ -25,6 +25,8 @@ fun DashboardScreen(
     onNavigateToAccounts: () -> Unit,
     onNavigateToCategories: () -> Unit,
     onNavigateToTransactions: () -> Unit,
+    onNavigateToBudgets: () -> Unit,
+    onNavigateToRecurring: () -> Unit,
     onNavigateToAddTransaction: () -> Unit,
     onNavigateToTransactionDetail: (String) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
@@ -133,6 +135,8 @@ fun DashboardScreen(
                         onNavigateToAccounts = onNavigateToAccounts,
                         onNavigateToCategories = onNavigateToCategories,
                         onNavigateToTransactions = onNavigateToTransactions,
+                        onNavigateToBudgets = onNavigateToBudgets,
+                        onNavigateToRecurring = onNavigateToRecurring,
                     )
                 }
 
@@ -354,6 +358,8 @@ private fun MenuSection(
     onNavigateToAccounts: () -> Unit,
     onNavigateToCategories: () -> Unit,
     onNavigateToTransactions: () -> Unit,
+    onNavigateToBudgets: () -> Unit,
+    onNavigateToRecurring: () -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -379,6 +385,18 @@ private fun MenuSection(
             title = "Kategori",
             description = "Kelola kategori pemasukan & pengeluaran",
             onClick = onNavigateToCategories,
+        )
+        MenuCard(
+            icon = Icons.Default.PieChart,
+            title = "Budget",
+            description = "Set dan pantau budget bulanan",
+            onClick = onNavigateToBudgets,
+        )
+        MenuCard(
+            icon = Icons.Default.Repeat,
+            title = "Transaksi Berulang",
+            description = "Kelola transaksi otomatis berulang",
+            onClick = onNavigateToRecurring,
         )
     }
 }

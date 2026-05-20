@@ -1,7 +1,6 @@
 package com.nyatetduwit.presentation.account
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nyatetduwit.domain.model.Account
 import com.nyatetduwit.domain.model.AccountType
-import org.burnoutcrew.reorderable.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,13 +30,7 @@ fun AccountScreen(
     val accounts by viewModel.accounts.collectAsState()
     val totalBalance by viewModel.totalBalance.collectAsState()
     var showDeleteDialog by remember { mutableStateOf<Account?>(null) }
-
-    val state = rememberReorderableLazyListState(
-        lazyListState = rememberLazyListState(),
-        onMove = { from, to ->
-            viewModel.reorderAccount(from.index, to.index)
-        },
-    )
+    val lazyListState = rememberLazyListState()
 
     Scaffold(
         topBar = {
@@ -66,10 +58,9 @@ fun AccountScreen(
             )
         } else {
             LazyColumn(
-                state = state.listState,
+                state = lazyListState,
                 modifier = Modifier
-                    .padding(paddingValues)
-                    .reorderable(state),
+                    .padding(paddingValues),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
@@ -82,16 +73,7 @@ fun AccountScreen(
                         account = account,
                         onEdit = { onEditAccount(account.id) },
                         onDelete = { showDeleteDialog = account },
-                        modifier = Modifier.reorderableItem(state, key = account.id),
-                    ) { isDragging ->
-                        val alpha = if (isDragging) 0.5f else 1f
-                        AccountItemContent(
-                            account = account,
-                            onEdit = { onEditAccount(account.id) },
-                            onDelete = { showDeleteDialog = account },
-                            modifier = Modifier.alpha(alpha),
-                        )
-                    }
+                    )
                 }
             }
         }
@@ -126,12 +108,13 @@ private fun AccountItem(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable (Boolean) -> Unit,
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    Box(modifier = modifier) {
-        content(false)
-    }
+    AccountItemContent(
+        account = account,
+        onEdit = onEdit,
+        onDelete = onDelete,
+        modifier = modifier,
+    )
 }
 
 @Composable
@@ -263,13 +246,13 @@ private fun EmptyAccountState(
     }
 }
 
-private fun getAccountTypeIcon(type: AccountType) = when (type) {
+internal fun getAccountTypeIcon(type: AccountType) = when (type) {
     AccountType.CASH -> Icons.Default.Payments
     AccountType.BANK -> Icons.Default.AccountBalance
     AccountType.E_WALLET -> Icons.Default.PhoneAndroid
 }
 
-private fun getAccountTypeLabel(type: AccountType) = when (type) {
+internal fun getAccountTypeLabel(type: AccountType) = when (type) {
     AccountType.CASH -> "Cash"
     AccountType.BANK -> "Bank"
     AccountType.E_WALLET -> "E-Wallet"
