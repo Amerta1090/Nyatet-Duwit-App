@@ -367,14 +367,6 @@
 - [ ] Animations smooth (no jank)
 - [ ] Typography readable di semua screen size
 
-### Marketing
-- [ ] Screenshots (8 minimum)
-- [ ] Feature graphic
-- [ ] App description (bahasa Indonesia + English)
-- [ ] Short description (80 chars)
-- [ ] Promo video (optional tapi recommended)
-- [ ] Social media accounts ready
-
 ---
 
 ## V2 SPRINT OVERVIEW (Month 4-6)

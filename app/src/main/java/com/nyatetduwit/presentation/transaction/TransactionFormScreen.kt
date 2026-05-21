@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -91,6 +93,16 @@ fun TransactionFormScreen(
                 selectedType = formState.type,
                 onTypeSelected = { viewModel.setType(it) },
             )
+
+            if (uiState.templates.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TemplateChips(
+                    templates = uiState.templates,
+                    onTemplateClick = { viewModel.applyTemplate(it) },
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -410,4 +422,56 @@ fun NotesField(
         modifier = modifier.fillMaxWidth(),
         maxLines = 3,
     )
+}
+
+@Composable
+fun TemplateChips(
+    templates: List<com.nyatetduwit.domain.model.Template>,
+    onTemplateClick: (com.nyatetduwit.domain.model.Template) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Default.Star,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(16.dp),
+            )
+            Text(
+                text = "Template",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(templates) { template ->
+                SuggestionChip(
+                    onClick = { onTemplateClick(template) },
+                    label = {
+                        Text(
+                            text = template.name,
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                    },
+                    icon = {
+                        Text(
+                            text = when (template.type) {
+                                TransactionType.INCOME -> "📈"
+                                TransactionType.EXPENSE -> "📉"
+                                TransactionType.TRANSFER -> "🔄"
+                            },
+                        )
+                    },
+                )
+            }
+        }
+    }
 }

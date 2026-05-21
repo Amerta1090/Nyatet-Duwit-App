@@ -113,6 +113,37 @@ class TransactionRepositoryImpl @Inject constructor(
         return transactionDao.countTransactionsByAccount(accountId) > 0
     }
 
+    override fun searchTransactions(query: String): Flow<List<Transaction>> {
+        return transactionDao.searchTransactions(query).map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override fun filterTransactions(
+        type: String?,
+        categoryId: String?,
+        accountId: String?,
+        startDate: Long?,
+        endDate: Long?
+    ): Flow<List<Transaction>> {
+        return transactionDao.filterTransactions(type, categoryId, accountId, startDate, endDate).map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override fun searchAndFilterTransactions(
+        query: String?,
+        type: String?,
+        categoryId: String?,
+        accountId: String?,
+        startDate: Long?,
+        endDate: Long?
+    ): Flow<List<Transaction>> {
+        return transactionDao.searchAndFilterTransactions(query, type, categoryId, accountId, startDate, endDate).map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
     private fun TransactionEntity.toDomain(): Transaction {
         return Transaction(
             id = id,

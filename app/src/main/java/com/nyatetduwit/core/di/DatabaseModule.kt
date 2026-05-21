@@ -7,6 +7,7 @@ import com.nyatetduwit.data.local.dao.AccountDao
 import com.nyatetduwit.data.local.dao.BudgetDao
 import com.nyatetduwit.data.local.dao.CategoryDao
 import com.nyatetduwit.data.local.dao.RecurringTransactionDao
+import com.nyatetduwit.data.local.dao.TemplateDao
 import com.nyatetduwit.data.local.dao.TransactionDao
 import dagger.Module
 import dagger.Provides
@@ -56,5 +57,10 @@ object DatabaseModule {
     @Provides
     fun provideRecurringTransactionDao(database: NyatetDuwitDatabase): RecurringTransactionDao {
         return database.recurringTransactionDao()
+    }
+
+    @Provides
+    fun provideTemplateDao(database: NyatetDuwitDatabase): TemplateDao {
+        return database.templateDao()
     }
 }

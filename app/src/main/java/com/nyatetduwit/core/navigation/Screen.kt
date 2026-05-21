@@ -7,6 +7,7 @@ sealed class Screen(val route: String) {
     data object Transactions : Screen("transactions")
     data object Budgets : Screen("budgets")
     data object Recurring : Screen("recurring")
+    data object Templates : Screen("templates")
     data object AccountForm : Screen("account_form/{accountId}") {
         fun createRoute(accountId: String? = null) =
             if (accountId != null) "account_form/$accountId" else "account_form/null"

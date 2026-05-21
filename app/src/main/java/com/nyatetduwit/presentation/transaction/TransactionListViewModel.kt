@@ -2,23 +2,36 @@ package com.nyatetduwit.presentation.transaction
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nyatetduwit.domain.model.Account
+import com.nyatetduwit.domain.model.Category
 import com.nyatetduwit.domain.model.Transaction
-import com.nyatetduwit.domain.usecase.transaction.GetTransactionsUseCase
+import com.nyatetduwit.domain.model.TransactionType
+import com.nyatetduwit.domain.usecase.account.GetAccountsUseCase
+import com.nyatetduwit.domain.usecase.category.GetCategoriesUseCase
+import com.nyatetduwit.domain.usecase.template.CreateTemplateFromTransactionUseCase
+import com.nyatetduwit.domain.usecase.transaction.SearchAndFilterTransactionsUseCase
 import com.nyatetduwit.domain.usecase.transaction.SoftDeleteTransactionUseCase
 import com.nyatetduwit.domain.usecase.transaction.RestoreTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 
-data class TransactionListUiState(
-    val transactions: List<TransactionGroupedByDate> = emptyList(),
-    val isLoading: Boolean = true,
-    val isError: Boolean = false,
-    val errorMessage: String? = null,
-)
+data class TransactionFilterState(
+    val query: String = "",
+    val type: TransactionType? = null,
+    val categoryId: String? = null,
+    val accountId: String? = null,
+    val startDate: Long? = null,
+    val endDate: Long? = null,
+) {
+    val hasActiveFilters: Boolean
+        get() = query.isNotBlank() || type != null || categoryId != null || accountId != null || startDate != null || endDate != null
+}
 
 data class TransactionGroupedByDate(
     val dateLabel: String,
@@ -26,11 +39,24 @@ data class TransactionGroupedByDate(
     val transactions: List<Transaction>,
 )
 
+data class TransactionListUiState(
+    val transactions: List<TransactionGroupedByDate> = emptyList(),
+    val isLoading: Boolean = true,
+    val isError: Boolean = false,
+    val errorMessage: String? = null,
+    val filterState: TransactionFilterState = TransactionFilterState(),
+    val accounts: List<Account> = emptyList(),
+    val categories: List<Category> = emptyList(),
+)
+
 @HiltViewModel
 class TransactionListViewModel @Inject constructor(
-    private val getTransactionsUseCase: GetTransactionsUseCase,
+    private val searchAndFilterUseCase: SearchAndFilterTransactionsUseCase,
     private val softDeleteTransactionUseCase: SoftDeleteTransactionUseCase,
     private val restoreTransactionUseCase: RestoreTransactionUseCase,
+    private val getAccountsUseCase: GetAccountsUseCase,
+    private val getCategoriesUseCase: GetCategoriesUseCase,
+    private val createTemplateFromTransactionUseCase: CreateTemplateFromTransactionUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionListUiState())
@@ -40,14 +66,41 @@ class TransactionListViewModel @Inject constructor(
     val showUndoSnackbar: StateFlow<Boolean> = _showUndoSnackbar.asStateFlow()
 
     private var lastDeletedTransactionId: String? = null
+    private var searchJob: Job? = null
 
     init {
+        loadAccounts()
+        loadCategories()
         loadTransactions()
+    }
+
+    private fun loadAccounts() {
+        viewModelScope.launch {
+            getAccountsUseCase().collect { accounts ->
+                _uiState.update { it.copy(accounts = accounts) }
+            }
+        }
+    }
+
+    private fun loadCategories() {
+        viewModelScope.launch {
+            getCategoriesUseCase().collect { categories ->
+                _uiState.update { it.copy(categories = categories) }
+            }
+        }
     }
 
     private fun loadTransactions() {
         viewModelScope.launch {
-            getTransactionsUseCase()
+            val filter = _uiState.value.filterState
+            searchAndFilterUseCase(
+                query = if (filter.query.isBlank()) null else filter.query,
+                type = filter.type?.value,
+                categoryId = filter.categoryId,
+                accountId = filter.accountId,
+                startDate = filter.startDate,
+                endDate = filter.endDate,
+            )
                 .catch { e ->
                     _uiState.update {
                         it.copy(
@@ -67,6 +120,45 @@ class TransactionListViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    fun updateSearchQuery(query: String) {
+        _uiState.update {
+            it.copy(filterState = it.filterState.copy(query = query))
+        }
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            delay(300)
+            loadTransactions()
+        }
+    }
+
+    fun applyFilter(
+        type: TransactionType? = _uiState.value.filterState.type,
+        categoryId: String? = _uiState.value.filterState.categoryId,
+        accountId: String? = _uiState.value.filterState.accountId,
+        startDate: Long? = _uiState.value.filterState.startDate,
+        endDate: Long? = _uiState.value.filterState.endDate,
+    ) {
+        _uiState.update {
+            it.copy(
+                filterState = it.filterState.copy(
+                    type = type,
+                    categoryId = categoryId,
+                    accountId = accountId,
+                    startDate = startDate,
+                    endDate = endDate,
+                )
+            )
+        }
+        loadTransactions()
+    }
+
+    fun clearFilters() {
+        _uiState.update {
+            it.copy(filterState = TransactionFilterState())
+        }
+        loadTransactions()
     }
 
     private fun groupTransactionsByDate(transactions: List<Transaction>): List<TransactionGroupedByDate> {
@@ -145,5 +237,15 @@ class TransactionListViewModel @Inject constructor(
     fun dismissUndo() {
         _showUndoSnackbar.value = false
         lastDeletedTransactionId = null
+    }
+
+    fun saveAsTemplate(transactionId: String, name: String) {
+        viewModelScope.launch {
+            try {
+                createTemplateFromTransactionUseCase(transactionId, name)
+            } catch (e: Exception) {
+                // Handle error silently or show snackbar
+            }
+        }
     }
 }

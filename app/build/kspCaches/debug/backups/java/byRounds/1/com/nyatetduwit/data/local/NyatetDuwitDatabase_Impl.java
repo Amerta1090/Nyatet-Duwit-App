@@ -19,6 +19,8 @@ import com.nyatetduwit.data.local.dao.CategoryDao;
 import com.nyatetduwit.data.local.dao.CategoryDao_Impl;
 import com.nyatetduwit.data.local.dao.RecurringTransactionDao;
 import com.nyatetduwit.data.local.dao.RecurringTransactionDao_Impl;
+import com.nyatetduwit.data.local.dao.TemplateDao;
+import com.nyatetduwit.data.local.dao.TemplateDao_Impl;
 import com.nyatetduwit.data.local.dao.TransactionDao;
 import com.nyatetduwit.data.local.dao.TransactionDao_Impl;
 import java.lang.Class;
@@ -46,10 +48,12 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
 
   private volatile RecurringTransactionDao _recurringTransactionDao;
 
+  private volatile TemplateDao _templateDao;
+
   @Override
   @NonNull
   protected SupportSQLiteOpenHelper createOpenHelper(@NonNull final DatabaseConfiguration config) {
-    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(3) {
+    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(4) {
       @Override
       public void createAllTables(@NonNull final SupportSQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS `accounts` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `balance` INTEGER NOT NULL, `icon` TEXT NOT NULL, `color` TEXT NOT NULL, `is_hidden` INTEGER NOT NULL, `order_index` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))");
@@ -57,8 +61,9 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
         db.execSQL("CREATE TABLE IF NOT EXISTS `transactions` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `amount` INTEGER NOT NULL, `account_id` TEXT NOT NULL, `category_id` TEXT, `to_account_id` TEXT, `notes` TEXT, `date_time` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `is_deleted` INTEGER NOT NULL, `deleted_at` INTEGER, PRIMARY KEY(`id`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS `budgets` (`id` TEXT NOT NULL, `category_id` TEXT, `amount` INTEGER NOT NULL, `period` TEXT NOT NULL, `start_date` INTEGER NOT NULL, `end_date` INTEGER NOT NULL, `is_active` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS `recurring_transactions` (`id` TEXT NOT NULL, `template_transaction_id` TEXT NOT NULL, `frequency` TEXT NOT NULL, `start_date` INTEGER NOT NULL, `end_date` INTEGER, `next_due` INTEGER NOT NULL, `is_active` INTEGER NOT NULL, `last_processed` INTEGER, `skipped_dates` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `templates` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `amount` INTEGER NOT NULL, `category_id` TEXT, `account_id` TEXT, `notes` TEXT, `usage_count` INTEGER NOT NULL, `last_used` INTEGER, `is_pinned` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, PRIMARY KEY(`id`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ff362fa795586827553ee577d4a9a15e')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '701dbabad926016a4c700b51ee16b861')");
       }
 
       @Override
@@ -68,6 +73,7 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
         db.execSQL("DROP TABLE IF EXISTS `transactions`");
         db.execSQL("DROP TABLE IF EXISTS `budgets`");
         db.execSQL("DROP TABLE IF EXISTS `recurring_transactions`");
+        db.execSQL("DROP TABLE IF EXISTS `templates`");
         final List<? extends RoomDatabase.Callback> _callbacks = mCallbacks;
         if (_callbacks != null) {
           for (RoomDatabase.Callback _callback : _callbacks) {
@@ -212,9 +218,30 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
                   + " Expected:\n" + _infoRecurringTransactions + "\n"
                   + " Found:\n" + _existingRecurringTransactions);
         }
+        final HashMap<String, TableInfo.Column> _columnsTemplates = new HashMap<String, TableInfo.Column>(11);
+        _columnsTemplates.put("id", new TableInfo.Column("id", "TEXT", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTemplates.put("name", new TableInfo.Column("name", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTemplates.put("type", new TableInfo.Column("type", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTemplates.put("amount", new TableInfo.Column("amount", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTemplates.put("category_id", new TableInfo.Column("category_id", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTemplates.put("account_id", new TableInfo.Column("account_id", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTemplates.put("notes", new TableInfo.Column("notes", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTemplates.put("usage_count", new TableInfo.Column("usage_count", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTemplates.put("last_used", new TableInfo.Column("last_used", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTemplates.put("is_pinned", new TableInfo.Column("is_pinned", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTemplates.put("created_at", new TableInfo.Column("created_at", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        final HashSet<TableInfo.ForeignKey> _foreignKeysTemplates = new HashSet<TableInfo.ForeignKey>(0);
+        final HashSet<TableInfo.Index> _indicesTemplates = new HashSet<TableInfo.Index>(0);
+        final TableInfo _infoTemplates = new TableInfo("templates", _columnsTemplates, _foreignKeysTemplates, _indicesTemplates);
+        final TableInfo _existingTemplates = TableInfo.read(db, "templates");
+        if (!_infoTemplates.equals(_existingTemplates)) {
+          return new RoomOpenHelper.ValidationResult(false, "templates(com.nyatetduwit.data.local.entity.TemplateEntity).\n"
+                  + " Expected:\n" + _infoTemplates + "\n"
+                  + " Found:\n" + _existingTemplates);
+        }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "ff362fa795586827553ee577d4a9a15e", "8a2ac1d1d91e14f313cc9389722ed67f");
+    }, "701dbabad926016a4c700b51ee16b861", "b2c6b5f6afc2ea5422c2f9416f338ae8");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;
@@ -225,7 +252,7 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
   protected InvalidationTracker createInvalidationTracker() {
     final HashMap<String, String> _shadowTablesMap = new HashMap<String, String>(0);
     final HashMap<String, Set<String>> _viewTables = new HashMap<String, Set<String>>(0);
-    return new InvalidationTracker(this, _shadowTablesMap, _viewTables, "accounts","categories","transactions","budgets","recurring_transactions");
+    return new InvalidationTracker(this, _shadowTablesMap, _viewTables, "accounts","categories","transactions","budgets","recurring_transactions","templates");
   }
 
   @Override
@@ -239,6 +266,7 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
       _db.execSQL("DELETE FROM `transactions`");
       _db.execSQL("DELETE FROM `budgets`");
       _db.execSQL("DELETE FROM `recurring_transactions`");
+      _db.execSQL("DELETE FROM `templates`");
       super.setTransactionSuccessful();
     } finally {
       super.endTransaction();
@@ -258,6 +286,7 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
     _typeConvertersMap.put(TransactionDao.class, TransactionDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(BudgetDao.class, BudgetDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(RecurringTransactionDao.class, RecurringTransactionDao_Impl.getRequiredConverters());
+    _typeConvertersMap.put(TemplateDao.class, TemplateDao_Impl.getRequiredConverters());
     return _typeConvertersMap;
   }
 
@@ -342,6 +371,20 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
           _recurringTransactionDao = new RecurringTransactionDao_Impl(this);
         }
         return _recurringTransactionDao;
+      }
+    }
+  }
+
+  @Override
+  public TemplateDao templateDao() {
+    if (_templateDao != null) {
+      return _templateDao;
+    } else {
+      synchronized(this) {
+        if(_templateDao == null) {
+          _templateDao = new TemplateDao_Impl(this);
+        }
+        return _templateDao;
       }
     }
   }

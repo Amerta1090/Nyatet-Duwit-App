@@ -27,6 +27,7 @@ fun DashboardScreen(
     onNavigateToTransactions: () -> Unit,
     onNavigateToBudgets: () -> Unit,
     onNavigateToRecurring: () -> Unit,
+    onNavigateToTemplates: () -> Unit,
     onNavigateToAddTransaction: () -> Unit,
     onNavigateToTransactionDetail: (String) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
@@ -137,6 +138,7 @@ fun DashboardScreen(
                         onNavigateToTransactions = onNavigateToTransactions,
                         onNavigateToBudgets = onNavigateToBudgets,
                         onNavigateToRecurring = onNavigateToRecurring,
+                        onNavigateToTemplates = onNavigateToTemplates,
                     )
                 }
 
@@ -360,6 +362,7 @@ private fun MenuSection(
     onNavigateToTransactions: () -> Unit,
     onNavigateToBudgets: () -> Unit,
     onNavigateToRecurring: () -> Unit,
+    onNavigateToTemplates: () -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -397,6 +400,12 @@ private fun MenuSection(
             title = "Transaksi Berulang",
             description = "Kelola transaksi otomatis berulang",
             onClick = onNavigateToRecurring,
+        )
+        MenuCard(
+            icon = Icons.Default.Star,
+            title = "Template",
+            description = "Transaksi cepat dengan template",
+            onClick = onNavigateToTemplates,
         )
     }
 }

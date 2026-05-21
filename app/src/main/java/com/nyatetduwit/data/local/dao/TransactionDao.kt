@@ -173,6 +173,69 @@ interface TransactionDao {
         startDate: Long,
         endDate: Long
     ): Long
+
+    @Query(
+        """
+        SELECT t.* FROM transactions t
+        LEFT JOIN categories c ON t.category_id = c.id
+        WHERE t.is_deleted = 0 
+        AND (
+            LOWER(t.notes) LIKE '%' || LOWER(:query) || '%'
+            OR LOWER(c.name) LIKE '%' || LOWER(:query) || '%'
+            OR CAST(t.amount AS TEXT) LIKE '%' || :query || '%'
+        )
+        ORDER BY t.date_time DESC
+        """
+    )
+    fun searchTransactions(query: String): Flow<List<TransactionEntity>>
+
+    @Query(
+        """
+        SELECT * FROM transactions 
+        WHERE is_deleted = 0 
+        AND (:type IS NULL OR type = :type)
+        AND (:categoryId IS NULL OR category_id = :categoryId)
+        AND (:accountId IS NULL OR account_id = :accountId)
+        AND (:startDate IS NULL OR date_time >= :startDate)
+        AND (:endDate IS NULL OR date_time <= :endDate)
+        ORDER BY date_time DESC
+        """
+    )
+    fun filterTransactions(
+        type: String?,
+        categoryId: String?,
+        accountId: String?,
+        startDate: Long?,
+        endDate: Long?
+    ): Flow<List<TransactionEntity>>
+
+    @Query(
+        """
+        SELECT t.* FROM transactions t
+        LEFT JOIN categories c ON t.category_id = c.id
+        WHERE t.is_deleted = 0 
+        AND (:type IS NULL OR t.type = :type)
+        AND (:categoryId IS NULL OR t.category_id = :categoryId)
+        AND (:accountId IS NULL OR t.account_id = :accountId)
+        AND (:startDate IS NULL OR t.date_time >= :startDate)
+        AND (:endDate IS NULL OR t.date_time <= :endDate)
+        AND (
+            :query IS NULL
+            OR LOWER(t.notes) LIKE '%' || LOWER(:query) || '%'
+            OR LOWER(c.name) LIKE '%' || LOWER(:query) || '%'
+            OR CAST(t.amount AS TEXT) LIKE '%' || :query || '%'
+        )
+        ORDER BY t.date_time DESC
+        """
+    )
+    fun searchAndFilterTransactions(
+        query: String?,
+        type: String?,
+        categoryId: String?,
+        accountId: String?,
+        startDate: Long?,
+        endDate: Long?
+    ): Flow<List<TransactionEntity>>
 }
 
 data class CategoryExpenseSummary(

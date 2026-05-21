@@ -1187,6 +1187,445 @@ public final class TransactionDao_Impl implements TransactionDao {
     }, $completion);
   }
 
+  @Override
+  public Flow<List<TransactionEntity>> searchTransactions(final String query) {
+    final String _sql = "\n"
+            + "        SELECT t.* FROM transactions t\n"
+            + "        LEFT JOIN categories c ON t.category_id = c.id\n"
+            + "        WHERE t.is_deleted = 0 \n"
+            + "        AND (\n"
+            + "            LOWER(t.notes) LIKE '%' || LOWER(?) || '%'\n"
+            + "            OR LOWER(c.name) LIKE '%' || LOWER(?) || '%'\n"
+            + "            OR CAST(t.amount AS TEXT) LIKE '%' || ? || '%'\n"
+            + "        )\n"
+            + "        ORDER BY t.date_time DESC\n"
+            + "        ";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 3);
+    int _argIndex = 1;
+    _statement.bindString(_argIndex, query);
+    _argIndex = 2;
+    _statement.bindString(_argIndex, query);
+    _argIndex = 3;
+    _statement.bindString(_argIndex, query);
+    return CoroutinesRoom.createFlow(__db, false, new String[] {"transactions",
+        "categories"}, new Callable<List<TransactionEntity>>() {
+      @Override
+      @NonNull
+      public List<TransactionEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfType = CursorUtil.getColumnIndexOrThrow(_cursor, "type");
+          final int _cursorIndexOfAmount = CursorUtil.getColumnIndexOrThrow(_cursor, "amount");
+          final int _cursorIndexOfAccountId = CursorUtil.getColumnIndexOrThrow(_cursor, "account_id");
+          final int _cursorIndexOfCategoryId = CursorUtil.getColumnIndexOrThrow(_cursor, "category_id");
+          final int _cursorIndexOfToAccountId = CursorUtil.getColumnIndexOrThrow(_cursor, "to_account_id");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfDateTime = CursorUtil.getColumnIndexOrThrow(_cursor, "date_time");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfIsDeleted = CursorUtil.getColumnIndexOrThrow(_cursor, "is_deleted");
+          final int _cursorIndexOfDeletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "deleted_at");
+          final List<TransactionEntity> _result = new ArrayList<TransactionEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final TransactionEntity _item;
+            final String _tmpId;
+            _tmpId = _cursor.getString(_cursorIndexOfId);
+            final String _tmpType;
+            _tmpType = _cursor.getString(_cursorIndexOfType);
+            final long _tmpAmount;
+            _tmpAmount = _cursor.getLong(_cursorIndexOfAmount);
+            final String _tmpAccountId;
+            _tmpAccountId = _cursor.getString(_cursorIndexOfAccountId);
+            final String _tmpCategoryId;
+            if (_cursor.isNull(_cursorIndexOfCategoryId)) {
+              _tmpCategoryId = null;
+            } else {
+              _tmpCategoryId = _cursor.getString(_cursorIndexOfCategoryId);
+            }
+            final String _tmpToAccountId;
+            if (_cursor.isNull(_cursorIndexOfToAccountId)) {
+              _tmpToAccountId = null;
+            } else {
+              _tmpToAccountId = _cursor.getString(_cursorIndexOfToAccountId);
+            }
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final long _tmpDateTime;
+            _tmpDateTime = _cursor.getLong(_cursorIndexOfDateTime);
+            final long _tmpCreatedAt;
+            _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
+            final long _tmpUpdatedAt;
+            _tmpUpdatedAt = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            final boolean _tmpIsDeleted;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsDeleted);
+            _tmpIsDeleted = _tmp != 0;
+            final Long _tmpDeletedAt;
+            if (_cursor.isNull(_cursorIndexOfDeletedAt)) {
+              _tmpDeletedAt = null;
+            } else {
+              _tmpDeletedAt = _cursor.getLong(_cursorIndexOfDeletedAt);
+            }
+            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+        }
+      }
+
+      @Override
+      protected void finalize() {
+        _statement.release();
+      }
+    });
+  }
+
+  @Override
+  public Flow<List<TransactionEntity>> filterTransactions(final String type,
+      final String categoryId, final String accountId, final Long startDate, final Long endDate) {
+    final String _sql = "\n"
+            + "        SELECT * FROM transactions \n"
+            + "        WHERE is_deleted = 0 \n"
+            + "        AND (? IS NULL OR type = ?)\n"
+            + "        AND (? IS NULL OR category_id = ?)\n"
+            + "        AND (? IS NULL OR account_id = ?)\n"
+            + "        AND (? IS NULL OR date_time >= ?)\n"
+            + "        AND (? IS NULL OR date_time <= ?)\n"
+            + "        ORDER BY date_time DESC\n"
+            + "        ";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 10);
+    int _argIndex = 1;
+    if (type == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, type);
+    }
+    _argIndex = 2;
+    if (type == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, type);
+    }
+    _argIndex = 3;
+    if (categoryId == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, categoryId);
+    }
+    _argIndex = 4;
+    if (categoryId == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, categoryId);
+    }
+    _argIndex = 5;
+    if (accountId == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, accountId);
+    }
+    _argIndex = 6;
+    if (accountId == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, accountId);
+    }
+    _argIndex = 7;
+    if (startDate == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindLong(_argIndex, startDate);
+    }
+    _argIndex = 8;
+    if (startDate == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindLong(_argIndex, startDate);
+    }
+    _argIndex = 9;
+    if (endDate == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindLong(_argIndex, endDate);
+    }
+    _argIndex = 10;
+    if (endDate == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindLong(_argIndex, endDate);
+    }
+    return CoroutinesRoom.createFlow(__db, false, new String[] {"transactions"}, new Callable<List<TransactionEntity>>() {
+      @Override
+      @NonNull
+      public List<TransactionEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfType = CursorUtil.getColumnIndexOrThrow(_cursor, "type");
+          final int _cursorIndexOfAmount = CursorUtil.getColumnIndexOrThrow(_cursor, "amount");
+          final int _cursorIndexOfAccountId = CursorUtil.getColumnIndexOrThrow(_cursor, "account_id");
+          final int _cursorIndexOfCategoryId = CursorUtil.getColumnIndexOrThrow(_cursor, "category_id");
+          final int _cursorIndexOfToAccountId = CursorUtil.getColumnIndexOrThrow(_cursor, "to_account_id");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfDateTime = CursorUtil.getColumnIndexOrThrow(_cursor, "date_time");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfIsDeleted = CursorUtil.getColumnIndexOrThrow(_cursor, "is_deleted");
+          final int _cursorIndexOfDeletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "deleted_at");
+          final List<TransactionEntity> _result = new ArrayList<TransactionEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final TransactionEntity _item;
+            final String _tmpId;
+            _tmpId = _cursor.getString(_cursorIndexOfId);
+            final String _tmpType;
+            _tmpType = _cursor.getString(_cursorIndexOfType);
+            final long _tmpAmount;
+            _tmpAmount = _cursor.getLong(_cursorIndexOfAmount);
+            final String _tmpAccountId;
+            _tmpAccountId = _cursor.getString(_cursorIndexOfAccountId);
+            final String _tmpCategoryId;
+            if (_cursor.isNull(_cursorIndexOfCategoryId)) {
+              _tmpCategoryId = null;
+            } else {
+              _tmpCategoryId = _cursor.getString(_cursorIndexOfCategoryId);
+            }
+            final String _tmpToAccountId;
+            if (_cursor.isNull(_cursorIndexOfToAccountId)) {
+              _tmpToAccountId = null;
+            } else {
+              _tmpToAccountId = _cursor.getString(_cursorIndexOfToAccountId);
+            }
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final long _tmpDateTime;
+            _tmpDateTime = _cursor.getLong(_cursorIndexOfDateTime);
+            final long _tmpCreatedAt;
+            _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
+            final long _tmpUpdatedAt;
+            _tmpUpdatedAt = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            final boolean _tmpIsDeleted;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsDeleted);
+            _tmpIsDeleted = _tmp != 0;
+            final Long _tmpDeletedAt;
+            if (_cursor.isNull(_cursorIndexOfDeletedAt)) {
+              _tmpDeletedAt = null;
+            } else {
+              _tmpDeletedAt = _cursor.getLong(_cursorIndexOfDeletedAt);
+            }
+            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+        }
+      }
+
+      @Override
+      protected void finalize() {
+        _statement.release();
+      }
+    });
+  }
+
+  @Override
+  public Flow<List<TransactionEntity>> searchAndFilterTransactions(final String query,
+      final String type, final String categoryId, final String accountId, final Long startDate,
+      final Long endDate) {
+    final String _sql = "\n"
+            + "        SELECT t.* FROM transactions t\n"
+            + "        LEFT JOIN categories c ON t.category_id = c.id\n"
+            + "        WHERE t.is_deleted = 0 \n"
+            + "        AND (? IS NULL OR t.type = ?)\n"
+            + "        AND (? IS NULL OR t.category_id = ?)\n"
+            + "        AND (? IS NULL OR t.account_id = ?)\n"
+            + "        AND (? IS NULL OR t.date_time >= ?)\n"
+            + "        AND (? IS NULL OR t.date_time <= ?)\n"
+            + "        AND (\n"
+            + "            ? IS NULL\n"
+            + "            OR LOWER(t.notes) LIKE '%' || LOWER(?) || '%'\n"
+            + "            OR LOWER(c.name) LIKE '%' || LOWER(?) || '%'\n"
+            + "            OR CAST(t.amount AS TEXT) LIKE '%' || ? || '%'\n"
+            + "        )\n"
+            + "        ORDER BY t.date_time DESC\n"
+            + "        ";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 14);
+    int _argIndex = 1;
+    if (type == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, type);
+    }
+    _argIndex = 2;
+    if (type == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, type);
+    }
+    _argIndex = 3;
+    if (categoryId == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, categoryId);
+    }
+    _argIndex = 4;
+    if (categoryId == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, categoryId);
+    }
+    _argIndex = 5;
+    if (accountId == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, accountId);
+    }
+    _argIndex = 6;
+    if (accountId == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, accountId);
+    }
+    _argIndex = 7;
+    if (startDate == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindLong(_argIndex, startDate);
+    }
+    _argIndex = 8;
+    if (startDate == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindLong(_argIndex, startDate);
+    }
+    _argIndex = 9;
+    if (endDate == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindLong(_argIndex, endDate);
+    }
+    _argIndex = 10;
+    if (endDate == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindLong(_argIndex, endDate);
+    }
+    _argIndex = 11;
+    if (query == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, query);
+    }
+    _argIndex = 12;
+    if (query == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, query);
+    }
+    _argIndex = 13;
+    if (query == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, query);
+    }
+    _argIndex = 14;
+    if (query == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, query);
+    }
+    return CoroutinesRoom.createFlow(__db, false, new String[] {"transactions",
+        "categories"}, new Callable<List<TransactionEntity>>() {
+      @Override
+      @NonNull
+      public List<TransactionEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfType = CursorUtil.getColumnIndexOrThrow(_cursor, "type");
+          final int _cursorIndexOfAmount = CursorUtil.getColumnIndexOrThrow(_cursor, "amount");
+          final int _cursorIndexOfAccountId = CursorUtil.getColumnIndexOrThrow(_cursor, "account_id");
+          final int _cursorIndexOfCategoryId = CursorUtil.getColumnIndexOrThrow(_cursor, "category_id");
+          final int _cursorIndexOfToAccountId = CursorUtil.getColumnIndexOrThrow(_cursor, "to_account_id");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfDateTime = CursorUtil.getColumnIndexOrThrow(_cursor, "date_time");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfIsDeleted = CursorUtil.getColumnIndexOrThrow(_cursor, "is_deleted");
+          final int _cursorIndexOfDeletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "deleted_at");
+          final List<TransactionEntity> _result = new ArrayList<TransactionEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final TransactionEntity _item;
+            final String _tmpId;
+            _tmpId = _cursor.getString(_cursorIndexOfId);
+            final String _tmpType;
+            _tmpType = _cursor.getString(_cursorIndexOfType);
+            final long _tmpAmount;
+            _tmpAmount = _cursor.getLong(_cursorIndexOfAmount);
+            final String _tmpAccountId;
+            _tmpAccountId = _cursor.getString(_cursorIndexOfAccountId);
+            final String _tmpCategoryId;
+            if (_cursor.isNull(_cursorIndexOfCategoryId)) {
+              _tmpCategoryId = null;
+            } else {
+              _tmpCategoryId = _cursor.getString(_cursorIndexOfCategoryId);
+            }
+            final String _tmpToAccountId;
+            if (_cursor.isNull(_cursorIndexOfToAccountId)) {
+              _tmpToAccountId = null;
+            } else {
+              _tmpToAccountId = _cursor.getString(_cursorIndexOfToAccountId);
+            }
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final long _tmpDateTime;
+            _tmpDateTime = _cursor.getLong(_cursorIndexOfDateTime);
+            final long _tmpCreatedAt;
+            _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
+            final long _tmpUpdatedAt;
+            _tmpUpdatedAt = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            final boolean _tmpIsDeleted;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsDeleted);
+            _tmpIsDeleted = _tmp != 0;
+            final Long _tmpDeletedAt;
+            if (_cursor.isNull(_cursorIndexOfDeletedAt)) {
+              _tmpDeletedAt = null;
+            } else {
+              _tmpDeletedAt = _cursor.getLong(_cursorIndexOfDeletedAt);
+            }
+            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+        }
+      }
+
+      @Override
+      protected void finalize() {
+        _statement.release();
+      }
+    });
+  }
+
   @NonNull
   public static List<Class<?>> getRequiredConverters() {
     return Collections.emptyList();

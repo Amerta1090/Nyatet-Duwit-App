@@ -10,6 +10,7 @@ import com.nyatetduwit.presentation.budget.BudgetViewModel_HiltModules;
 import com.nyatetduwit.presentation.category.CategoryViewModel_HiltModules;
 import com.nyatetduwit.presentation.dashboard.DashboardViewModel_HiltModules;
 import com.nyatetduwit.presentation.recurring.RecurringTransactionViewModel_HiltModules;
+import com.nyatetduwit.presentation.template.TemplateViewModel_HiltModules;
 import com.nyatetduwit.presentation.transaction.TransactionDetailViewModel_HiltModules;
 import com.nyatetduwit.presentation.transaction.TransactionListViewModel_HiltModules;
 import com.nyatetduwit.presentation.transaction.TransactionViewModel_HiltModules;
@@ -177,6 +178,7 @@ public final class NyatetDuwitApp_HiltComponents {
           ActivityCBuilderModule.class,
           ViewModelCBuilderModule.class,
           RecurringTransactionViewModel_HiltModules.KeyModule.class,
+          TemplateViewModel_HiltModules.KeyModule.class,
           TransactionDetailViewModel_HiltModules.KeyModule.class,
           TransactionListViewModel_HiltModules.KeyModule.class,
           TransactionViewModel_HiltModules.KeyModule.class
@@ -221,6 +223,7 @@ public final class NyatetDuwitApp_HiltComponents {
           DashboardViewModel_HiltModules.BindsModule.class,
           HiltWrapper_HiltViewModelFactory_ViewModelModule.class,
           RecurringTransactionViewModel_HiltModules.BindsModule.class,
+          TemplateViewModel_HiltModules.BindsModule.class,
           TransactionDetailViewModel_HiltModules.BindsModule.class,
           TransactionListViewModel_HiltModules.BindsModule.class,
           TransactionViewModel_HiltModules.BindsModule.class

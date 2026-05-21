@@ -8,10 +8,13 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
+@RunWith(MockitoJUnitRunner::class)
 class GetAccountsUseCaseTest {
 
     private lateinit var repository: AccountRepository
@@ -24,7 +27,7 @@ class GetAccountsUseCaseTest {
     }
 
     @Test
-    fun `invoke should return list of accounts`() = runBlocking {
+    fun invoke_shouldReturnListOfAccounts() {
         val expectedAccounts = listOf(
             Account(
                 id = "1",
@@ -41,9 +44,10 @@ class GetAccountsUseCaseTest {
         )
         whenever(repository.getAllAccounts()).thenReturn(flowOf(expectedAccounts))
 
-        val result = getAccountsUseCase()
-
-        assertNotNull(result)
-        verify(repository).getAllAccounts()
+        runBlocking {
+            val result = getAccountsUseCase()
+            assertNotNull(result)
+            verify(repository).getAllAccounts()
+        }
     }
 }

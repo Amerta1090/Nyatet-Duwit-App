@@ -4,10 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nyatetduwit.domain.model.Account
 import com.nyatetduwit.domain.model.Category
+import com.nyatetduwit.domain.model.Template
 import com.nyatetduwit.domain.model.Transaction
 import com.nyatetduwit.domain.model.TransactionType
 import com.nyatetduwit.domain.usecase.account.GetAccountsUseCase
 import com.nyatetduwit.domain.usecase.category.GetCategoriesByTypeUseCase
+import com.nyatetduwit.domain.usecase.template.GetPinnedTemplatesUseCase
+import com.nyatetduwit.domain.usecase.template.IncrementTemplateUsageUseCase
 import com.nyatetduwit.domain.usecase.transaction.AddTransactionUseCase
 import com.nyatetduwit.domain.usecase.transaction.BalanceUpdateService
 import com.nyatetduwit.domain.usecase.transaction.GetTransactionByIdUseCase
@@ -35,6 +38,7 @@ data class TransactionFormState(
 data class TransactionUiState(
     val accounts: List<Account> = emptyList(),
     val categories: List<Category> = emptyList(),
+    val templates: List<Template> = emptyList(),
     val formState: TransactionFormState = TransactionFormState(),
 )
 
@@ -46,6 +50,8 @@ class TransactionViewModel @Inject constructor(
     private val updateTransactionUseCase: UpdateTransactionUseCase,
     private val getTransactionByIdUseCase: GetTransactionByIdUseCase,
     private val balanceUpdateService: BalanceUpdateService,
+    private val getPinnedTemplatesUseCase: GetPinnedTemplatesUseCase,
+    private val incrementTemplateUsageUseCase: IncrementTemplateUsageUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionUiState())
@@ -59,6 +65,15 @@ class TransactionViewModel @Inject constructor(
     init {
         loadAccounts()
         loadCategories()
+        loadTemplates()
+    }
+
+    private fun loadTemplates() {
+        viewModelScope.launch {
+            getPinnedTemplatesUseCase().collect { templates ->
+                _uiState.update { it.copy(templates = templates) }
+            }
+        }
     }
 
     fun loadTransactionForEdit(transactionId: String) {
@@ -191,6 +206,25 @@ class TransactionViewModel @Inject constructor(
             currentState.copy(
                 formState = currentState.formState.copy(dateTime = dateTime)
             )
+        }
+    }
+
+    fun applyTemplate(template: Template) {
+        viewModelScope.launch {
+            incrementTemplateUsageUseCase(template.id)
+            _uiState.update { currentState ->
+                currentState.copy(
+                    formState = currentState.formState.copy(
+                        type = template.type,
+                        amount = template.amount,
+                        accountId = template.accountId ?: currentState.formState.accountId,
+                        toAccountId = "",
+                        categoryId = template.categoryId,
+                        notes = template.notes,
+                    )
+                )
+            }
+            loadCategories()
         }
     }
 

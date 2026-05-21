@@ -5,12 +5,14 @@ import com.nyatetduwit.data.repository.BudgetRepositoryImpl
 import com.nyatetduwit.data.repository.CategoryRepositoryImpl
 import com.nyatetduwit.data.repository.RecurringTransactionRepositoryImpl
 import com.nyatetduwit.data.repository.SettingsRepositoryImpl
+import com.nyatetduwit.data.repository.TemplateRepositoryImpl
 import com.nyatetduwit.data.repository.TransactionRepositoryImpl
 import com.nyatetduwit.domain.repository.AccountRepository
 import com.nyatetduwit.domain.repository.BudgetRepository
 import com.nyatetduwit.domain.repository.CategoryRepository
 import com.nyatetduwit.domain.repository.RecurringTransactionRepository
 import com.nyatetduwit.domain.repository.SettingsRepository
+import com.nyatetduwit.domain.repository.TemplateRepository
 import com.nyatetduwit.domain.repository.TransactionRepository
 import dagger.Binds
 import dagger.Module
@@ -45,4 +47,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindRecurringTransactionRepository(impl: RecurringTransactionRepositoryImpl): RecurringTransactionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTemplateRepository(impl: TemplateRepositoryImpl): TemplateRepository
 }

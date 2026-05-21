@@ -16,6 +16,7 @@ import com.nyatetduwit.presentation.category.CategoryScreen
 import com.nyatetduwit.presentation.dashboard.DashboardScreen
 import com.nyatetduwit.presentation.recurring.RecurringTransactionFormScreen
 import com.nyatetduwit.presentation.recurring.RecurringTransactionScreen
+import com.nyatetduwit.presentation.template.TemplateScreen
 import com.nyatetduwit.presentation.transaction.TransactionDetailScreen
 import com.nyatetduwit.presentation.transaction.TransactionFormScreen
 import com.nyatetduwit.presentation.transaction.TransactionListScreen
@@ -38,6 +39,7 @@ fun NyatetDuwitNavHost(
                 onNavigateToTransactions = { navController.navigate(Screen.Transactions.route) },
                 onNavigateToBudgets = { navController.navigate(Screen.Budgets.route) },
                 onNavigateToRecurring = { navController.navigate(Screen.Recurring.route) },
+                onNavigateToTemplates = { navController.navigate(Screen.Templates.route) },
                 onNavigateToAddTransaction = { navController.navigate(Screen.TransactionForm.createRoute()) },
                 onNavigateToTransactionDetail = { transactionId ->
                     navController.navigate(Screen.TransactionDetail.createRoute(transactionId))
@@ -153,6 +155,15 @@ fun NyatetDuwitNavHost(
             RecurringTransactionScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onAddRecurring = { navController.navigate(Screen.RecurringForm.createRoute()) },
+            )
+        }
+
+        composable(Screen.Templates.route) {
+            TemplateScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onTemplateClick = { templateId ->
+                    navController.navigate(Screen.TransactionForm.createRoute(null))
+                },
             )
         }
 
