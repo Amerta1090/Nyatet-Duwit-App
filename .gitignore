@@ -9,7 +9,6 @@
 .cxx
 local.properties
 .kotlin/
-app/build/
 app/schemas/
 
 # Generated icon foregrounds (keep source PNG, not build intermediates)
