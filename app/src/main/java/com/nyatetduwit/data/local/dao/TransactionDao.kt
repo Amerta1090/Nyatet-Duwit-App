@@ -236,7 +236,57 @@ interface TransactionDao {
         startDate: Long?,
         endDate: Long?
     ): Flow<List<TransactionEntity>>
+
+    @Query(
+        """
+        SELECT strftime('%Y-%m-%d', date_time / 1000, 'unixepoch') as day, 
+               COALESCE(SUM(amount), 0) as total 
+        FROM transactions 
+        WHERE type = 'expense' AND is_deleted = 0 
+        AND date_time >= :startDate AND date_time <= :endDate
+        GROUP BY day 
+        ORDER BY day ASC
+        """
+    )
+    fun getDailyExpenseTrend(startDate: Long, endDate: Long): Flow<List<DailyExpenseSummary>>
+
+    @Query(
+        """
+        SELECT * FROM transactions 
+        WHERE type = 'expense' AND is_deleted = 0 
+        AND date_time >= :startDate AND date_time <= :endDate
+        ORDER BY amount DESC 
+        LIMIT 1
+        """
+    )
+    suspend fun getBiggestExpense(startDate: Long, endDate: Long): TransactionEntity?
+
+    @Query(
+        """
+        SELECT COUNT(DISTINCT strftime('%Y-%m-%d', date_time / 1000, 'unixepoch')) 
+        FROM transactions 
+        WHERE is_deleted = 0 
+        AND date_time >= :startDate AND date_time <= :endDate
+        """
+    )
+    suspend fun getActiveDaysCount(startDate: Long, endDate: Long): Int
+
+    @Query(
+        """
+        SELECT COUNT(*) FROM transactions 
+        WHERE is_deleted = 0 
+        AND date_time >= :startDate AND date_time <= :endDate
+        """
+    )
+    suspend fun getTransactionCount(startDate: Long, endDate: Long): Int
 }
+
+data class DailyExpenseSummary(
+    @ColumnInfo(name = "day")
+    val day: String,
+    @ColumnInfo(name = "total")
+    val total: Long,
+)
 
 data class CategoryExpenseSummary(
     @ColumnInfo(name = "category_id")

@@ -16,6 +16,8 @@ import com.nyatetduwit.presentation.category.CategoryScreen
 import com.nyatetduwit.presentation.dashboard.DashboardScreen
 import com.nyatetduwit.presentation.recurring.RecurringTransactionFormScreen
 import com.nyatetduwit.presentation.recurring.RecurringTransactionScreen
+import com.nyatetduwit.presentation.monthlysummary.MonthlySummaryScreen
+import com.nyatetduwit.presentation.remindersettings.ReminderSettingsScreen
 import com.nyatetduwit.presentation.template.TemplateScreen
 import com.nyatetduwit.presentation.transaction.TransactionDetailScreen
 import com.nyatetduwit.presentation.transaction.TransactionFormScreen
@@ -40,6 +42,7 @@ fun NyatetDuwitNavHost(
                 onNavigateToBudgets = { navController.navigate(Screen.Budgets.route) },
                 onNavigateToRecurring = { navController.navigate(Screen.Recurring.route) },
                 onNavigateToTemplates = { navController.navigate(Screen.Templates.route) },
+                onNavigateToMonthlySummary = { navController.navigate(Screen.MonthlySummary.createRoute()) },
                 onNavigateToAddTransaction = { navController.navigate(Screen.TransactionForm.createRoute()) },
                 onNavigateToTransactionDetail = { transactionId ->
                     navController.navigate(Screen.TransactionDetail.createRoute(transactionId))
@@ -174,6 +177,25 @@ fun NyatetDuwitNavHost(
             val recurringId = backStackEntry.arguments?.getString("recurringId")
             RecurringTransactionFormScreen(
                 recurringId = if (recurringId == "null") null else recurringId,
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(
+            route = Screen.MonthlySummary.route,
+            arguments = listOf(navArgument("yearMonth") {
+                type = NavType.StringType
+                nullable = true
+            }),
+        ) {
+            MonthlySummaryScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToReminderSettings = { navController.navigate(Screen.ReminderSettings.route) },
+            )
+        }
+
+        composable(Screen.ReminderSettings.route) {
+            ReminderSettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
             )
         }

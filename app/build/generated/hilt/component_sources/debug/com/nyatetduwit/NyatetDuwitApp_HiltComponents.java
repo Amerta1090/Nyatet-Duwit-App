@@ -5,11 +5,14 @@ import com.nyatetduwit.core.di.DataStoreModule;
 import com.nyatetduwit.core.di.DatabaseModule;
 import com.nyatetduwit.core.di.RepositoryModule;
 import com.nyatetduwit.core.worker.RecurringTransactionWorker_HiltModule;
+import com.nyatetduwit.core.worker.ReminderWorker_HiltModule;
 import com.nyatetduwit.presentation.account.AccountViewModel_HiltModules;
 import com.nyatetduwit.presentation.budget.BudgetViewModel_HiltModules;
 import com.nyatetduwit.presentation.category.CategoryViewModel_HiltModules;
 import com.nyatetduwit.presentation.dashboard.DashboardViewModel_HiltModules;
+import com.nyatetduwit.presentation.monthlysummary.MonthlySummaryViewModel_HiltModules;
 import com.nyatetduwit.presentation.recurring.RecurringTransactionViewModel_HiltModules;
+import com.nyatetduwit.presentation.remindersettings.ReminderSettingsViewModel_HiltModules;
 import com.nyatetduwit.presentation.template.TemplateViewModel_HiltModules;
 import com.nyatetduwit.presentation.transaction.TransactionDetailViewModel_HiltModules;
 import com.nyatetduwit.presentation.transaction.TransactionListViewModel_HiltModules;
@@ -146,6 +149,7 @@ public final class NyatetDuwitApp_HiltComponents {
           ActivityRetainedCBuilderModule.class,
           ServiceCBuilderModule.class,
           RecurringTransactionWorker_HiltModule.class,
+          ReminderWorker_HiltModule.class,
           RepositoryModule.class
       }
   )
@@ -175,9 +179,11 @@ public final class NyatetDuwitApp_HiltComponents {
           DashboardViewModel_HiltModules.KeyModule.class,
           HiltWrapper_ActivityRetainedComponentManager_LifecycleModule.class,
           HiltWrapper_SavedStateHandleModule.class,
+          MonthlySummaryViewModel_HiltModules.KeyModule.class,
           ActivityCBuilderModule.class,
           ViewModelCBuilderModule.class,
           RecurringTransactionViewModel_HiltModules.KeyModule.class,
+          ReminderSettingsViewModel_HiltModules.KeyModule.class,
           TemplateViewModel_HiltModules.KeyModule.class,
           TransactionDetailViewModel_HiltModules.KeyModule.class,
           TransactionListViewModel_HiltModules.KeyModule.class,
@@ -222,7 +228,9 @@ public final class NyatetDuwitApp_HiltComponents {
           CategoryViewModel_HiltModules.BindsModule.class,
           DashboardViewModel_HiltModules.BindsModule.class,
           HiltWrapper_HiltViewModelFactory_ViewModelModule.class,
+          MonthlySummaryViewModel_HiltModules.BindsModule.class,
           RecurringTransactionViewModel_HiltModules.BindsModule.class,
+          ReminderSettingsViewModel_HiltModules.BindsModule.class,
           TemplateViewModel_HiltModules.BindsModule.class,
           TransactionDetailViewModel_HiltModules.BindsModule.class,
           TransactionListViewModel_HiltModules.BindsModule.class,

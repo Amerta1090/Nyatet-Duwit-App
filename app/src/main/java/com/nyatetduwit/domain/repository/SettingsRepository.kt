@@ -9,6 +9,8 @@ interface SettingsRepository {
     val lockTimeoutMinutes: Flow<Int>
     val isReminderEnabled: Flow<Boolean>
     val reminderHour: Flow<Int>
+    val reminderFrequency: Flow<Int>
+    val lastTransactionDate: Flow<Long>
 
     suspend fun setBalanceVisible(isVisible: Boolean)
     suspend fun setDarkTheme(isDark: Boolean)
@@ -16,4 +18,6 @@ interface SettingsRepository {
     suspend fun setLockTimeoutMinutes(minutes: Int)
     suspend fun setReminderEnabled(isEnabled: Boolean)
     suspend fun setReminderHour(hour: Int)
+    suspend fun setReminderFrequency(frequency: Int)
+    suspend fun setLastTransactionDate(timestamp: Long)
 }

@@ -37,4 +37,8 @@ interface TransactionRepository {
     suspend fun restoreTransaction(id: String)
     suspend fun purgeSoftDeleted(threshold: Long)
     suspend fun hasTransactions(accountId: String): Boolean
+    fun getDailyExpenseTrend(startDate: Long, endDate: Long): Flow<List<Pair<String, Long>>>
+    suspend fun getBiggestExpense(startDate: Long, endDate: Long): Transaction?
+    suspend fun getActiveDaysCount(startDate: Long, endDate: Long): Int
+    suspend fun getTransactionCount(startDate: Long, endDate: Long): Int
 }

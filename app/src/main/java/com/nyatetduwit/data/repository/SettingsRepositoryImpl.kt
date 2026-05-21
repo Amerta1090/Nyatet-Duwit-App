@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
+import androidx.datastore.preferences.core.longPreferencesKey
+
 class SettingsRepositoryImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) : SettingsRepository {
@@ -21,6 +23,8 @@ class SettingsRepositoryImpl @Inject constructor(
         val LOCK_TIMEOUT = intPreferencesKey("lock_timeout")
         val REMINDER_ENABLED = booleanPreferencesKey("reminder_enabled")
         val REMINDER_HOUR = intPreferencesKey("reminder_hour")
+        val REMINDER_FREQUENCY = intPreferencesKey("reminder_frequency")
+        val LAST_TRANSACTION_DATE = longPreferencesKey("last_transaction_date")
     }
 
     override val isBalanceVisible: Flow<Boolean> = dataStore.data
@@ -40,6 +44,12 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override val reminderHour: Flow<Int> = dataStore.data
         .map { preferences -> preferences[Keys.REMINDER_HOUR] ?: 20 }
+
+    override val reminderFrequency: Flow<Int> = dataStore.data
+        .map { preferences -> preferences[Keys.REMINDER_FREQUENCY] ?: 1 }
+
+    override val lastTransactionDate: Flow<Long> = dataStore.data
+        .map { preferences -> preferences[Keys.LAST_TRANSACTION_DATE] ?: 0L }
 
     override suspend fun setBalanceVisible(isVisible: Boolean) {
         dataStore.edit { preferences -> preferences[Keys.BALANCE_VISIBLE] = isVisible }
@@ -63,5 +73,13 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setReminderHour(hour: Int) {
         dataStore.edit { preferences -> preferences[Keys.REMINDER_HOUR] = hour }
+    }
+
+    override suspend fun setReminderFrequency(frequency: Int) {
+        dataStore.edit { preferences -> preferences[Keys.REMINDER_FREQUENCY] = frequency }
+    }
+
+    override suspend fun setLastTransactionDate(timestamp: Long) {
+        dataStore.edit { preferences -> preferences[Keys.LAST_TRANSACTION_DATE] = timestamp }
     }
 }

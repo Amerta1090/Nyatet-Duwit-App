@@ -1,5 +1,7 @@
 package com.nyatetduwit.data.repository
 
+import com.nyatetduwit.data.local.dao.CategoryExpenseSummary
+import com.nyatetduwit.data.local.dao.DailyExpenseSummary
 import com.nyatetduwit.data.local.dao.TransactionDao
 import com.nyatetduwit.data.local.entity.TransactionEntity
 import com.nyatetduwit.domain.model.Transaction
@@ -142,6 +144,24 @@ class TransactionRepositoryImpl @Inject constructor(
         return transactionDao.searchAndFilterTransactions(query, type, categoryId, accountId, startDate, endDate).map { entities ->
             entities.map { it.toDomain() }
         }
+    }
+
+    override fun getDailyExpenseTrend(startDate: Long, endDate: Long): Flow<List<Pair<String, Long>>> {
+        return transactionDao.getDailyExpenseTrend(startDate, endDate).map { summaries ->
+            summaries.map { it.day to it.total }
+        }
+    }
+
+    override suspend fun getBiggestExpense(startDate: Long, endDate: Long): Transaction? {
+        return transactionDao.getBiggestExpense(startDate, endDate)?.toDomain()
+    }
+
+    override suspend fun getActiveDaysCount(startDate: Long, endDate: Long): Int {
+        return transactionDao.getActiveDaysCount(startDate, endDate)
+    }
+
+    override suspend fun getTransactionCount(startDate: Long, endDate: Long): Int {
+        return transactionDao.getTransactionCount(startDate, endDate)
     }
 
     private fun TransactionEntity.toDomain(): Transaction {

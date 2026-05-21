@@ -20,6 +20,7 @@ import com.nyatetduwit.core.di.DatabaseModule_ProvideBudgetDaoFactory;
 import com.nyatetduwit.core.di.DatabaseModule_ProvideCategoryDaoFactory;
 import com.nyatetduwit.core.di.DatabaseModule_ProvideDatabaseFactory;
 import com.nyatetduwit.core.di.DatabaseModule_ProvideRecurringTransactionDaoFactory;
+import com.nyatetduwit.core.di.DatabaseModule_ProvideTemplateDaoFactory;
 import com.nyatetduwit.core.di.DatabaseModule_ProvideTransactionDaoFactory;
 import com.nyatetduwit.core.worker.RecurringTransactionWorker;
 import com.nyatetduwit.core.worker.RecurringTransactionWorker_AssistedFactory;
@@ -28,18 +29,21 @@ import com.nyatetduwit.data.local.dao.AccountDao;
 import com.nyatetduwit.data.local.dao.BudgetDao;
 import com.nyatetduwit.data.local.dao.CategoryDao;
 import com.nyatetduwit.data.local.dao.RecurringTransactionDao;
+import com.nyatetduwit.data.local.dao.TemplateDao;
 import com.nyatetduwit.data.local.dao.TransactionDao;
 import com.nyatetduwit.data.repository.AccountRepositoryImpl;
 import com.nyatetduwit.data.repository.BudgetRepositoryImpl;
 import com.nyatetduwit.data.repository.CategoryRepositoryImpl;
 import com.nyatetduwit.data.repository.RecurringTransactionRepositoryImpl;
 import com.nyatetduwit.data.repository.SettingsRepositoryImpl;
+import com.nyatetduwit.data.repository.TemplateRepositoryImpl;
 import com.nyatetduwit.data.repository.TransactionRepositoryImpl;
 import com.nyatetduwit.domain.repository.AccountRepository;
 import com.nyatetduwit.domain.repository.BudgetRepository;
 import com.nyatetduwit.domain.repository.CategoryRepository;
 import com.nyatetduwit.domain.repository.RecurringTransactionRepository;
 import com.nyatetduwit.domain.repository.SettingsRepository;
+import com.nyatetduwit.domain.repository.TemplateRepository;
 import com.nyatetduwit.domain.repository.TransactionRepository;
 import com.nyatetduwit.domain.usecase.account.AddAccountUseCase;
 import com.nyatetduwit.domain.usecase.account.CheckAccountTransactionsUseCase;
@@ -67,14 +71,20 @@ import com.nyatetduwit.domain.usecase.recurring.GetAllRecurringTransactionsUseCa
 import com.nyatetduwit.domain.usecase.recurring.GetRecurringTransactionsUseCase;
 import com.nyatetduwit.domain.usecase.recurring.SkipRecurringInstanceUseCase;
 import com.nyatetduwit.domain.usecase.recurring.UpdateRecurringTransactionUseCase;
+import com.nyatetduwit.domain.usecase.template.CreateTemplateFromTransactionUseCase;
+import com.nyatetduwit.domain.usecase.template.DeleteTemplateUseCase;
+import com.nyatetduwit.domain.usecase.template.GetPinnedTemplatesUseCase;
+import com.nyatetduwit.domain.usecase.template.GetTemplatesUseCase;
+import com.nyatetduwit.domain.usecase.template.IncrementTemplateUsageUseCase;
+import com.nyatetduwit.domain.usecase.template.ToggleTemplatePinUseCase;
 import com.nyatetduwit.domain.usecase.transaction.AddTransactionUseCase;
 import com.nyatetduwit.domain.usecase.transaction.BalanceUpdateService;
 import com.nyatetduwit.domain.usecase.transaction.GetRecentTransactionsUseCase;
 import com.nyatetduwit.domain.usecase.transaction.GetSumByTypeAndDateRangeUseCase;
 import com.nyatetduwit.domain.usecase.transaction.GetTopCategoriesByExpenseUseCase;
 import com.nyatetduwit.domain.usecase.transaction.GetTransactionByIdUseCase;
-import com.nyatetduwit.domain.usecase.transaction.GetTransactionsUseCase;
 import com.nyatetduwit.domain.usecase.transaction.RestoreTransactionUseCase;
+import com.nyatetduwit.domain.usecase.transaction.SearchAndFilterTransactionsUseCase;
 import com.nyatetduwit.domain.usecase.transaction.SoftDeleteTransactionUseCase;
 import com.nyatetduwit.domain.usecase.transaction.UpdateTransactionUseCase;
 import com.nyatetduwit.presentation.account.AccountViewModel;
@@ -87,6 +97,8 @@ import com.nyatetduwit.presentation.dashboard.DashboardViewModel;
 import com.nyatetduwit.presentation.dashboard.DashboardViewModel_HiltModules;
 import com.nyatetduwit.presentation.recurring.RecurringTransactionViewModel;
 import com.nyatetduwit.presentation.recurring.RecurringTransactionViewModel_HiltModules;
+import com.nyatetduwit.presentation.template.TemplateViewModel;
+import com.nyatetduwit.presentation.template.TemplateViewModel_HiltModules;
 import com.nyatetduwit.presentation.transaction.TransactionDetailViewModel;
 import com.nyatetduwit.presentation.transaction.TransactionDetailViewModel_HiltModules;
 import com.nyatetduwit.presentation.transaction.TransactionListViewModel;
@@ -455,7 +467,7 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
 
     @Override
     public Map<Class<?>, Boolean> getViewModelKeys() {
-      return LazyClassKeyMap.<Boolean>of(MapBuilder.<String, Boolean>newMapBuilder(8).put(LazyClassKeyProvider.com_nyatetduwit_presentation_account_AccountViewModel, AccountViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nyatetduwit_presentation_budget_BudgetViewModel, BudgetViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nyatetduwit_presentation_category_CategoryViewModel, CategoryViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nyatetduwit_presentation_dashboard_DashboardViewModel, DashboardViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel, RecurringTransactionViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nyatetduwit_presentation_transaction_TransactionDetailViewModel, TransactionDetailViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nyatetduwit_presentation_transaction_TransactionListViewModel, TransactionListViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nyatetduwit_presentation_transaction_TransactionViewModel, TransactionViewModel_HiltModules.KeyModule.provide()).build());
+      return LazyClassKeyMap.<Boolean>of(MapBuilder.<String, Boolean>newMapBuilder(9).put(LazyClassKeyProvider.com_nyatetduwit_presentation_account_AccountViewModel, AccountViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nyatetduwit_presentation_budget_BudgetViewModel, BudgetViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nyatetduwit_presentation_category_CategoryViewModel, CategoryViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nyatetduwit_presentation_dashboard_DashboardViewModel, DashboardViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel, RecurringTransactionViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nyatetduwit_presentation_template_TemplateViewModel, TemplateViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nyatetduwit_presentation_transaction_TransactionDetailViewModel, TransactionDetailViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nyatetduwit_presentation_transaction_TransactionListViewModel, TransactionListViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_nyatetduwit_presentation_transaction_TransactionViewModel, TransactionViewModel_HiltModules.KeyModule.provide()).build());
     }
 
     @Override
@@ -475,30 +487,26 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_nyatetduwit_presentation_transaction_TransactionDetailViewModel = "com.nyatetduwit.presentation.transaction.TransactionDetailViewModel";
-
-      static String com_nyatetduwit_presentation_dashboard_DashboardViewModel = "com.nyatetduwit.presentation.dashboard.DashboardViewModel";
-
-      static String com_nyatetduwit_presentation_budget_BudgetViewModel = "com.nyatetduwit.presentation.budget.BudgetViewModel";
+      static String com_nyatetduwit_presentation_transaction_TransactionListViewModel = "com.nyatetduwit.presentation.transaction.TransactionListViewModel";
 
       static String com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel = "com.nyatetduwit.presentation.recurring.RecurringTransactionViewModel";
 
       static String com_nyatetduwit_presentation_account_AccountViewModel = "com.nyatetduwit.presentation.account.AccountViewModel";
 
-      static String com_nyatetduwit_presentation_transaction_TransactionViewModel = "com.nyatetduwit.presentation.transaction.TransactionViewModel";
-
       static String com_nyatetduwit_presentation_category_CategoryViewModel = "com.nyatetduwit.presentation.category.CategoryViewModel";
 
-      static String com_nyatetduwit_presentation_transaction_TransactionListViewModel = "com.nyatetduwit.presentation.transaction.TransactionListViewModel";
+      static String com_nyatetduwit_presentation_dashboard_DashboardViewModel = "com.nyatetduwit.presentation.dashboard.DashboardViewModel";
+
+      static String com_nyatetduwit_presentation_budget_BudgetViewModel = "com.nyatetduwit.presentation.budget.BudgetViewModel";
+
+      static String com_nyatetduwit_presentation_transaction_TransactionViewModel = "com.nyatetduwit.presentation.transaction.TransactionViewModel";
+
+      static String com_nyatetduwit_presentation_transaction_TransactionDetailViewModel = "com.nyatetduwit.presentation.transaction.TransactionDetailViewModel";
+
+      static String com_nyatetduwit_presentation_template_TemplateViewModel = "com.nyatetduwit.presentation.template.TemplateViewModel";
 
       @KeepFieldType
-      TransactionDetailViewModel com_nyatetduwit_presentation_transaction_TransactionDetailViewModel2;
-
-      @KeepFieldType
-      DashboardViewModel com_nyatetduwit_presentation_dashboard_DashboardViewModel2;
-
-      @KeepFieldType
-      BudgetViewModel com_nyatetduwit_presentation_budget_BudgetViewModel2;
+      TransactionListViewModel com_nyatetduwit_presentation_transaction_TransactionListViewModel2;
 
       @KeepFieldType
       RecurringTransactionViewModel com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel2;
@@ -507,13 +515,22 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
       AccountViewModel com_nyatetduwit_presentation_account_AccountViewModel2;
 
       @KeepFieldType
-      TransactionViewModel com_nyatetduwit_presentation_transaction_TransactionViewModel2;
-
-      @KeepFieldType
       CategoryViewModel com_nyatetduwit_presentation_category_CategoryViewModel2;
 
       @KeepFieldType
-      TransactionListViewModel com_nyatetduwit_presentation_transaction_TransactionListViewModel2;
+      DashboardViewModel com_nyatetduwit_presentation_dashboard_DashboardViewModel2;
+
+      @KeepFieldType
+      BudgetViewModel com_nyatetduwit_presentation_budget_BudgetViewModel2;
+
+      @KeepFieldType
+      TransactionViewModel com_nyatetduwit_presentation_transaction_TransactionViewModel2;
+
+      @KeepFieldType
+      TransactionDetailViewModel com_nyatetduwit_presentation_transaction_TransactionDetailViewModel2;
+
+      @KeepFieldType
+      TemplateViewModel com_nyatetduwit_presentation_template_TemplateViewModel2;
     }
   }
 
@@ -533,6 +550,8 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
     private Provider<DashboardViewModel> dashboardViewModelProvider;
 
     private Provider<RecurringTransactionViewModel> recurringTransactionViewModelProvider;
+
+    private Provider<TemplateViewModel> templateViewModelProvider;
 
     private Provider<TransactionDetailViewModel> transactionDetailViewModelProvider;
 
@@ -658,6 +677,18 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
       return new SkipRecurringInstanceUseCase(singletonCImpl.bindRecurringTransactionRepositoryProvider.get());
     }
 
+    private GetTemplatesUseCase getTemplatesUseCase() {
+      return new GetTemplatesUseCase(singletonCImpl.bindTemplateRepositoryProvider.get());
+    }
+
+    private DeleteTemplateUseCase deleteTemplateUseCase() {
+      return new DeleteTemplateUseCase(singletonCImpl.bindTemplateRepositoryProvider.get());
+    }
+
+    private ToggleTemplatePinUseCase toggleTemplatePinUseCase() {
+      return new ToggleTemplatePinUseCase(singletonCImpl.bindTemplateRepositoryProvider.get());
+    }
+
     private GetTransactionByIdUseCase getTransactionByIdUseCase() {
       return new GetTransactionByIdUseCase(singletonCImpl.bindTransactionRepositoryProvider.get());
     }
@@ -674,12 +705,16 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
       return new BalanceUpdateService(singletonCImpl.bindAccountRepositoryProvider.get(), singletonCImpl.bindTransactionRepositoryProvider.get());
     }
 
-    private GetTransactionsUseCase getTransactionsUseCase() {
-      return new GetTransactionsUseCase(singletonCImpl.bindTransactionRepositoryProvider.get());
+    private SearchAndFilterTransactionsUseCase searchAndFilterTransactionsUseCase() {
+      return new SearchAndFilterTransactionsUseCase(singletonCImpl.bindTransactionRepositoryProvider.get());
     }
 
     private RestoreTransactionUseCase restoreTransactionUseCase() {
       return new RestoreTransactionUseCase(singletonCImpl.bindTransactionRepositoryProvider.get());
+    }
+
+    private CreateTemplateFromTransactionUseCase createTemplateFromTransactionUseCase() {
+      return new CreateTemplateFromTransactionUseCase(singletonCImpl.bindTemplateRepositoryProvider.get());
     }
 
     private GetCategoriesByTypeUseCase getCategoriesByTypeUseCase() {
@@ -694,6 +729,14 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
       return new UpdateTransactionUseCase(singletonCImpl.bindTransactionRepositoryProvider.get());
     }
 
+    private GetPinnedTemplatesUseCase getPinnedTemplatesUseCase() {
+      return new GetPinnedTemplatesUseCase(singletonCImpl.bindTemplateRepositoryProvider.get());
+    }
+
+    private IncrementTemplateUsageUseCase incrementTemplateUsageUseCase() {
+      return new IncrementTemplateUsageUseCase(singletonCImpl.bindTemplateRepositoryProvider.get());
+    }
+
     @SuppressWarnings("unchecked")
     private void initialize(final SavedStateHandle savedStateHandleParam,
         final ViewModelLifecycle viewModelLifecycleParam) {
@@ -702,14 +745,15 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
       this.categoryViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 2);
       this.dashboardViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 3);
       this.recurringTransactionViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 4);
-      this.transactionDetailViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 5);
-      this.transactionListViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 6);
-      this.transactionViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 7);
+      this.templateViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 5);
+      this.transactionDetailViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 6);
+      this.transactionListViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 7);
+      this.transactionViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 8);
     }
 
     @Override
     public Map<Class<?>, javax.inject.Provider<ViewModel>> getHiltViewModelMap() {
-      return LazyClassKeyMap.<javax.inject.Provider<ViewModel>>of(MapBuilder.<String, javax.inject.Provider<ViewModel>>newMapBuilder(8).put(LazyClassKeyProvider.com_nyatetduwit_presentation_account_AccountViewModel, ((Provider) accountViewModelProvider)).put(LazyClassKeyProvider.com_nyatetduwit_presentation_budget_BudgetViewModel, ((Provider) budgetViewModelProvider)).put(LazyClassKeyProvider.com_nyatetduwit_presentation_category_CategoryViewModel, ((Provider) categoryViewModelProvider)).put(LazyClassKeyProvider.com_nyatetduwit_presentation_dashboard_DashboardViewModel, ((Provider) dashboardViewModelProvider)).put(LazyClassKeyProvider.com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel, ((Provider) recurringTransactionViewModelProvider)).put(LazyClassKeyProvider.com_nyatetduwit_presentation_transaction_TransactionDetailViewModel, ((Provider) transactionDetailViewModelProvider)).put(LazyClassKeyProvider.com_nyatetduwit_presentation_transaction_TransactionListViewModel, ((Provider) transactionListViewModelProvider)).put(LazyClassKeyProvider.com_nyatetduwit_presentation_transaction_TransactionViewModel, ((Provider) transactionViewModelProvider)).build());
+      return LazyClassKeyMap.<javax.inject.Provider<ViewModel>>of(MapBuilder.<String, javax.inject.Provider<ViewModel>>newMapBuilder(9).put(LazyClassKeyProvider.com_nyatetduwit_presentation_account_AccountViewModel, ((Provider) accountViewModelProvider)).put(LazyClassKeyProvider.com_nyatetduwit_presentation_budget_BudgetViewModel, ((Provider) budgetViewModelProvider)).put(LazyClassKeyProvider.com_nyatetduwit_presentation_category_CategoryViewModel, ((Provider) categoryViewModelProvider)).put(LazyClassKeyProvider.com_nyatetduwit_presentation_dashboard_DashboardViewModel, ((Provider) dashboardViewModelProvider)).put(LazyClassKeyProvider.com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel, ((Provider) recurringTransactionViewModelProvider)).put(LazyClassKeyProvider.com_nyatetduwit_presentation_template_TemplateViewModel, ((Provider) templateViewModelProvider)).put(LazyClassKeyProvider.com_nyatetduwit_presentation_transaction_TransactionDetailViewModel, ((Provider) transactionDetailViewModelProvider)).put(LazyClassKeyProvider.com_nyatetduwit_presentation_transaction_TransactionListViewModel, ((Provider) transactionListViewModelProvider)).put(LazyClassKeyProvider.com_nyatetduwit_presentation_transaction_TransactionViewModel, ((Provider) transactionViewModelProvider)).build());
     }
 
     @Override
@@ -719,45 +763,50 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_nyatetduwit_presentation_category_CategoryViewModel = "com.nyatetduwit.presentation.category.CategoryViewModel";
-
-      static String com_nyatetduwit_presentation_dashboard_DashboardViewModel = "com.nyatetduwit.presentation.dashboard.DashboardViewModel";
+      static String com_nyatetduwit_presentation_budget_BudgetViewModel = "com.nyatetduwit.presentation.budget.BudgetViewModel";
 
       static String com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel = "com.nyatetduwit.presentation.recurring.RecurringTransactionViewModel";
 
+      static String com_nyatetduwit_presentation_dashboard_DashboardViewModel = "com.nyatetduwit.presentation.dashboard.DashboardViewModel";
+
       static String com_nyatetduwit_presentation_transaction_TransactionDetailViewModel = "com.nyatetduwit.presentation.transaction.TransactionDetailViewModel";
-
-      static String com_nyatetduwit_presentation_account_AccountViewModel = "com.nyatetduwit.presentation.account.AccountViewModel";
-
-      static String com_nyatetduwit_presentation_budget_BudgetViewModel = "com.nyatetduwit.presentation.budget.BudgetViewModel";
-
-      static String com_nyatetduwit_presentation_transaction_TransactionViewModel = "com.nyatetduwit.presentation.transaction.TransactionViewModel";
 
       static String com_nyatetduwit_presentation_transaction_TransactionListViewModel = "com.nyatetduwit.presentation.transaction.TransactionListViewModel";
 
-      @KeepFieldType
-      CategoryViewModel com_nyatetduwit_presentation_category_CategoryViewModel2;
+      static String com_nyatetduwit_presentation_template_TemplateViewModel = "com.nyatetduwit.presentation.template.TemplateViewModel";
 
-      @KeepFieldType
-      DashboardViewModel com_nyatetduwit_presentation_dashboard_DashboardViewModel2;
+      static String com_nyatetduwit_presentation_category_CategoryViewModel = "com.nyatetduwit.presentation.category.CategoryViewModel";
 
-      @KeepFieldType
-      RecurringTransactionViewModel com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel2;
+      static String com_nyatetduwit_presentation_account_AccountViewModel = "com.nyatetduwit.presentation.account.AccountViewModel";
 
-      @KeepFieldType
-      TransactionDetailViewModel com_nyatetduwit_presentation_transaction_TransactionDetailViewModel2;
-
-      @KeepFieldType
-      AccountViewModel com_nyatetduwit_presentation_account_AccountViewModel2;
+      static String com_nyatetduwit_presentation_transaction_TransactionViewModel = "com.nyatetduwit.presentation.transaction.TransactionViewModel";
 
       @KeepFieldType
       BudgetViewModel com_nyatetduwit_presentation_budget_BudgetViewModel2;
 
       @KeepFieldType
-      TransactionViewModel com_nyatetduwit_presentation_transaction_TransactionViewModel2;
+      RecurringTransactionViewModel com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel2;
+
+      @KeepFieldType
+      DashboardViewModel com_nyatetduwit_presentation_dashboard_DashboardViewModel2;
+
+      @KeepFieldType
+      TransactionDetailViewModel com_nyatetduwit_presentation_transaction_TransactionDetailViewModel2;
 
       @KeepFieldType
       TransactionListViewModel com_nyatetduwit_presentation_transaction_TransactionListViewModel2;
+
+      @KeepFieldType
+      TemplateViewModel com_nyatetduwit_presentation_template_TemplateViewModel2;
+
+      @KeepFieldType
+      CategoryViewModel com_nyatetduwit_presentation_category_CategoryViewModel2;
+
+      @KeepFieldType
+      AccountViewModel com_nyatetduwit_presentation_account_AccountViewModel2;
+
+      @KeepFieldType
+      TransactionViewModel com_nyatetduwit_presentation_transaction_TransactionViewModel2;
     }
 
     private static final class SwitchingProvider<T> implements Provider<T> {
@@ -796,14 +845,17 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
           case 4: // com.nyatetduwit.presentation.recurring.RecurringTransactionViewModel 
           return (T) new RecurringTransactionViewModel(viewModelCImpl.getRecurringTransactionsUseCase(), viewModelCImpl.getAllRecurringTransactionsUseCase(), singletonCImpl.bindRecurringTransactionRepositoryProvider.get(), singletonCImpl.bindTransactionRepositoryProvider.get(), viewModelCImpl.addRecurringTransactionUseCase(), viewModelCImpl.updateRecurringTransactionUseCase(), viewModelCImpl.deleteRecurringTransactionUseCase(), viewModelCImpl.deactivateRecurringTransactionUseCase(), viewModelCImpl.skipRecurringInstanceUseCase());
 
-          case 5: // com.nyatetduwit.presentation.transaction.TransactionDetailViewModel 
+          case 5: // com.nyatetduwit.presentation.template.TemplateViewModel 
+          return (T) new TemplateViewModel(viewModelCImpl.getTemplatesUseCase(), viewModelCImpl.deleteTemplateUseCase(), viewModelCImpl.toggleTemplatePinUseCase());
+
+          case 6: // com.nyatetduwit.presentation.transaction.TransactionDetailViewModel 
           return (T) new TransactionDetailViewModel(viewModelCImpl.getTransactionByIdUseCase(), viewModelCImpl.getAccountByIdUseCase(), viewModelCImpl.getCategoryByIdUseCase(), viewModelCImpl.softDeleteTransactionUseCase(), viewModelCImpl.balanceUpdateService());
 
-          case 6: // com.nyatetduwit.presentation.transaction.TransactionListViewModel 
-          return (T) new TransactionListViewModel(viewModelCImpl.getTransactionsUseCase(), viewModelCImpl.softDeleteTransactionUseCase(), viewModelCImpl.restoreTransactionUseCase());
+          case 7: // com.nyatetduwit.presentation.transaction.TransactionListViewModel 
+          return (T) new TransactionListViewModel(viewModelCImpl.searchAndFilterTransactionsUseCase(), viewModelCImpl.softDeleteTransactionUseCase(), viewModelCImpl.restoreTransactionUseCase(), viewModelCImpl.getAccountsUseCase(), viewModelCImpl.getCategoriesUseCase(), viewModelCImpl.createTemplateFromTransactionUseCase());
 
-          case 7: // com.nyatetduwit.presentation.transaction.TransactionViewModel 
-          return (T) new TransactionViewModel(viewModelCImpl.getAccountsUseCase(), viewModelCImpl.getCategoriesByTypeUseCase(), viewModelCImpl.addTransactionUseCase(), viewModelCImpl.updateTransactionUseCase(), viewModelCImpl.getTransactionByIdUseCase(), viewModelCImpl.balanceUpdateService());
+          case 8: // com.nyatetduwit.presentation.transaction.TransactionViewModel 
+          return (T) new TransactionViewModel(viewModelCImpl.getAccountsUseCase(), viewModelCImpl.getCategoriesByTypeUseCase(), viewModelCImpl.addTransactionUseCase(), viewModelCImpl.updateTransactionUseCase(), viewModelCImpl.getTransactionByIdUseCase(), viewModelCImpl.balanceUpdateService(), viewModelCImpl.getPinnedTemplatesUseCase(), viewModelCImpl.incrementTemplateUsageUseCase());
 
           default: throw new AssertionError(id);
         }
@@ -915,6 +967,10 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
 
     private Provider<SettingsRepository> bindSettingsRepositoryProvider;
 
+    private Provider<TemplateRepositoryImpl> templateRepositoryImplProvider;
+
+    private Provider<TemplateRepository> bindTemplateRepositoryProvider;
+
     private SingletonCImpl(ApplicationContextModule applicationContextModuleParam) {
       this.applicationContextModule = applicationContextModuleParam;
       initialize(applicationContextModuleParam);
@@ -950,6 +1006,10 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
       return DatabaseModule_ProvideCategoryDaoFactory.provideCategoryDao(provideDatabaseProvider.get());
     }
 
+    private TemplateDao templateDao() {
+      return DatabaseModule_ProvideTemplateDaoFactory.provideTemplateDao(provideDatabaseProvider.get());
+    }
+
     @SuppressWarnings("unchecked")
     private void initialize(final ApplicationContextModule applicationContextModuleParam) {
       this.provideDatabaseProvider = DoubleCheck.provider(new SwitchingProvider<NyatetDuwitDatabase>(singletonCImpl, 2));
@@ -967,6 +1027,8 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
       this.provideDataStoreProvider = DoubleCheck.provider(new SwitchingProvider<DataStore<Preferences>>(singletonCImpl, 8));
       this.settingsRepositoryImplProvider = new SwitchingProvider<>(singletonCImpl, 7);
       this.bindSettingsRepositoryProvider = DoubleCheck.provider((Provider) settingsRepositoryImplProvider);
+      this.templateRepositoryImplProvider = new SwitchingProvider<>(singletonCImpl, 9);
+      this.bindTemplateRepositoryProvider = DoubleCheck.provider((Provider) templateRepositoryImplProvider);
     }
 
     @Override
@@ -1040,6 +1102,9 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
 
           case 8: // androidx.datastore.core.DataStore<androidx.datastore.preferences.core.Preferences> 
           return (T) DataStoreModule_ProvideDataStoreFactory.provideDataStore(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+
+          case 9: // com.nyatetduwit.data.repository.TemplateRepositoryImpl 
+          return (T) new TemplateRepositoryImpl(singletonCImpl.templateDao(), singletonCImpl.transactionDao());
 
           default: throw new AssertionError(id);
         }

@@ -7,6 +7,7 @@ import com.nyatetduwit.domain.model.Category
 import com.nyatetduwit.domain.model.Template
 import com.nyatetduwit.domain.model.Transaction
 import com.nyatetduwit.domain.model.TransactionType
+import com.nyatetduwit.domain.repository.SettingsRepository
 import com.nyatetduwit.domain.usecase.account.GetAccountsUseCase
 import com.nyatetduwit.domain.usecase.category.GetCategoriesByTypeUseCase
 import com.nyatetduwit.domain.usecase.template.GetPinnedTemplatesUseCase
@@ -52,6 +53,7 @@ class TransactionViewModel @Inject constructor(
     private val balanceUpdateService: BalanceUpdateService,
     private val getPinnedTemplatesUseCase: GetPinnedTemplatesUseCase,
     private val incrementTemplateUsageUseCase: IncrementTemplateUsageUseCase,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionUiState())
@@ -279,6 +281,7 @@ class TransactionViewModel @Inject constructor(
                 }
 
                 balanceUpdateService.onTransactionAdded(transaction)
+                settingsRepository.setLastTransactionDate(System.currentTimeMillis())
 
                 _uiState.update {
                     it.copy(

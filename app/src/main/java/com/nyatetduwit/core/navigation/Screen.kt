@@ -31,4 +31,9 @@ sealed class Screen(val route: String) {
         fun createRoute(recurringId: String? = null) =
             if (recurringId != null) "recurring_form/$recurringId" else "recurring_form/null"
     }
+    data object MonthlySummary : Screen("monthly_summary/{yearMonth}") {
+        fun createRoute(yearMonth: String? = null) =
+            if (yearMonth != null) "monthly_summary/$yearMonth" else "monthly_summary/current"
+    }
+    data object ReminderSettings : Screen("reminder_settings")
 }

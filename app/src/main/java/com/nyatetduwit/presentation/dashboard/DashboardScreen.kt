@@ -28,6 +28,7 @@ fun DashboardScreen(
     onNavigateToBudgets: () -> Unit,
     onNavigateToRecurring: () -> Unit,
     onNavigateToTemplates: () -> Unit,
+    onNavigateToMonthlySummary: () -> Unit,
     onNavigateToAddTransaction: () -> Unit,
     onNavigateToTransactionDetail: (String) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
@@ -139,6 +140,7 @@ fun DashboardScreen(
                         onNavigateToBudgets = onNavigateToBudgets,
                         onNavigateToRecurring = onNavigateToRecurring,
                         onNavigateToTemplates = onNavigateToTemplates,
+                        onNavigateToMonthlySummary = onNavigateToMonthlySummary,
                     )
                 }
 
@@ -363,6 +365,7 @@ private fun MenuSection(
     onNavigateToBudgets: () -> Unit,
     onNavigateToRecurring: () -> Unit,
     onNavigateToTemplates: () -> Unit,
+    onNavigateToMonthlySummary: () -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -406,6 +409,12 @@ private fun MenuSection(
             title = "Template",
             description = "Transaksi cepat dengan template",
             onClick = onNavigateToTemplates,
+        )
+        MenuCard(
+            icon = Icons.Default.BarChart,
+            title = "Ringkasan Bulanan",
+            description = "Lihat tren dan perbandingan bulanan",
+            onClick = onNavigateToMonthlySummary,
         )
     }
 }

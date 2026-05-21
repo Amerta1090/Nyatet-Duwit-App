@@ -9,6 +9,7 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.nyatetduwit.core.worker.RecurringTransactionWorker
+import com.nyatetduwit.core.worker.ReminderWorker
 import dagger.hilt.android.HiltAndroidApp
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -27,6 +28,7 @@ class NyatetDuwitApp : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         setupRecurringWorker()
+        setupReminderWorker()
     }
 
     private fun setupRecurringWorker() {
@@ -45,6 +47,25 @@ class NyatetDuwitApp : Application(), Configuration.Provider {
             "recurring_transaction_check",
             ExistingPeriodicWorkPolicy.KEEP,
             recurringWork,
+        )
+    }
+
+    private fun setupReminderWorker() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+            .build()
+
+        val reminderWork = PeriodicWorkRequestBuilder<ReminderWorker>(
+            repeatInterval = 3,
+            TimeUnit.HOURS,
+        )
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            ReminderWorker.WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            reminderWork,
         )
     }
 }
