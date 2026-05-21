@@ -25,6 +25,7 @@ class SettingsRepositoryImpl @Inject constructor(
         val REMINDER_HOUR = intPreferencesKey("reminder_hour")
         val REMINDER_FREQUENCY = intPreferencesKey("reminder_frequency")
         val LAST_TRANSACTION_DATE = longPreferencesKey("last_transaction_date")
+        val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
     }
 
     override val isBalanceVisible: Flow<Boolean> = dataStore.data
@@ -50,6 +51,9 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override val lastTransactionDate: Flow<Long> = dataStore.data
         .map { preferences -> preferences[Keys.LAST_TRANSACTION_DATE] ?: 0L }
+
+    override val isOnboardingCompleted: Flow<Boolean> = dataStore.data
+        .map { preferences -> preferences[Keys.ONBOARDING_COMPLETED] ?: false }
 
     override suspend fun setBalanceVisible(isVisible: Boolean) {
         dataStore.edit { preferences -> preferences[Keys.BALANCE_VISIBLE] = isVisible }
@@ -81,5 +85,9 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setLastTransactionDate(timestamp: Long) {
         dataStore.edit { preferences -> preferences[Keys.LAST_TRANSACTION_DATE] = timestamp }
+    }
+
+    override suspend fun setOnboardingCompleted(completed: Boolean) {
+        dataStore.edit { preferences -> preferences[Keys.ONBOARDING_COMPLETED] = completed }
     }
 }

@@ -126,7 +126,7 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val account = Account(
-                    id = formState.id,
+                    id = if (formState.id.isEmpty()) UUID.randomUUID().toString() else formState.id,
                     name = formState.name.trim(),
                     type = formState.type,
                     balance = formState.balance,

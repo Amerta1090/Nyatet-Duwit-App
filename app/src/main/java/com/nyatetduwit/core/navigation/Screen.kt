@@ -36,4 +36,7 @@ sealed class Screen(val route: String) {
             if (yearMonth != null) "monthly_summary/$yearMonth" else "monthly_summary/current"
     }
     data object ReminderSettings : Screen("reminder_settings")
+    data object Onboarding : Screen("onboarding")
+    data object PinSetup : Screen("pin_setup")
+    data object SecuritySettings : Screen("security_settings")
 }

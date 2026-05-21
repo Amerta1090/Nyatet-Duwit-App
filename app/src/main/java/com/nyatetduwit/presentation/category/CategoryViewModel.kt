@@ -8,6 +8,7 @@ import com.nyatetduwit.domain.usecase.category.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,11 +35,11 @@ class CategoryViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
-        seedCategories()
+        seedDefaultCategories()
         loadCategory()
     }
 
-    private fun seedCategories() {
+    fun seedDefaultCategories() {
         viewModelScope.launch {
             seedDefaultCategoriesUseCase()
         }
@@ -108,7 +109,7 @@ class CategoryViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val category = Category(
-                    id = formState.id,
+                    id = if (formState.id.isEmpty()) UUID.randomUUID().toString() else formState.id,
                     name = formState.name.trim(),
                     type = formState.type,
                     icon = formState.icon,

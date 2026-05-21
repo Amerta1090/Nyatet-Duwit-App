@@ -147,7 +147,7 @@ class RecurringTransactionViewModel @Inject constructor(
                 val nextDue = calculateNextDue(formState.frequency, System.currentTimeMillis())
 
                 val recurring = RecurringTransaction(
-                    id = formState.id,
+                    id = if (formState.id.isEmpty()) UUID.randomUUID().toString() else formState.id,
                     templateTransactionId = templateTransaction.id,
                     frequency = formState.frequency,
                     startDate = System.currentTimeMillis(),

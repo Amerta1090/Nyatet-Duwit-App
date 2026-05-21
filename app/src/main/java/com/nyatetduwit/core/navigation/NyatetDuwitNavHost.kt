@@ -22,18 +22,68 @@ import com.nyatetduwit.presentation.template.TemplateScreen
 import com.nyatetduwit.presentation.transaction.TransactionDetailScreen
 import com.nyatetduwit.presentation.transaction.TransactionFormScreen
 import com.nyatetduwit.presentation.transaction.TransactionListScreen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun NyatetDuwitNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
     startDestination: String = Screen.Dashboard.route,
+    isOnboardingCompleted: Boolean = true,
 ) {
+    val actualStartDestination = if (!isOnboardingCompleted) Screen.Onboarding.route else startDestination
+
     NavHost(
         navController = navController,
-        startDestination = startDestination,
+        startDestination = actualStartDestination,
         modifier = modifier,
     ) {
+        composable(Screen.Onboarding.route) {
+            com.nyatetduwit.presentation.onboarding.OnboardingScreen(
+                onComplete = {
+                    val context = navController.context
+                    val app = context.applicationContext as com.nyatetduwit.NyatetDuwitApp
+                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                        app.settingsRepository.setOnboardingCompleted(true)
+                    }
+                    navController.navigate(Screen.Dashboard.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    }
+                },
+                onSkip = {
+                    val context = navController.context
+                    val app = context.applicationContext as com.nyatetduwit.NyatetDuwitApp
+                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                        app.settingsRepository.setOnboardingCompleted(true)
+                    }
+                    navController.navigate(Screen.Dashboard.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
+        composable(Screen.PinSetup.route) {
+            com.nyatetduwit.presentation.security.PinSetupScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onPinSet = { pin ->
+                    val context = navController.context
+                    val app = context.applicationContext as com.nyatetduwit.NyatetDuwitApp
+                    app.securityManager.setPin(pin)
+                    navController.popBackStack()
+                },
+            )
+        }
+
+        composable(Screen.SecuritySettings.route) {
+            com.nyatetduwit.presentation.security.SecuritySettingsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToPinSetup = { navController.navigate(Screen.PinSetup.route) },
+            )
+        }
+
         composable(Screen.Dashboard.route) {
             DashboardScreen(
                 onNavigateToAccounts = { navController.navigate(Screen.Accounts.route) },
@@ -43,6 +93,7 @@ fun NyatetDuwitNavHost(
                 onNavigateToRecurring = { navController.navigate(Screen.Recurring.route) },
                 onNavigateToTemplates = { navController.navigate(Screen.Templates.route) },
                 onNavigateToMonthlySummary = { navController.navigate(Screen.MonthlySummary.createRoute()) },
+                onNavigateToSecuritySettings = { navController.navigate(Screen.SecuritySettings.route) },
                 onNavigateToAddTransaction = { navController.navigate(Screen.TransactionForm.createRoute()) },
                 onNavigateToTransactionDetail = { transactionId ->
                     navController.navigate(Screen.TransactionDetail.createRoute(transactionId))

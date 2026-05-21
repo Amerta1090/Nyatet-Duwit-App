@@ -1,6 +1,8 @@
 package com.nyatetduwit
 
 import android.app.Application
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.Constraints
@@ -8,8 +10,11 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.nyatetduwit.core.security.AppLockManager
+import com.nyatetduwit.core.security.SecurityManager
 import com.nyatetduwit.core.worker.RecurringTransactionWorker
 import com.nyatetduwit.core.worker.ReminderWorker
+import com.nyatetduwit.domain.repository.SettingsRepository
 import dagger.hilt.android.HiltAndroidApp
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -20,6 +25,18 @@ class NyatetDuwitApp : Application(), Configuration.Provider {
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
+    @Inject
+    lateinit var dataStore: DataStore<Preferences>
+
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
+
+    lateinit var securityManager: SecurityManager
+        private set
+
+    lateinit var appLockManager: AppLockManager
+        private set
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
@@ -27,6 +44,8 @@ class NyatetDuwitApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        securityManager = SecurityManager(this)
+        appLockManager = AppLockManager(this)
         setupRecurringWorker()
         setupReminderWorker()
     }

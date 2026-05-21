@@ -12,7 +12,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalView
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.nyatetduwit.core.util.HapticFeedback
 import com.nyatetduwit.domain.model.TransactionType
 import java.text.SimpleDateFormat
 import java.util.*
@@ -29,18 +31,26 @@ fun DashboardScreen(
     onNavigateToRecurring: () -> Unit,
     onNavigateToTemplates: () -> Unit,
     onNavigateToMonthlySummary: () -> Unit,
+    onNavigateToSecuritySettings: () -> Unit = {},
     onNavigateToAddTransaction: () -> Unit,
     onNavigateToTransactionDetail: (String) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val pullToRefreshState = rememberPullToRefreshState()
+    val view = LocalView.current
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("NyatetDuwit") },
                 actions = {
+                    IconButton(onClick = onNavigateToSecuritySettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Pengaturan keamanan",
+                        )
+                    }
                     IconButton(onClick = { viewModel.toggleBalanceVisibility() }) {
                         Icon(
                             imageVector = if (uiState.isBalanceVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
@@ -52,7 +62,10 @@ fun DashboardScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onNavigateToAddTransaction,
+                onClick = {
+                    HapticFeedback.click(view)
+                    onNavigateToAddTransaction()
+                },
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Tambah Transaksi")
             }

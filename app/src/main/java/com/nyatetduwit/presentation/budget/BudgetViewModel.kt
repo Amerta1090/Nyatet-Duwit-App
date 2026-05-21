@@ -122,7 +122,7 @@ class BudgetViewModel @Inject constructor(
                 }.timeInMillis
 
                 val budget = Budget(
-                    id = formState.id,
+                    id = if (formState.id.isEmpty()) UUID.randomUUID().toString() else formState.id,
                     categoryId = if (formState.isTotalBudget) null else formState.categoryId,
                     amount = formState.amount,
                     period = formState.period,
