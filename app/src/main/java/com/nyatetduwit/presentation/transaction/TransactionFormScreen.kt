@@ -1,36 +1,73 @@
 package com.nyatetduwit.presentation.transaction
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.AttachMoney
-import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ripple
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.nyatetduwit.core.theme.NyatetDuwitColor
+import com.nyatetduwit.core.theme.NyatetDuwitRadius
+import com.nyatetduwit.core.theme.NyatetDuwitSpacing
+import com.nyatetduwit.core.util.formatRupiah
 import com.nyatetduwit.domain.model.Account
 import com.nyatetduwit.domain.model.Category
+import com.nyatetduwit.domain.model.Template
 import com.nyatetduwit.domain.model.TransactionType
 import com.nyatetduwit.presentation.components.CustomNumpad
-import com.nyatetduwit.presentation.account.formatRupiah
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +78,7 @@ fun TransactionFormScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val formState = uiState.formState
+    val haptic = LocalHapticFeedback.current
 
     LaunchedEffect(transactionId) {
         transactionId?.let { viewModel.loadTransactionForEdit(it) }
@@ -58,100 +96,82 @@ fun TransactionFormScreen(
             TopAppBar(
                 title = {
                     Text(
-                        when (formState.type) {
+                        text = when (formState.type) {
                             TransactionType.INCOME -> "Pemasukan"
                             TransactionType.EXPENSE -> "Pengeluaran"
                             TransactionType.TRANSFER -> "Transfer"
-                        }
+                        },
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Text("←")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                        )
                     }
                 },
-                actions = {
-                    if (formState.amount > 0) {
-                        TextButton(
-                            onClick = { viewModel.saveTransaction(transactionId) },
-                            enabled = !formState.isLoading,
-                        ) {
-                            Text("Simpan")
-                        }
-                    }
-                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                ),
             )
         },
-    ) { paddingValues ->
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState()),
+                .padding(padding),
         ) {
             TransactionTypeSelector(
                 selectedType = formState.type,
                 onTypeSelected = { viewModel.setType(it) },
+                modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.lg),
             )
 
             if (uiState.templates.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(12.dp))
-
-                TemplateChips(
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.md))
+                TemplateStrip(
                     templates = uiState.templates,
                     onTemplateClick = { viewModel.applyTemplate(it) },
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                    modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.lg),
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xxl))
 
-            AmountDisplay(
+            AmountHero(
                 amount = formState.amount,
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.lg),
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xl))
 
             CustomNumpad(
                 onNumberClick = { viewModel.appendToAmount(it) },
                 onBackspaceClick = { viewModel.backspaceAmount() },
                 onPresetClick = { viewModel.setAmount(it) },
-                modifier = Modifier.padding(horizontal = 8.dp),
+                currentAmount = formState.amount,
+                modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.sm),
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.weight(1f))
 
-            if (formState.type != TransactionType.TRANSFER) {
-                CategoryPicker(
-                    categories = uiState.categories,
-                    selectedCategoryId = formState.categoryId,
-                    onCategorySelected = { viewModel.setCategoryId(it) },
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            AccountPickerSection(
-                accounts = uiState.accounts,
-                selectedAccountId = formState.accountId,
-                selectedToAccountId = formState.toAccountId,
-                transactionType = formState.type,
-                onAccountSelected = { viewModel.setAccountId(it) },
-                onToAccountSelected = { viewModel.setToAccountId(it) },
-                modifier = Modifier.padding(horizontal = 16.dp),
+            BottomActionBar(
+                amount = formState.amount,
+                type = formState.type,
+                selectedCategory = uiState.categories.find { it.id == formState.categoryId },
+                selectedAccount = uiState.accounts.find { it.id == formState.accountId },
+                selectedToAccount = uiState.accounts.find { it.id == formState.toAccountId },
+                hasNotes = formState.notes != null,
+                onSave = { viewModel.saveTransaction(transactionId) },
+                onCategoryClick = { /* open category picker */ },
+                onAccountClick = { /* open account picker */ },
+                onNotesClick = { /* open notes input */ },
+                isLoading = formState.isLoading,
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            NotesField(
-                notes = formState.notes,
-                onNotesChanged = { viewModel.setNotes(it) },
-                modifier = Modifier.padding(horizontal = 16.dp),
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 
@@ -178,300 +198,252 @@ fun TransactionTypeSelector(
     val haptic = LocalHapticFeedback.current
 
     Row(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
     ) {
         val types = listOf(
-            Triple(TransactionType.EXPENSE, "Pengeluaran", Icons.Default.ArrowDownward),
-            Triple(TransactionType.INCOME, "Pemasukan", Icons.Default.ArrowUpward),
-            Triple(TransactionType.TRANSFER, "Transfer", Icons.Default.SwapHoriz),
+            TransactionType.EXPENSE to "Pengeluaran",
+            TransactionType.INCOME to "Pemasukan",
+            TransactionType.TRANSFER to "Transfer",
         )
-        types.forEach { (type, label, icon) ->
+
+        types.forEach { (type, label) ->
             val isSelected = type == selectedType
-            Card(
-                modifier = Modifier.weight(1f).clickable {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onTypeSelected(type)
-                },
-                colors = CardDefaults.cardColors(
-                    containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-                ),
-                border = if (isSelected) {
-                    BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-                } else {
-                    BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                },
+            val bgColor by animateColorAsState(
+                targetValue = if (isSelected) when (type) {
+                    TransactionType.EXPENSE -> NyatetDuwitColor.red100
+                    TransactionType.INCOME -> NyatetDuwitColor.green100
+                    TransactionType.TRANSFER -> NyatetDuwitColor.gold100
+                } else Color.Transparent,
+                animationSpec = spring(),
+                label = "typeBg",
+            )
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+                    .background(bgColor)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ripple(),
+                    ) {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onTypeSelected(type)
+                    }
+                    .padding(vertical = NyatetDuwitSpacing.md + 2.dp),
+                contentAlignment = Alignment.Center,
             ) {
-                Column(
-                    modifier = Modifier.padding(12.dp).fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = label,
-                        modifier = Modifier.size(20.dp),
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    )
-                }
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                    color = if (isSelected) when (type) {
+                        TransactionType.EXPENSE -> NyatetDuwitColor.red500
+                        TransactionType.INCOME -> NyatetDuwitColor.green500
+                        TransactionType.TRANSFER -> NyatetDuwitColor.gold700
+                    } else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }
 }
 
 @Composable
-fun AmountDisplay(
+fun AmountHero(
     amount: Long,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
+    Box(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.primaryContainer,
+        contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = Modifier.padding(24.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = formatRupiah(amount),
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
+        Text(
+            text = formatRupiah(amount).ifEmpty { "Rp 0" },
+            style = MaterialTheme.typography.displayLarge,
+            fontWeight = FontWeight.Bold,
+            color = if (amount > 0) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+fun TemplateStrip(
+    templates: List<Template>,
+    onTemplateClick: (Template) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val haptic = LocalHapticFeedback.current
+
+    LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
+    ) {
+        items(templates) { template ->
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(NyatetDuwitRadius.full))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ripple(),
+                    ) {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onTemplateClick(template)
+                    }
+                    .padding(horizontal = NyatetDuwitSpacing.md, vertical = NyatetDuwitSpacing.sm),
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.xs),
+                ) {
+                    Text(
+                        text = when (template.type) {
+                            TransactionType.INCOME -> "↓"
+                            TransactionType.EXPENSE -> "↑"
+                            TransactionType.TRANSFER -> "⇄"
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                    Text(
+                        text = template.name,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    Text(
+                        text = formatRupiah(template.amount),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun CategoryPicker(
-    categories: List<Category>,
-    selectedCategoryId: String?,
-    onCategorySelected: (String?) -> Unit,
-    modifier: Modifier = Modifier,
+private fun BottomActionBar(
+    amount: Long,
+    type: TransactionType,
+    selectedCategory: Category?,
+    selectedAccount: Account?,
+    selectedToAccount: Account?,
+    hasNotes: Boolean,
+    isLoading: Boolean,
+    onSave: () -> Unit,
+    onCategoryClick: () -> Unit,
+    onAccountClick: () -> Unit,
+    onNotesClick: () -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    val selectedCategory = categories.find { it.id == selectedCategoryId }
+    val haptic = LocalHapticFeedback.current
+    val isEnabled = amount > 0
 
-    OutlinedCard(
-        modifier = modifier.fillMaxWidth().clickable { expanded = true },
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(topStart = NyatetDuwitRadius.xl, topEnd = NyatetDuwitRadius.xl))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(NyatetDuwitSpacing.lg),
     ) {
         Row(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
+        ) {
+            if (type != TransactionType.TRANSFER) {
+                PickerChip(
+                    label = selectedCategory?.name ?: "Kategori",
+                    icon = selectedCategory?.icon ?: "📁",
+                    onClick = onCategoryClick,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            PickerChip(
+                label = selectedAccount?.name ?: "Akun",
+                icon = "💳",
+                onClick = onAccountClick,
+                modifier = Modifier.weight(1f),
+            )
+            PickerChip(
+                label = if (hasNotes) "Ada catatan" else "Catatan",
+                icon = if (hasNotes) "📝" else "✏️",
+                onClick = onNotesClick,
+                modifier = Modifier.weight(1f),
+            )
+        }
+
+        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.md))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp)
+                .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+                .background(
+                    if (isEnabled && !isLoading) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.surfaceVariant
+                )
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = ripple(),
+                    enabled = isEnabled && !isLoading,
+                ) {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onSave()
+                },
+            contentAlignment = Alignment.Center,
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
             ) {
-                Icon(
-                    imageVector = Icons.Default.Category,
-                    contentDescription = null,
-                )
+                if (!isLoading) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        tint = if (isEnabled) MaterialTheme.colorScheme.onPrimary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
                 Text(
-                    text = selectedCategory?.name ?: "Pilih Kategori",
-                    style = MaterialTheme.typography.bodyLarge,
+                    text = if (isLoading) "Menyimpan..." else "Simpan Transaksi",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isEnabled && !isLoading) MaterialTheme.colorScheme.onPrimary
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Text("▼")
-        }
-    }
-
-    if (expanded) {
-        AlertDialog(
-            onDismissRequest = { expanded = false },
-            title = { Text("Pilih Kategori") },
-            text = {
-                LazyColumn {
-                    items(categories.size) { index ->
-                        val category = categories[index]
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    onCategorySelected(category.id)
-                                    expanded = false
-                                }
-                                .padding(vertical = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(category.icon)
-                            Text(category.name)
-                        }
-                    }
-                }
-            },
-            confirmButton = {},
-        )
-    }
-}
-
-@Composable
-fun AccountPickerSection(
-    accounts: List<Account>,
-    selectedAccountId: String,
-    selectedToAccountId: String,
-    transactionType: TransactionType,
-    onAccountSelected: (String) -> Unit,
-    onToAccountSelected: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier) {
-        AccountPicker(
-            label = if (transactionType == TransactionType.TRANSFER) "Dari Akun" else "Akun",
-            accounts = accounts,
-            selectedAccountId = selectedAccountId,
-            onAccountSelected = onAccountSelected,
-        )
-
-        if (transactionType == TransactionType.TRANSFER) {
-            Spacer(modifier = Modifier.height(12.dp))
-
-            AccountPicker(
-                label = "Ke Akun",
-                accounts = accounts,
-                selectedAccountId = selectedToAccountId,
-                onAccountSelected = onToAccountSelected,
-            )
         }
     }
 }
 
 @Composable
-fun AccountPicker(
+private fun PickerChip(
     label: String,
-    accounts: List<Account>,
-    selectedAccountId: String,
-    onAccountSelected: (String) -> Unit,
+    icon: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    val selectedAccount = accounts.find { it.id == selectedAccountId }
-
-    OutlinedCard(
-        modifier = Modifier.fillMaxWidth().clickable { expanded = true },
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(),
+            ) { onClick() }
+            .padding(vertical = NyatetDuwitSpacing.sm),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = selectedAccount?.name ?: "Pilih Akun",
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
-            Text("▼")
-        }
-    }
-
-    if (expanded) {
-        AlertDialog(
-            onDismissRequest = { expanded = false },
-            title = { Text("Pilih Akun") },
-            text = {
-                LazyColumn {
-                    items(accounts.size) { index ->
-                        val account = accounts[index]
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    onAccountSelected(account.id)
-                                    expanded = false
-                                }
-                                .padding(vertical = 12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(account.name)
-                            Text(formatRupiah(account.balance))
-                        }
-                    }
-                }
-            },
-            confirmButton = {},
+        Text(text = icon, style = MaterialTheme.typography.bodyMedium)
+        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xxs))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
-    }
-}
-
-@Composable
-fun NotesField(
-    notes: String?,
-    onNotesChanged: (String?) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    OutlinedTextField(
-        value = notes ?: "",
-        onValueChange = { onNotesChanged(it) },
-        label = { Text("Catatan (opsional)") },
-        leadingIcon = {
-            Icon(imageVector = Icons.Default.Description, contentDescription = null)
-        },
-        modifier = modifier.fillMaxWidth(),
-        maxLines = 3,
-    )
-}
-
-@Composable
-fun TemplateChips(
-    templates: List<com.nyatetduwit.domain.model.Template>,
-    onTemplateClick: (com.nyatetduwit.domain.model.Template) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            Icon(
-                imageVector = Icons.Default.Star,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(16.dp),
-            )
-            Text(
-                text = "Template",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.primary,
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            items(templates) { template ->
-                SuggestionChip(
-                    onClick = { onTemplateClick(template) },
-                    label = {
-                        Text(
-                            text = template.name,
-                            style = MaterialTheme.typography.labelMedium,
-                        )
-                    },
-                    icon = {
-                        Text(
-                            text = when (template.type) {
-                                TransactionType.INCOME -> "📈"
-                                TransactionType.EXPENSE -> "📉"
-                                TransactionType.TRANSFER -> "🔄"
-                            },
-                        )
-                    },
-                )
-            }
-        }
     }
 }

@@ -1,5 +1,6 @@
 package com.nyatetduwit.presentation.onboarding
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -12,13 +13,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.nyatetduwit.core.util.HapticFeedback
 import kotlinx.coroutines.launch
 
 data class OnboardingPage(
-    val icon: ImageVector,
+    val icon: ImageVector? = null,
+    val imageResId: Int? = null,
     val title: String,
     val description: String,
 )
@@ -32,7 +37,7 @@ fun OnboardingScreen(
     val scope = rememberCoroutineScope()
     val pages = listOf(
         OnboardingPage(
-            icon = Icons.Default.AccountBalanceWallet,
+            imageResId = com.nyatetduwit.R.drawable.ic_logo,
             title = "Selamat Datang di NyatetDuwit",
             description = "Nyatet duit, hidup tenang. Aplikasi pencatat keuangan yang cepat, private, dan ringan.",
         ),
@@ -113,28 +118,39 @@ private fun OnboardingPageContent(page: OnboardingPage) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Icon(
-            imageVector = page.icon,
-            contentDescription = null,
-            modifier = Modifier.size(120.dp),
-            tint = MaterialTheme.colorScheme.primary,
-        )
+        if (page.imageResId != null) {
+            Image(
+                painter = painterResource(id = page.imageResId),
+                contentDescription = null,
+                modifier = Modifier.size(140.dp),
+            )
+        } else if (page.icon != null) {
+            Icon(
+                imageVector = page.icon,
+                contentDescription = null,
+                modifier = Modifier.size(120.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(36.dp))
 
         Text(
             text = page.title,
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
         Text(
             text = page.description,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
+            lineHeight = 24.sp,
         )
     }
 }

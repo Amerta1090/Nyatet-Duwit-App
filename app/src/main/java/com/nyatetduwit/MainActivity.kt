@@ -16,13 +16,12 @@ import com.nyatetduwit.core.theme.NyatetDuwitTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    @Inject
-    lateinit var appLockManager: AppLockManager
+    private val appLockManager: AppLockManager
+        get() = (application as NyatetDuwitApp).appLockManager
 
     private var isOnboardingCompleted: Boolean = false
 

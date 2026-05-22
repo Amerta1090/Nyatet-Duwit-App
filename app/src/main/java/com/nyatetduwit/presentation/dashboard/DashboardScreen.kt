@@ -1,25 +1,71 @@
 package com.nyatetduwit.presentation.dashboard
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalView
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.nyatetduwit.core.util.HapticFeedback
-import com.nyatetduwit.domain.model.TransactionType
-import java.text.SimpleDateFormat
-import java.util.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.material3.ripple
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.material3.ExperimentalMaterial3Api
+import com.nyatetduwit.core.theme.NyatetDuwitColor
+import com.nyatetduwit.core.theme.NyatetDuwitRadius
+import com.nyatetduwit.core.theme.NyatetDuwitSpacing
+import com.nyatetduwit.core.util.HapticFeedback
+import com.nyatetduwit.core.util.formatRupiah
+import com.nyatetduwit.domain.model.Transaction
+import com.nyatetduwit.domain.model.TransactionType
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,130 +84,152 @@ fun DashboardScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val pullToRefreshState = rememberPullToRefreshState()
+    val haptic = LocalHapticFeedback.current
     val view = LocalView.current
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("NyatetDuwit") },
-                actions = {
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Pengaturan keamanan",
-                        )
-                    }
-                    IconButton(onClick = { viewModel.toggleBalanceVisibility() }) {
-                        Icon(
-                            imageVector = if (uiState.isBalanceVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = if (uiState.isBalanceVisible) "Sembunyikan saldo" else "Tampilkan saldo",
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(NyatetDuwitRadius.sm))
+                                .background(MaterialTheme.colorScheme.primary),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = "N",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                            )
+                        }
+                        Text(
+                            text = "NyatetDuwit",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
                         )
                     }
                 },
+                actions = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.xxs)) {
+                        IconButton(onClick = { viewModel.toggleBalanceVisibility() }) {
+                            Icon(
+                                imageVector = if (uiState.isBalanceVisible) Icons.Default.Visibility
+                                else Icons.Default.VisibilityOff,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        IconButton(onClick = {
+                            HapticFeedback.click(view)
+                            onNavigateToSettings()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                ),
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    HapticFeedback.click(view)
-                    onNavigateToAddTransaction()
-                },
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Tambah Transaksi")
-            }
+            FAB(onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                onNavigateToAddTransaction()
+            })
         },
-    ) { paddingValues ->
+    ) { padding ->
         PullToRefreshBox(
             isRefreshing = uiState.isRefreshing,
             onRefresh = { viewModel.refresh() },
             state = pullToRefreshState,
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier.padding(padding),
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(
+                    start = NyatetDuwitSpacing.lg,
+                    end = NyatetDuwitSpacing.lg,
+                    top = NyatetDuwitSpacing.sm,
+                    bottom = 96.dp,
+                ),
+                verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.lg),
             ) {
-                item {
-                    BalanceCard(
+                item(key = "balance") {
+                    BalanceHero(
                         totalBalance = uiState.totalBalance,
                         isBalanceVisible = uiState.isBalanceVisible,
-                        onToggleVisibility = { viewModel.toggleBalanceVisibility() },
                     )
                 }
 
-                item {
-                    IncomeExpenseCard(
-                        monthlyIncome = uiState.monthlyIncome,
-                        monthlyExpense = uiState.monthlyExpense,
+                item(key = "income_expense") {
+                    IncomeExpenseBar(
+                        income = uiState.monthlyIncome,
+                        expense = uiState.monthlyExpense,
                     )
-                }
-
-                if (uiState.topCategories.isNotEmpty()) {
-                    item {
-                        Text(
-                            text = "Kategori Teratas Bulan Ini",
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                    }
-
-                    item {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            uiState.topCategories.forEach { category ->
-                                TopCategoryCard(
-                                    item = category,
-                                    modifier = Modifier.weight(1f),
-                                )
-                            }
-                        }
-                    }
                 }
 
                 if (uiState.recentTransactions.isNotEmpty()) {
-                    item {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = "Transaksi Terakhir",
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                            TextButton(onClick = onNavigateToTransactions) {
-                                Text("Lihat Semua")
-                            }
-                        }
+                    item(key = "recent_header") {
+                        SectionHeader(
+                            title = "Transaksi terakhir",
+                            action = "Lihat semua",
+                            onAction = onNavigateToTransactions,
+                        )
                     }
 
-                    items(uiState.recentTransactions) { transaction ->
-                        RecentTransactionItem(
+                    items(
+                        items = uiState.recentTransactions,
+                        key = { "recent_${it.id}" },
+                    ) { transaction ->
+                        TransactionRow(
                             transaction = transaction,
                             onClick = { onNavigateToTransactionDetail(transaction.id) },
                         )
                     }
                 }
 
-                item {
-                    MenuSection(
-                        onNavigateToAccounts = onNavigateToAccounts,
-                        onNavigateToCategories = onNavigateToCategories,
-                        onNavigateToTransactions = onNavigateToTransactions,
-                        onNavigateToBudgets = onNavigateToBudgets,
-                        onNavigateToRecurring = onNavigateToRecurring,
-                        onNavigateToTemplates = onNavigateToTemplates,
-                        onNavigateToMonthlySummary = onNavigateToMonthlySummary,
+                if (uiState.topCategories.isNotEmpty()) {
+                    item(key = "top_categories") {
+                        Column(verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm)) {
+                            SectionHeader(title = "Pengeluaran terbesar", action = null, onAction = {})
+
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
+                            ) {
+                                items(uiState.topCategories) { category ->
+                                    TopCategoryPill(item = category)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                item(key = "quick_menu") {
+                    QuickMenuGrid(
+                        onAccounts = onNavigateToAccounts,
+                        onBudgets = onNavigateToBudgets,
+                        onMonthlySummary = onNavigateToMonthlySummary,
+                        onTemplates = onNavigateToTemplates,
+                        onRecurring = onNavigateToRecurring,
+                        onCategories = onNavigateToCategories,
                     )
                 }
 
                 if (uiState.recentTransactions.isEmpty() && uiState.monthlyIncome == 0L && uiState.monthlyExpense == 0L) {
-                    item {
-                        DashboardEmptyState(
-                            onAddTransaction = onNavigateToAddTransaction,
-                        )
+                    item(key = "empty") {
+                        EmptyDashboardState(onAddTransaction = onNavigateToAddTransaction)
                     }
                 }
             }
@@ -169,371 +237,460 @@ fun DashboardScreen(
     }
 }
 
+private fun Long.savingsRate(expense: Long): Int {
+    if (this == 0L) return 0
+    return ((this - expense).toFloat() / this * 100).toInt().coerceIn(0, 100)
+}
+
 @Composable
-private fun BalanceCard(
+private fun BalanceHero(
     totalBalance: Long,
     isBalanceVisible: Boolean,
-    onToggleVisibility: () -> Unit,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "Total Saldo",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
-                IconButton(onClick = onToggleVisibility) {
-                    Icon(
-                        imageVector = if (isBalanceVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = if (isBalanceVisible) "Sembunyikan saldo" else "Tampilkan saldo",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = if (isBalanceVisible) formatRupiah(totalBalance) else "Rp ****",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-        }
-    }
-}
-
-@Composable
-private fun IncomeExpenseCard(
-    monthlyIncome: Long,
-    monthlyExpense: Long,
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-        ) {
-            Text(
-                text = "Bulan Ini",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowDownward,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp),
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Pemasukan",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = formatRupiah(monthlyIncome),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                }
-                HorizontalDivider(
-                    modifier = Modifier
-                        .height(40.dp)
-                        .width(1.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant,
-                )
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowUpward,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(24.dp),
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Pengeluaran",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = formatRupiah(monthlyExpense),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun TopCategoryCard(
-    item: TopCategoryItem,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        modifier = modifier,
-    ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = item.categoryIcon,
-                style = MaterialTheme.typography.headlineSmall,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = item.categoryName,
-                style = MaterialTheme.typography.labelSmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = formatRupiah(item.total),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-@Composable
-private fun RecentTransactionItem(
-    transaction: com.nyatetduwit.domain.model.Transaction,
-    onClick: () -> Unit,
-) {
-    Card(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clip(RoundedCornerShape(NyatetDuwitRadius.lg))
+            .background(MaterialTheme.colorScheme.primary)
+            .padding(NyatetDuwitSpacing.xxl),
+    ) {
+        Text(
+            text = "Total Saldo",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+            fontWeight = FontWeight.Medium,
+        )
+        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.sm))
+        Text(
+            text = if (isBalanceVisible) formatRupiah(totalBalance) else "Rp •••••••",
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.animateContentSize(animationSpec = tween(300)),
+        )
+    }
+}
+
+@Composable
+private fun IncomeExpenseBar(
+    income: Long,
+    expense: Long,
+) {
+    val total = income + expense
+    val expenseRatio = if (total > 0) expense.toFloat() / total else 0f
+    val animatedRatio by animateFloatAsState(
+        targetValue = expenseRatio,
+        animationSpec = spring(stiffness = 200f),
+        label = "ratio",
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(NyatetDuwitSpacing.lg),
     ) {
         Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(NyatetDuwitColor.teal500),
+                )
+                Spacer(modifier = Modifier.width(NyatetDuwitSpacing.sm))
+                Column {
+                    Text(
+                        text = "Pemasukan",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = formatRupiah(income),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = NyatetDuwitColor.teal500,
+                    )
+                }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(NyatetDuwitColor.coral500),
+                )
+                Spacer(modifier = Modifier.width(NyatetDuwitSpacing.sm))
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = "Pengeluaran",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = formatRupiah(expense),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = NyatetDuwitColor.coral500,
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.md))
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+                .height(6.dp)
+                .clip(RoundedCornerShape(NyatetDuwitRadius.full))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(animatedRatio)
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(NyatetDuwitRadius.full))
+                    .background(NyatetDuwitColor.coral500),
+            )
+        }
+        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xxs))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "Menabung ${income.savingsRate(expense)}%",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Medium,
+                color = NyatetDuwitColor.teal500,
+            )
+            if (total > 0) {
                 Text(
-                    text = transaction.notes ?: getTransactionTypeLabel(transaction.type),
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = formatDateTime(transaction.dateTime),
+                    text = "${(expenseRatio * 100).toInt()}% habis",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Text(
-                text = formatTransactionAmount(transaction),
-                style = MaterialTheme.typography.titleSmall,
-                color = when (transaction.type) {
-                    TransactionType.INCOME -> MaterialTheme.colorScheme.primary
-                    TransactionType.EXPENSE -> MaterialTheme.colorScheme.error
-                    TransactionType.TRANSFER -> MaterialTheme.colorScheme.onSurfaceVariant
-                },
-            )
         }
     }
 }
 
 @Composable
-private fun MenuSection(
-    onNavigateToAccounts: () -> Unit,
-    onNavigateToCategories: () -> Unit,
-    onNavigateToTransactions: () -> Unit,
-    onNavigateToBudgets: () -> Unit,
-    onNavigateToRecurring: () -> Unit,
-    onNavigateToTemplates: () -> Unit,
-    onNavigateToMonthlySummary: () -> Unit,
-) {
+private fun TopCategoryPill(item: TopCategoryItem) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(),
+            ) { }
+            .padding(horizontal = NyatetDuwitSpacing.md, vertical = NyatetDuwitSpacing.sm + 2.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Text(text = item.categoryIcon, style = MaterialTheme.typography.titleLarge)
+        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xxs))
         Text(
-            text = "Menu",
-            style = MaterialTheme.typography.titleMedium,
+            text = item.categoryName,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
         )
-        MenuCard(
-            icon = Icons.Default.SwapHoriz,
-            title = "Transaksi",
-            description = "Lihat dan kelola semua transaksi",
-            onClick = onNavigateToTransactions,
-        )
-        MenuCard(
-            icon = Icons.Default.AccountBalanceWallet,
-            title = "Akun",
-            description = "Kelola akun cash, bank, dan e-wallet",
-            onClick = onNavigateToAccounts,
-        )
-        MenuCard(
-            icon = Icons.Default.Category,
-            title = "Kategori",
-            description = "Kelola kategori pemasukan & pengeluaran",
-            onClick = onNavigateToCategories,
-        )
-        MenuCard(
-            icon = Icons.Default.PieChart,
-            title = "Budget",
-            description = "Set dan pantau budget bulanan",
-            onClick = onNavigateToBudgets,
-        )
-        MenuCard(
-            icon = Icons.Default.Repeat,
-            title = "Transaksi Berulang",
-            description = "Kelola transaksi otomatis berulang",
-            onClick = onNavigateToRecurring,
-        )
-        MenuCard(
-            icon = Icons.Default.Star,
-            title = "Template",
-            description = "Transaksi cepat dengan template",
-            onClick = onNavigateToTemplates,
-        )
-        MenuCard(
-            icon = Icons.Default.BarChart,
-            title = "Ringkasan Bulanan",
-            description = "Lihat tren dan perbandingan bulanan",
-            onClick = onNavigateToMonthlySummary,
+        Text(
+            text = formatRupiah(item.total),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
 
 @Composable
-private fun MenuCard(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    description: String,
+private fun TransactionRow(
+    transaction: Transaction,
     onClick: () -> Unit,
 ) {
-    Card(
+    val (icon, bgColor, amountColor) = when (transaction.type) {
+        TransactionType.INCOME -> Triple(
+            "↓",
+            NyatetDuwitColor.green100,
+            NyatetDuwitColor.green500,
+        )
+        TransactionType.EXPENSE -> Triple(
+            "↑",
+            NyatetDuwitColor.red100,
+            NyatetDuwitColor.red500,
+        )
+        TransactionType.TRANSFER -> Triple(
+            "⇄",
+            NyatetDuwitColor.gold100,
+            MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(),
+            ) { onClick() }
+            .padding(NyatetDuwitSpacing.lg),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .size(42.dp)
+                .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+                .background(bgColor),
+            contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(32.dp),
-                tint = MaterialTheme.colorScheme.primary,
+            Text(
+                text = icon,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = amountColor,
             )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Icon(
-                Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        }
+
+        Spacer(modifier = Modifier.width(NyatetDuwitSpacing.md))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = transaction.notes ?: labelForType(transaction.type),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                text = formatDateShort(transaction.dateTime),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        Text(
+            text = formatAmount(transaction),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = amountColor,
+        )
+    }
+}
+
+@Composable
+private fun QuickMenuGrid(
+    onAccounts: () -> Unit,
+    onBudgets: () -> Unit,
+    onMonthlySummary: () -> Unit,
+    onTemplates: () -> Unit,
+    onRecurring: () -> Unit,
+    onCategories: () -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm)) {
+        SectionHeader(title = "Menu Cepat", action = null, onAction = {})
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
+        ) {
+            QuickMenuItem(
+                label = "Akun",
+                onClick = onAccounts,
+                modifier = Modifier.weight(1f),
+            )
+            QuickMenuItem(
+                label = "Budget",
+                onClick = onBudgets,
+                modifier = Modifier.weight(1f),
+            )
+            QuickMenuItem(
+                label = "Ringkasan",
+                onClick = onMonthlySummary,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
+        ) {
+            QuickMenuItem(
+                label = "Template",
+                onClick = onTemplates,
+                modifier = Modifier.weight(1f),
+            )
+            QuickMenuItem(
+                label = "Berulang",
+                onClick = onRecurring,
+                modifier = Modifier.weight(1f),
+            )
+            QuickMenuItem(
+                label = "Kategori",
+                onClick = onCategories,
+                modifier = Modifier.weight(1f),
             )
         }
     }
 }
 
 @Composable
-private fun DashboardEmptyState(
-    onAddTransaction: () -> Unit,
+private fun QuickMenuItem(
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    val haptic = LocalHapticFeedback.current
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(),
+            ) {
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                onClick()
+            }
+            .padding(vertical = NyatetDuwitSpacing.md + 2.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun SectionHeader(
+    title: String,
+    action: String?,
+    onAction: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+        )
+        if (action != null) {
+            Text(
+                text = action,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = ripple(),
+                ) { onAction() },
+            )
+        }
+    }
+}
+
+@Composable
+private fun FAB(onClick: () -> Unit) {
+    FloatingActionButton(
+        onClick = onClick,
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+        shape = RoundedCornerShape(NyatetDuwitRadius.lg),
+        modifier = Modifier.padding(bottom = NyatetDuwitSpacing.lg, end = NyatetDuwitSpacing.sm),
+    ) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "Tambah transaksi",
+            modifier = Modifier.size(26.dp),
+        )
+    }
+}
+
+@Composable
+private fun EmptyDashboardState(onAddTransaction: () -> Unit) {
+    val haptic = LocalHapticFeedback.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 32.dp),
+            .padding(vertical = NyatetDuwitSpacing.xxxl),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "👋",
+            text = "📝",
             style = MaterialTheme.typography.displayMedium,
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.lg))
         Text(
-            text = "Yuk mulai nyatet!",
+            text = "Belum ada catatan",
             style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.sm))
         Text(
-            text = "Tap tombol + di bawah untuk transaksi pertamamu",
+            text = "Yuk mulai! Tap + buat transaksi pertamamu",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(modifier = Modifier.height(16.dp))
-        FilledTonalButton(onClick = onAddTransaction) {
-            Icon(Icons.Default.Add, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Tambah Transaksi")
+        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xl))
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+                .background(MaterialTheme.colorScheme.primary)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = ripple(),
+                ) {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onAddTransaction()
+                }
+                .padding(horizontal = NyatetDuwitSpacing.xxl, vertical = NyatetDuwitSpacing.md),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(18.dp),
+                )
+                Text(
+                    text = "Transaksi Baru",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                )
+            }
         }
     }
 }
 
-private fun formatRupiah(amount: Long): String {
-    val prefix = if (amount < 0) "-" else ""
-    val absAmount = kotlin.math.abs(amount)
-    return "${prefix}Rp ${String.format("%,d", absAmount).replace(',', '.')}"
+private fun labelForType(type: TransactionType): String = when (type) {
+    TransactionType.INCOME -> "Pemasukan"
+    TransactionType.EXPENSE -> "Pengeluaran"
+    TransactionType.TRANSFER -> "Transfer"
 }
 
-private fun getTransactionTypeLabel(type: TransactionType): String {
-    return when (type) {
-        TransactionType.INCOME -> "Pemasukan"
-        TransactionType.EXPENSE -> "Pengeluaran"
-        TransactionType.TRANSFER -> "Transfer"
-    }
+private fun formatAmount(transaction: Transaction): String = when (transaction.type) {
+    TransactionType.INCOME -> "+${formatRupiah(transaction.amount)}"
+    TransactionType.EXPENSE -> "-${formatRupiah(transaction.amount)}"
+    TransactionType.TRANSFER -> formatRupiah(transaction.amount)
 }
 
-private fun formatDateTime(timestamp: Long): String {
-    val sdf = SimpleDateFormat("d MMM yyyy, HH:mm", Locale("id"))
+private fun formatDateShort(timestamp: Long): String {
+    val sdf = SimpleDateFormat("d MMM HH:mm", Locale("id"))
     return sdf.format(Date(timestamp))
-}
-
-private fun formatTransactionAmount(transaction: com.nyatetduwit.domain.model.Transaction): String {
-    return when (transaction.type) {
-        TransactionType.INCOME -> "+${formatRupiah(transaction.amount)}"
-        TransactionType.EXPENSE -> "-${formatRupiah(transaction.amount)}"
-        TransactionType.TRANSFER -> formatRupiah(transaction.amount)
-    }
 }

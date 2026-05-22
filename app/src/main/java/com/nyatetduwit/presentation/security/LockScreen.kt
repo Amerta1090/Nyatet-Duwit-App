@@ -1,5 +1,6 @@
 package com.nyatetduwit.presentation.security
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fingerprint
@@ -10,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,11 +56,10 @@ fun LockScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Icon(
-            imageVector = if (showPin) Icons.Default.Lock else Icons.Default.Fingerprint,
+        Image(
+            painter = painterResource(id = com.nyatetduwit.R.drawable.ic_logo),
             contentDescription = null,
-            modifier = Modifier.size(80.dp),
-            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(100.dp),
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -119,8 +120,70 @@ fun LockScreen(
                         HapticFeedback.click(view)
                     }
                 },
+                leftButton = if (securityManager.isBiometricAvailable()) {
+                    {
+                        IconButton(
+                            onClick = {
+                                val activity = context as? FragmentActivity
+                                if (activity != null) {
+                                    securityManager.authenticateWithBiometric(
+                                        activity = activity,
+                                        title = "Buka NyatetDuwit",
+                                        subtitle = "Sentuh sensor sidik jari atau gunakan PIN",
+                                        onSuccess = {
+                                            onUnlock()
+                                        },
+                                        onError = {
+                                            // Handle error
+                                        }
+                                    )
+                                }
+                            },
+                            modifier = Modifier.size(80.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Fingerprint,
+                                contentDescription = "Sidik Jari",
+                                modifier = Modifier.size(28.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                } else null
             )
         } else {
+            IconButton(
+                onClick = {
+                    HapticFeedback.click(view)
+                    val activity = context as? FragmentActivity
+                    if (activity != null) {
+                        securityManager.authenticateWithBiometric(
+                            activity = activity,
+                            title = "Buka NyatetDuwit",
+                            subtitle = "Sentuh sensor sidik jari atau gunakan PIN",
+                            onSuccess = {
+                                onUnlock()
+                            },
+                            onError = {
+                                showPin = true
+                            }
+                        )
+                    }
+                },
+                modifier = Modifier
+                    .size(100.dp)
+                    .padding(12.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Fingerprint,
+                    contentDescription = "Sentuh Sidik Jari",
+                    modifier = Modifier.fillMaxSize(),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             FilledTonalButton(
                 onClick = {
                     HapticFeedback.click(view)

@@ -3,6 +3,7 @@ package com.nyatetduwit.presentation.security
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Backspace
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Shield
@@ -126,13 +127,19 @@ fun PinSetupScreen(
 @Composable
 internal fun PinDots(pin: String) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.padding(vertical = 12.dp)
     ) {
         repeat(6) { index ->
+            val active = index < pin.length
             Surface(
                 modifier = Modifier.size(16.dp),
-                shape = MaterialTheme.shapes.medium,
-                color = if (index < pin.length) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                shape = androidx.compose.foundation.shape.CircleShape,
+                color = if (active) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
+                }
             ) {}
         }
     }
@@ -142,6 +149,7 @@ internal fun PinDots(pin: String) {
 internal fun PinKeypad(
     onKeyTap: (String) -> Unit,
     onDelete: () -> Unit,
+    leftButton: @Composable (() -> Unit)? = null,
 ) {
     val keys = listOf(
         listOf("1", "2", "3"),
@@ -162,29 +170,53 @@ internal fun PinKeypad(
                 row.forEach { key ->
                     when (key) {
                         "" -> {
-                            Box(modifier = Modifier.size(72.dp))
+                            if (leftButton != null) {
+                                Box(
+                                    modifier = Modifier.size(80.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    leftButton()
+                                }
+                            } else {
+                                Box(modifier = Modifier.size(80.dp))
+                            }
                         }
                         "delete" -> {
-                            TextButton(
+                            IconButton(
                                 onClick = onDelete,
-                                modifier = Modifier.size(72.dp),
+                                modifier = Modifier.size(80.dp),
                             ) {
-                                Text("Hapus", fontSize = 16.sp)
+                                Icon(
+                                    imageVector = Icons.Default.Backspace,
+                                    contentDescription = "Hapus",
+                                    modifier = Modifier.size(24.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
                         else -> {
                             FilledTonalButton(
                                 onClick = { onKeyTap(key) },
-                                modifier = Modifier.size(72.dp),
+                                modifier = Modifier.size(80.dp),
+                                shape = androidx.compose.foundation.shape.CircleShape,
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    contentColor = MaterialTheme.colorScheme.onSurface
+                                ),
                                 contentPadding = PaddingValues(0.dp),
                             ) {
-                                Text(key, fontSize = 24.sp)
+                                Text(
+                                    text = key,
+                                    fontSize = 28.sp,
+                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Normal
+                                )
                             }
                         }
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
+

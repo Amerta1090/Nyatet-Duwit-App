@@ -13,6 +13,7 @@ import com.nyatetduwit.presentation.dashboard.DashboardViewModel_HiltModules;
 import com.nyatetduwit.presentation.monthlysummary.MonthlySummaryViewModel_HiltModules;
 import com.nyatetduwit.presentation.recurring.RecurringTransactionViewModel_HiltModules;
 import com.nyatetduwit.presentation.remindersettings.ReminderSettingsViewModel_HiltModules;
+import com.nyatetduwit.presentation.settings.SettingsViewModel_HiltModules;
 import com.nyatetduwit.presentation.template.TemplateViewModel_HiltModules;
 import com.nyatetduwit.presentation.transaction.TransactionDetailViewModel_HiltModules;
 import com.nyatetduwit.presentation.transaction.TransactionListViewModel_HiltModules;
@@ -184,6 +185,7 @@ public final class NyatetDuwitApp_HiltComponents {
           ViewModelCBuilderModule.class,
           RecurringTransactionViewModel_HiltModules.KeyModule.class,
           ReminderSettingsViewModel_HiltModules.KeyModule.class,
+          SettingsViewModel_HiltModules.KeyModule.class,
           TemplateViewModel_HiltModules.KeyModule.class,
           TransactionDetailViewModel_HiltModules.KeyModule.class,
           TransactionListViewModel_HiltModules.KeyModule.class,
@@ -231,6 +233,7 @@ public final class NyatetDuwitApp_HiltComponents {
           MonthlySummaryViewModel_HiltModules.BindsModule.class,
           RecurringTransactionViewModel_HiltModules.BindsModule.class,
           ReminderSettingsViewModel_HiltModules.BindsModule.class,
+          SettingsViewModel_HiltModules.BindsModule.class,
           TemplateViewModel_HiltModules.BindsModule.class,
           TransactionDetailViewModel_HiltModules.BindsModule.class,
           TransactionListViewModel_HiltModules.BindsModule.class,

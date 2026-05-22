@@ -1,26 +1,64 @@
 package com.nyatetduwit.presentation.monthlysummary
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.TrendingDown
+import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.nyatetduwit.core.theme.NyatetDuwitColor
+import com.nyatetduwit.core.theme.NyatetDuwitRadius
+import com.nyatetduwit.core.theme.NyatetDuwitSpacing
 import com.nyatetduwit.domain.model.Transaction
 import com.nyatetduwit.domain.model.TransactionType
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -36,10 +74,16 @@ fun MonthlySummaryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Ringkasan Bulanan") },
+                title = {
+                    Text(
+                        text = "Ringkasan Bulanan",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
                 actions = {
@@ -47,6 +91,7 @@ fun MonthlySummaryScreen(
                         Icon(Icons.Default.Notifications, contentDescription = "Pengaturan Reminder")
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             )
         },
     ) { paddingValues ->
@@ -54,8 +99,8 @@ fun MonthlySummaryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(NyatetDuwitSpacing.lg),
+            verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.lg),
         ) {
             item {
                 MonthSelector(
@@ -144,21 +189,28 @@ private fun MonthSelector(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(NyatetDuwitRadius.md),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(NyatetDuwitSpacing.lg),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onPreviousMonth) {
-                Icon(Icons.Default.ChevronLeft, contentDescription = "Bulan sebelumnya")
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Bulan sebelumnya",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
 
             Text(
                 text = getMonthYearLabel(year, month),
                 style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
             )
 
             val now = Calendar.getInstance()
@@ -167,7 +219,12 @@ private fun MonthSelector(
                 onClick = onNextMonth,
                 enabled = !isCurrentMonth,
             ) {
-                Icon(Icons.Default.ChevronRight, contentDescription = "Bulan berikutnya")
+                Icon(
+                    Icons.Default.ArrowForward,
+                    contentDescription = "Bulan berikutnya",
+                    tint = if (isCurrentMonth) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }
@@ -182,14 +239,15 @@ private fun SummaryCards(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(NyatetDuwitRadius.md),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            containerColor = MaterialTheme.colorScheme.surface,
         ),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(NyatetDuwitSpacing.lg),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -200,21 +258,22 @@ private fun SummaryCards(
                     modifier = Modifier.weight(1f),
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ArrowDownward,
+                        imageVector = Icons.Default.TrendingDown,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp),
+                        tint = NyatetDuwitColor.green500,
+                        modifier = Modifier.size(22.dp),
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(NyatetDuwitSpacing.sm))
                     Text(
                         text = "Pemasukan",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
                         text = formatRupiah(totalIncome),
                         style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                        color = NyatetDuwitColor.green500,
                     )
                     if (comparison != null) {
                         ComparisonBadge(
@@ -226,9 +285,9 @@ private fun SummaryCards(
 
                 HorizontalDivider(
                     modifier = Modifier
-                        .height(60.dp)
+                        .height(64.dp)
                         .width(1.dp),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.3f),
+                    color = MaterialTheme.colorScheme.outlineVariant,
                 )
 
                 Column(
@@ -236,21 +295,22 @@ private fun SummaryCards(
                     modifier = Modifier.weight(1f),
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ArrowUpward,
+                        imageVector = Icons.Default.TrendingUp,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(24.dp),
+                        tint = NyatetDuwitColor.red500,
+                        modifier = Modifier.size(22.dp),
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(NyatetDuwitSpacing.sm))
                     Text(
                         text = "Pengeluaran",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
                         text = formatRupiah(totalExpense),
                         style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold,
+                        color = NyatetDuwitColor.red500,
                     )
                     if (comparison != null) {
                         ComparisonBadge(
@@ -261,11 +321,11 @@ private fun SummaryCards(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(NyatetDuwitSpacing.md))
             HorizontalDivider(
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.3f),
+                color = MaterialTheme.colorScheme.outlineVariant,
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(NyatetDuwitSpacing.sm))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -275,12 +335,13 @@ private fun SummaryCards(
                 Text(
                     text = "Selisih",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
                     text = formatRupiah(netSavings),
                     style = MaterialTheme.typography.titleLarge,
-                    color = if (netSavings >= 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                    fontWeight = FontWeight.Bold,
+                    color = if (netSavings >= 0) NyatetDuwitColor.green500 else NyatetDuwitColor.red500,
                 )
             }
         }
@@ -293,23 +354,25 @@ private fun ComparisonBadge(
     isPositive: Boolean,
 ) {
     val absPercent = abs(percentage)
-    val label = if (percentage > 0) "Naik ${absPercent.toInt()}%" else if (percentage < 0) "Turun ${absPercent.toInt()}%" else "Sama"
+    val label = if (percentage > 0) "+${absPercent.toInt()}%" else if (percentage < 0) "-${absPercent.toInt()}%" else "="
     val color = if (isPositive) {
-        if (percentage > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+        if (percentage > 0) NyatetDuwitColor.green500 else NyatetDuwitColor.red500
     } else {
-        if (percentage > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+        if (percentage > 0) NyatetDuwitColor.red500 else NyatetDuwitColor.green500
     }
 
-    Surface(
-        color = color.copy(alpha = 0.1f),
-        shape = MaterialTheme.shapes.small,
-        modifier = Modifier.padding(top = 4.dp),
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(NyatetDuwitRadius.xs))
+            .background(color.copy(alpha = 0.1f))
+            .padding(horizontal = NyatetDuwitSpacing.sm, vertical = NyatetDuwitSpacing.xxs)
+            .padding(top = NyatetDuwitSpacing.xxs),
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
             color = color,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
         )
     }
 }
@@ -321,25 +384,29 @@ private fun StatsRow(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.md),
     ) {
         Card(
             modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(NyatetDuwitRadius.md),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
+                    .padding(NyatetDuwitSpacing.md),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
                     text = "$activeDays",
                     style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
                 )
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xxs))
                 Text(
                     text = "Hari Aktif",
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -347,21 +414,25 @@ private fun StatsRow(
 
         Card(
             modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(NyatetDuwitRadius.md),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
+                    .padding(NyatetDuwitSpacing.md),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
                     text = "$transactionCount",
                     style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
                 )
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xxs))
                 Text(
                     text = "Transaksi",
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -373,23 +444,26 @@ private fun StatsRow(
 private fun TopCategoryRow(item: TopCategoryItem) {
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(NyatetDuwitRadius.md),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(NyatetDuwitSpacing.md),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = item.categoryIcon,
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.size(32.dp),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.size(36.dp),
             )
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(NyatetDuwitSpacing.md))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.categoryName,
                     style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -411,11 +485,13 @@ private fun SpendingTrendChart(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(NyatetDuwitRadius.md),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(NyatetDuwitSpacing.lg),
         ) {
             val maxAmount = dailyTrend.maxOfOrNull { it.amount } ?: 0L
             val primaryColor = MaterialTheme.colorScheme.primary
@@ -480,11 +556,13 @@ private fun SpendingTrendChart(
 private fun BiggestExpenseCard(transaction: Transaction) {
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(NyatetDuwitRadius.md),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(NyatetDuwitSpacing.md),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -492,10 +570,11 @@ private fun BiggestExpenseCard(transaction: Transaction) {
                 Text(
                     text = transaction.notes ?: "Tanpa catatan",
                     style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xxs))
                 Text(
                     text = formatDateTime(transaction.dateTime),
                     style = MaterialTheme.typography.labelSmall,
@@ -505,7 +584,8 @@ private fun BiggestExpenseCard(transaction: Transaction) {
             Text(
                 text = "-${formatRupiah(transaction.amount)}",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.error,
+                fontWeight = FontWeight.Bold,
+                color = NyatetDuwitColor.red500,
             )
         }
     }
