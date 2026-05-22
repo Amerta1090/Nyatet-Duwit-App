@@ -33,4 +33,13 @@ interface AccountDao {
 
     @Query("SELECT COALESCE(SUM(balance), 0) FROM accounts WHERE id = :accountId")
     fun getAccountBalance(accountId: String): Flow<Long>
+
+    @Query("SELECT * FROM accounts ORDER BY order_index ASC")
+    suspend fun getAllAccountsSync(): List<AccountEntity>
+
+    @Query("DELETE FROM accounts")
+    suspend fun deleteAll()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(accounts: List<AccountEntity>)
 }

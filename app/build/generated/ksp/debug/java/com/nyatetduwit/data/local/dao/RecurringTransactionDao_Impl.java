@@ -49,6 +49,8 @@ public final class RecurringTransactionDao_Impl implements RecurringTransactionD
 
   private final SharedSQLiteStatement __preparedStmtOfUpdateSkippedDates;
 
+  private final SharedSQLiteStatement __preparedStmtOfDeleteAll;
+
   public RecurringTransactionDao_Impl(@NonNull final RoomDatabase __db) {
     this.__db = __db;
     this.__insertionAdapterOfRecurringTransactionEntity = new EntityInsertionAdapter<RecurringTransactionEntity>(__db) {
@@ -161,10 +163,37 @@ public final class RecurringTransactionDao_Impl implements RecurringTransactionD
         return _query;
       }
     };
+    this.__preparedStmtOfDeleteAll = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "DELETE FROM recurring_transactions";
+        return _query;
+      }
+    };
   }
 
   @Override
   public Object insert(final RecurringTransactionEntity recurring,
+      final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        __db.beginTransaction();
+        try {
+          __insertionAdapterOfRecurringTransactionEntity.insert(recurring);
+          __db.setTransactionSuccessful();
+          return Unit.INSTANCE;
+        } finally {
+          __db.endTransaction();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object insertAll(final List<RecurringTransactionEntity> recurring,
       final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
@@ -324,6 +353,29 @@ public final class RecurringTransactionDao_Impl implements RecurringTransactionD
           }
         } finally {
           __preparedStmtOfUpdateSkippedDates.release(_stmt);
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object deleteAll(final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfDeleteAll.acquire();
+        try {
+          __db.beginTransaction();
+          try {
+            _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return Unit.INSTANCE;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfDeleteAll.release(_stmt);
         }
       }
     }, $completion);
@@ -555,6 +607,76 @@ public final class RecurringTransactionDao_Impl implements RecurringTransactionD
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     _statement.bindLong(_argIndex, now);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<RecurringTransactionEntity>>() {
+      @Override
+      @NonNull
+      public List<RecurringTransactionEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfTemplateTransactionId = CursorUtil.getColumnIndexOrThrow(_cursor, "template_transaction_id");
+          final int _cursorIndexOfFrequency = CursorUtil.getColumnIndexOrThrow(_cursor, "frequency");
+          final int _cursorIndexOfStartDate = CursorUtil.getColumnIndexOrThrow(_cursor, "start_date");
+          final int _cursorIndexOfEndDate = CursorUtil.getColumnIndexOrThrow(_cursor, "end_date");
+          final int _cursorIndexOfNextDue = CursorUtil.getColumnIndexOrThrow(_cursor, "next_due");
+          final int _cursorIndexOfIsActive = CursorUtil.getColumnIndexOrThrow(_cursor, "is_active");
+          final int _cursorIndexOfLastProcessed = CursorUtil.getColumnIndexOrThrow(_cursor, "last_processed");
+          final int _cursorIndexOfSkippedDates = CursorUtil.getColumnIndexOrThrow(_cursor, "skipped_dates");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<RecurringTransactionEntity> _result = new ArrayList<RecurringTransactionEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final RecurringTransactionEntity _item;
+            final String _tmpId;
+            _tmpId = _cursor.getString(_cursorIndexOfId);
+            final String _tmpTemplateTransactionId;
+            _tmpTemplateTransactionId = _cursor.getString(_cursorIndexOfTemplateTransactionId);
+            final String _tmpFrequency;
+            _tmpFrequency = _cursor.getString(_cursorIndexOfFrequency);
+            final long _tmpStartDate;
+            _tmpStartDate = _cursor.getLong(_cursorIndexOfStartDate);
+            final Long _tmpEndDate;
+            if (_cursor.isNull(_cursorIndexOfEndDate)) {
+              _tmpEndDate = null;
+            } else {
+              _tmpEndDate = _cursor.getLong(_cursorIndexOfEndDate);
+            }
+            final long _tmpNextDue;
+            _tmpNextDue = _cursor.getLong(_cursorIndexOfNextDue);
+            final boolean _tmpIsActive;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsActive);
+            _tmpIsActive = _tmp != 0;
+            final Long _tmpLastProcessed;
+            if (_cursor.isNull(_cursorIndexOfLastProcessed)) {
+              _tmpLastProcessed = null;
+            } else {
+              _tmpLastProcessed = _cursor.getLong(_cursorIndexOfLastProcessed);
+            }
+            final String _tmpSkippedDates;
+            _tmpSkippedDates = _cursor.getString(_cursorIndexOfSkippedDates);
+            final long _tmpCreatedAt;
+            _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
+            final long _tmpUpdatedAt;
+            _tmpUpdatedAt = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            _item = new RecurringTransactionEntity(_tmpId,_tmpTemplateTransactionId,_tmpFrequency,_tmpStartDate,_tmpEndDate,_tmpNextDue,_tmpIsActive,_tmpLastProcessed,_tmpSkippedDates,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object getAllRecurringSync(
+      final Continuation<? super List<RecurringTransactionEntity>> $completion) {
+    final String _sql = "SELECT * FROM recurring_transactions ORDER BY next_due ASC";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<RecurringTransactionEntity>>() {
       @Override

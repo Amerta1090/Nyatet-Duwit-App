@@ -42,6 +42,8 @@ public final class BudgetDao_Impl implements BudgetDao {
 
   private final SharedSQLiteStatement __preparedStmtOfDeactivate;
 
+  private final SharedSQLiteStatement __preparedStmtOfDeleteAll;
+
   public BudgetDao_Impl(@NonNull final RoomDatabase __db) {
     this.__db = __db;
     this.__insertionAdapterOfBudgetEntity = new EntityInsertionAdapter<BudgetEntity>(__db) {
@@ -118,6 +120,14 @@ public final class BudgetDao_Impl implements BudgetDao {
         return _query;
       }
     };
+    this.__preparedStmtOfDeleteAll = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "DELETE FROM budgets";
+        return _query;
+      }
+    };
   }
 
   @Override
@@ -129,6 +139,25 @@ public final class BudgetDao_Impl implements BudgetDao {
         __db.beginTransaction();
         try {
           __insertionAdapterOfBudgetEntity.insert(budget);
+          __db.setTransactionSuccessful();
+          return Unit.INSTANCE;
+        } finally {
+          __db.endTransaction();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object insertAll(final List<BudgetEntity> budgets,
+      final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        __db.beginTransaction();
+        try {
+          __insertionAdapterOfBudgetEntity.insert(budgets);
           __db.setTransactionSuccessful();
           return Unit.INSTANCE;
         } finally {
@@ -194,6 +223,29 @@ public final class BudgetDao_Impl implements BudgetDao {
           }
         } finally {
           __preparedStmtOfDeactivate.release(_stmt);
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object deleteAll(final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfDeleteAll.acquire();
+        try {
+          __db.beginTransaction();
+          try {
+            _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return Unit.INSTANCE;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfDeleteAll.release(_stmt);
         }
       }
     }, $completion);
@@ -574,6 +626,65 @@ public final class BudgetDao_Impl implements BudgetDao {
         _statement.release();
       }
     });
+  }
+
+  @Override
+  public Object getAllBudgetsSync(final Continuation<? super List<BudgetEntity>> $completion) {
+    final String _sql = "SELECT * FROM budgets ORDER BY created_at DESC";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<BudgetEntity>>() {
+      @Override
+      @NonNull
+      public List<BudgetEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfCategoryId = CursorUtil.getColumnIndexOrThrow(_cursor, "category_id");
+          final int _cursorIndexOfAmount = CursorUtil.getColumnIndexOrThrow(_cursor, "amount");
+          final int _cursorIndexOfPeriod = CursorUtil.getColumnIndexOrThrow(_cursor, "period");
+          final int _cursorIndexOfStartDate = CursorUtil.getColumnIndexOrThrow(_cursor, "start_date");
+          final int _cursorIndexOfEndDate = CursorUtil.getColumnIndexOrThrow(_cursor, "end_date");
+          final int _cursorIndexOfIsActive = CursorUtil.getColumnIndexOrThrow(_cursor, "is_active");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<BudgetEntity> _result = new ArrayList<BudgetEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final BudgetEntity _item;
+            final String _tmpId;
+            _tmpId = _cursor.getString(_cursorIndexOfId);
+            final String _tmpCategoryId;
+            if (_cursor.isNull(_cursorIndexOfCategoryId)) {
+              _tmpCategoryId = null;
+            } else {
+              _tmpCategoryId = _cursor.getString(_cursorIndexOfCategoryId);
+            }
+            final long _tmpAmount;
+            _tmpAmount = _cursor.getLong(_cursorIndexOfAmount);
+            final String _tmpPeriod;
+            _tmpPeriod = _cursor.getString(_cursorIndexOfPeriod);
+            final long _tmpStartDate;
+            _tmpStartDate = _cursor.getLong(_cursorIndexOfStartDate);
+            final long _tmpEndDate;
+            _tmpEndDate = _cursor.getLong(_cursorIndexOfEndDate);
+            final boolean _tmpIsActive;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsActive);
+            _tmpIsActive = _tmp != 0;
+            final long _tmpCreatedAt;
+            _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
+            final long _tmpUpdatedAt;
+            _tmpUpdatedAt = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            _item = new BudgetEntity(_tmpId,_tmpCategoryId,_tmpAmount,_tmpPeriod,_tmpStartDate,_tmpEndDate,_tmpIsActive,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
   }
 
   @NonNull

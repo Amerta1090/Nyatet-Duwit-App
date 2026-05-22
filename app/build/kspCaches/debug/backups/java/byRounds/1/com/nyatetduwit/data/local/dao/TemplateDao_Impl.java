@@ -45,6 +45,8 @@ public final class TemplateDao_Impl implements TemplateDao {
 
   private final SharedSQLiteStatement __preparedStmtOfTogglePin;
 
+  private final SharedSQLiteStatement __preparedStmtOfDeleteAll;
+
   public TemplateDao_Impl(@NonNull final RoomDatabase __db) {
     this.__db = __db;
     this.__insertionAdapterOfTemplateEntity = new EntityInsertionAdapter<TemplateEntity>(__db) {
@@ -165,6 +167,14 @@ public final class TemplateDao_Impl implements TemplateDao {
         return _query;
       }
     };
+    this.__preparedStmtOfDeleteAll = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "DELETE FROM templates";
+        return _query;
+      }
+    };
   }
 
   @Override
@@ -177,6 +187,25 @@ public final class TemplateDao_Impl implements TemplateDao {
         __db.beginTransaction();
         try {
           __insertionAdapterOfTemplateEntity.insert(template);
+          __db.setTransactionSuccessful();
+          return Unit.INSTANCE;
+        } finally {
+          __db.endTransaction();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object insertAll(final List<TemplateEntity> templates,
+      final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        __db.beginTransaction();
+        try {
+          __insertionAdapterOfTemplateEntity.insert(templates);
           __db.setTransactionSuccessful();
           return Unit.INSTANCE;
         } finally {
@@ -276,6 +305,29 @@ public final class TemplateDao_Impl implements TemplateDao {
           }
         } finally {
           __preparedStmtOfTogglePin.release(_stmt);
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object deleteAll(final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfDeleteAll.acquire();
+        try {
+          __db.beginTransaction();
+          try {
+            _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return Unit.INSTANCE;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfDeleteAll.release(_stmt);
         }
       }
     }, $completion);
@@ -701,6 +753,83 @@ public final class TemplateDao_Impl implements TemplateDao {
         _statement.release();
       }
     });
+  }
+
+  @Override
+  public Object getAllTemplatesSync(final Continuation<? super List<TemplateEntity>> $completion) {
+    final String _sql = "SELECT * FROM templates ORDER BY is_pinned DESC, usage_count DESC";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<TemplateEntity>>() {
+      @Override
+      @NonNull
+      public List<TemplateEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfName = CursorUtil.getColumnIndexOrThrow(_cursor, "name");
+          final int _cursorIndexOfType = CursorUtil.getColumnIndexOrThrow(_cursor, "type");
+          final int _cursorIndexOfAmount = CursorUtil.getColumnIndexOrThrow(_cursor, "amount");
+          final int _cursorIndexOfCategoryId = CursorUtil.getColumnIndexOrThrow(_cursor, "category_id");
+          final int _cursorIndexOfAccountId = CursorUtil.getColumnIndexOrThrow(_cursor, "account_id");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfUsageCount = CursorUtil.getColumnIndexOrThrow(_cursor, "usage_count");
+          final int _cursorIndexOfLastUsed = CursorUtil.getColumnIndexOrThrow(_cursor, "last_used");
+          final int _cursorIndexOfIsPinned = CursorUtil.getColumnIndexOrThrow(_cursor, "is_pinned");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final List<TemplateEntity> _result = new ArrayList<TemplateEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final TemplateEntity _item;
+            final String _tmpId;
+            _tmpId = _cursor.getString(_cursorIndexOfId);
+            final String _tmpName;
+            _tmpName = _cursor.getString(_cursorIndexOfName);
+            final String _tmpType;
+            _tmpType = _cursor.getString(_cursorIndexOfType);
+            final long _tmpAmount;
+            _tmpAmount = _cursor.getLong(_cursorIndexOfAmount);
+            final String _tmpCategoryId;
+            if (_cursor.isNull(_cursorIndexOfCategoryId)) {
+              _tmpCategoryId = null;
+            } else {
+              _tmpCategoryId = _cursor.getString(_cursorIndexOfCategoryId);
+            }
+            final String _tmpAccountId;
+            if (_cursor.isNull(_cursorIndexOfAccountId)) {
+              _tmpAccountId = null;
+            } else {
+              _tmpAccountId = _cursor.getString(_cursorIndexOfAccountId);
+            }
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final int _tmpUsageCount;
+            _tmpUsageCount = _cursor.getInt(_cursorIndexOfUsageCount);
+            final Long _tmpLastUsed;
+            if (_cursor.isNull(_cursorIndexOfLastUsed)) {
+              _tmpLastUsed = null;
+            } else {
+              _tmpLastUsed = _cursor.getLong(_cursorIndexOfLastUsed);
+            }
+            final boolean _tmpIsPinned;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsPinned);
+            _tmpIsPinned = _tmp != 0;
+            final long _tmpCreatedAt;
+            _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
+            _item = new TemplateEntity(_tmpId,_tmpName,_tmpType,_tmpAmount,_tmpCategoryId,_tmpAccountId,_tmpNotes,_tmpUsageCount,_tmpLastUsed,_tmpIsPinned,_tmpCreatedAt);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
   }
 
   @NonNull

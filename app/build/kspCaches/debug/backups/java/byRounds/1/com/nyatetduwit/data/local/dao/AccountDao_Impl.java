@@ -9,6 +9,7 @@ import androidx.room.EntityDeletionOrUpdateAdapter;
 import androidx.room.EntityInsertionAdapter;
 import androidx.room.RoomDatabase;
 import androidx.room.RoomSQLiteQuery;
+import androidx.room.SharedSQLiteStatement;
 import androidx.room.util.CursorUtil;
 import androidx.room.util.DBUtil;
 import androidx.sqlite.db.SupportSQLiteStatement;
@@ -40,6 +41,8 @@ public final class AccountDao_Impl implements AccountDao {
   private final EntityDeletionOrUpdateAdapter<AccountEntity> __deletionAdapterOfAccountEntity;
 
   private final EntityDeletionOrUpdateAdapter<AccountEntity> __updateAdapterOfAccountEntity;
+
+  private final SharedSQLiteStatement __preparedStmtOfDeleteAll;
 
   public AccountDao_Impl(@NonNull final RoomDatabase __db) {
     this.__db = __db;
@@ -103,6 +106,14 @@ public final class AccountDao_Impl implements AccountDao {
         statement.bindString(11, entity.getId());
       }
     };
+    this.__preparedStmtOfDeleteAll = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "DELETE FROM accounts";
+        return _query;
+      }
+    };
   }
 
   @Override
@@ -114,6 +125,25 @@ public final class AccountDao_Impl implements AccountDao {
         __db.beginTransaction();
         try {
           __insertionAdapterOfAccountEntity.insert(account);
+          __db.setTransactionSuccessful();
+          return Unit.INSTANCE;
+        } finally {
+          __db.endTransaction();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object insertAll(final List<AccountEntity> accounts,
+      final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        __db.beginTransaction();
+        try {
+          __insertionAdapterOfAccountEntity.insert(accounts);
           __db.setTransactionSuccessful();
           return Unit.INSTANCE;
         } finally {
@@ -154,6 +184,29 @@ public final class AccountDao_Impl implements AccountDao {
           return Unit.INSTANCE;
         } finally {
           __db.endTransaction();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object deleteAll(final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfDeleteAll.acquire();
+        try {
+          __db.beginTransaction();
+          try {
+            _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return Unit.INSTANCE;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfDeleteAll.release(_stmt);
         }
       }
     }, $completion);
@@ -434,6 +487,64 @@ public final class AccountDao_Impl implements AccountDao {
         _statement.release();
       }
     });
+  }
+
+  @Override
+  public Object getAllAccountsSync(final Continuation<? super List<AccountEntity>> $completion) {
+    final String _sql = "SELECT * FROM accounts ORDER BY order_index ASC";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<AccountEntity>>() {
+      @Override
+      @NonNull
+      public List<AccountEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfName = CursorUtil.getColumnIndexOrThrow(_cursor, "name");
+          final int _cursorIndexOfType = CursorUtil.getColumnIndexOrThrow(_cursor, "type");
+          final int _cursorIndexOfBalance = CursorUtil.getColumnIndexOrThrow(_cursor, "balance");
+          final int _cursorIndexOfIcon = CursorUtil.getColumnIndexOrThrow(_cursor, "icon");
+          final int _cursorIndexOfColor = CursorUtil.getColumnIndexOrThrow(_cursor, "color");
+          final int _cursorIndexOfIsHidden = CursorUtil.getColumnIndexOrThrow(_cursor, "is_hidden");
+          final int _cursorIndexOfOrderIndex = CursorUtil.getColumnIndexOrThrow(_cursor, "order_index");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<AccountEntity> _result = new ArrayList<AccountEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final AccountEntity _item;
+            final String _tmpId;
+            _tmpId = _cursor.getString(_cursorIndexOfId);
+            final String _tmpName;
+            _tmpName = _cursor.getString(_cursorIndexOfName);
+            final String _tmpType;
+            _tmpType = _cursor.getString(_cursorIndexOfType);
+            final long _tmpBalance;
+            _tmpBalance = _cursor.getLong(_cursorIndexOfBalance);
+            final String _tmpIcon;
+            _tmpIcon = _cursor.getString(_cursorIndexOfIcon);
+            final String _tmpColor;
+            _tmpColor = _cursor.getString(_cursorIndexOfColor);
+            final boolean _tmpIsHidden;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsHidden);
+            _tmpIsHidden = _tmp != 0;
+            final int _tmpOrderIndex;
+            _tmpOrderIndex = _cursor.getInt(_cursorIndexOfOrderIndex);
+            final long _tmpCreatedAt;
+            _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
+            final long _tmpUpdatedAt;
+            _tmpUpdatedAt = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            _item = new AccountEntity(_tmpId,_tmpName,_tmpType,_tmpBalance,_tmpIcon,_tmpColor,_tmpIsHidden,_tmpOrderIndex,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
   }
 
   @NonNull

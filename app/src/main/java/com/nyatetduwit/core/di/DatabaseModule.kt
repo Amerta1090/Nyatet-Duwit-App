@@ -2,6 +2,7 @@ package com.nyatetduwit.core.di
 
 import android.content.Context
 import androidx.room.Room
+import com.nyatetduwit.data.local.ExportManager
 import com.nyatetduwit.data.local.NyatetDuwitDatabase
 import com.nyatetduwit.data.local.dao.AccountDao
 import com.nyatetduwit.data.local.dao.BudgetDao
@@ -62,5 +63,25 @@ object DatabaseModule {
     @Provides
     fun provideTemplateDao(database: NyatetDuwitDatabase): TemplateDao {
         return database.templateDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideExportManager(
+        transactionDao: TransactionDao,
+        accountDao: AccountDao,
+        categoryDao: CategoryDao,
+        budgetDao: BudgetDao,
+        recurringTransactionDao: RecurringTransactionDao,
+        templateDao: TemplateDao,
+    ): ExportManager {
+        return ExportManager(
+            transactionDao = transactionDao,
+            accountDao = accountDao,
+            categoryDao = categoryDao,
+            budgetDao = budgetDao,
+            recurringTransactionDao = recurringTransactionDao,
+            templateDao = templateDao,
+        )
     }
 }

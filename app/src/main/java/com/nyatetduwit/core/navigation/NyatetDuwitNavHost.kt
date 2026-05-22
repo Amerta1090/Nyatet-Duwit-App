@@ -18,6 +18,8 @@ import com.nyatetduwit.presentation.recurring.RecurringTransactionFormScreen
 import com.nyatetduwit.presentation.recurring.RecurringTransactionScreen
 import com.nyatetduwit.presentation.monthlysummary.MonthlySummaryScreen
 import com.nyatetduwit.presentation.remindersettings.ReminderSettingsScreen
+import com.nyatetduwit.presentation.settings.AboutScreen
+import com.nyatetduwit.presentation.settings.SettingsScreen
 import com.nyatetduwit.presentation.template.TemplateScreen
 import com.nyatetduwit.presentation.transaction.TransactionDetailScreen
 import com.nyatetduwit.presentation.transaction.TransactionFormScreen
@@ -93,7 +95,7 @@ fun NyatetDuwitNavHost(
                 onNavigateToRecurring = { navController.navigate(Screen.Recurring.route) },
                 onNavigateToTemplates = { navController.navigate(Screen.Templates.route) },
                 onNavigateToMonthlySummary = { navController.navigate(Screen.MonthlySummary.createRoute()) },
-                onNavigateToSecuritySettings = { navController.navigate(Screen.SecuritySettings.route) },
+                onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
                 onNavigateToAddTransaction = { navController.navigate(Screen.TransactionForm.createRoute()) },
                 onNavigateToTransactionDetail = { transactionId ->
                     navController.navigate(Screen.TransactionDetail.createRoute(transactionId))
@@ -247,6 +249,21 @@ fun NyatetDuwitNavHost(
 
         composable(Screen.ReminderSettings.route) {
             ReminderSettingsScreen(
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(Screen.Settings.route) {
+            SettingsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToSecurity = { navController.navigate(Screen.SecuritySettings.route) },
+                onNavigateToReminder = { navController.navigate(Screen.ReminderSettings.route) },
+                onNavigateToAbout = { navController.navigate(Screen.About.route) },
+            )
+        }
+
+        composable(Screen.About.route) {
+            AboutScreen(
                 onNavigateBack = { navController.popBackStack() },
             )
         }

@@ -279,6 +279,15 @@ interface TransactionDao {
         """
     )
     suspend fun getTransactionCount(startDate: Long, endDate: Long): Int
+
+    @Query("SELECT * FROM transactions ORDER BY date_time DESC")
+    suspend fun getAllTransactionsSync(): List<TransactionEntity>
+
+    @Query("DELETE FROM transactions")
+    suspend fun deleteAll()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(transactions: List<TransactionEntity>)
 }
 
 data class DailyExpenseSummary(

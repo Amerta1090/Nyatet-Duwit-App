@@ -42,4 +42,13 @@ interface BudgetDao {
 
     @Query("UPDATE budgets SET is_active = 0 WHERE id = :id")
     suspend fun deactivate(id: String)
+
+    @Query("SELECT * FROM budgets ORDER BY created_at DESC")
+    suspend fun getAllBudgetsSync(): List<BudgetEntity>
+
+    @Query("DELETE FROM budgets")
+    suspend fun deleteAll()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(budgets: List<BudgetEntity>)
 }

@@ -44,4 +44,13 @@ interface RecurringTransactionDao {
 
     @Query("UPDATE recurring_transactions SET skipped_dates = :skippedDates WHERE id = :id")
     suspend fun updateSkippedDates(id: String, skippedDates: String)
+
+    @Query("SELECT * FROM recurring_transactions ORDER BY next_due ASC")
+    suspend fun getAllRecurringSync(): List<RecurringTransactionEntity>
+
+    @Query("DELETE FROM recurring_transactions")
+    suspend fun deleteAll()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(recurring: List<RecurringTransactionEntity>)
 }

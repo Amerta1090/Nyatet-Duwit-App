@@ -31,7 +31,7 @@ fun DashboardScreen(
     onNavigateToRecurring: () -> Unit,
     onNavigateToTemplates: () -> Unit,
     onNavigateToMonthlySummary: () -> Unit,
-    onNavigateToSecuritySettings: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
     onNavigateToAddTransaction: () -> Unit,
     onNavigateToTransactionDetail: (String) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
@@ -45,7 +45,7 @@ fun DashboardScreen(
             TopAppBar(
                 title = { Text("NyatetDuwit") },
                 actions = {
-                    IconButton(onClick = onNavigateToSecuritySettings) {
+                    IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Pengaturan keamanan",

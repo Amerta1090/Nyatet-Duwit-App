@@ -76,4 +76,13 @@ interface TemplateDao {
         """
     )
     suspend fun togglePin(id: String, isPinned: Boolean)
+
+    @Query("SELECT * FROM templates ORDER BY is_pinned DESC, usage_count DESC")
+    suspend fun getAllTemplatesSync(): List<TemplateEntity>
+
+    @Query("DELETE FROM templates")
+    suspend fun deleteAll()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(templates: List<TemplateEntity>)
 }
