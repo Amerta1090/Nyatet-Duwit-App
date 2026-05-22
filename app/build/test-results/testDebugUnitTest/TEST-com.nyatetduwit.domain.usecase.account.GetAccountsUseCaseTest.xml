@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.nyatetduwit.domain.usecase.account.GetAccountsUseCaseTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-05-21T01:42:37" hostname="SOTG1" time="0.854">
-  <properties/>
-  <testcase name="invoke_shouldReturnListOfAccounts" classname="com.nyatetduwit.domain.usecase.account.GetAccountsUseCaseTest" time="0.854"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
