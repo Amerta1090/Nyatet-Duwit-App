@@ -142,7 +142,7 @@ fun RecurringTransactionFormScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     val accColor = selectedAccount?.let {
-                        runCatching { Color(it.color.substring(1).toLong(16) or 0xFF000000) }
+                        runCatching { Color(it.color.substring(1).toLong(16) or 0xFF000000L) }
                             .getOrElse { MaterialTheme.colorScheme.primary }
                     } ?: MaterialTheme.colorScheme.onSurfaceVariant
                     Icon(
@@ -187,7 +187,7 @@ fun RecurringTransactionFormScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         val catColor = selectedCategory?.let {
-                            runCatching { Color(it.color.substring(1).toLong(16) or 0xFF000000) }
+                            runCatching { Color(it.color.substring(1).toLong(16) or 0xFF000000L) }
                                 .getOrElse { MaterialTheme.colorScheme.primary }
                         } ?: MaterialTheme.colorScheme.onSurfaceVariant
                         Icon(
@@ -269,7 +269,7 @@ fun RecurringTransactionFormScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             val accColor = runCatching {
-                                Color(account.color.substring(1).toLong(16) or 0xFF000000)
+                                Color(account.color.substring(1).toLong(16) or 0xFF000000L)
                             }.getOrElse { MaterialTheme.colorScheme.primary }
                             Icon(
                                 imageVector = getAccountTypeIcon(account.type),
@@ -336,7 +336,7 @@ fun RecurringTransactionFormScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             val catColor = runCatching {
-                                Color(category.color.substring(1).toLong(16) or 0xFF000000)
+                                Color(category.color.substring(1).toLong(16) or 0xFF000000L)
                             }.getOrElse { MaterialTheme.colorScheme.primary }
                             Surface(
                                 modifier = Modifier.size(36.dp),

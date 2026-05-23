@@ -246,20 +246,22 @@ private fun getPeriodLabel(period: BudgetPeriod): String {
     }
 }
 
-@Composable
 private fun getMaterialIconByName(name: String): androidx.compose.ui.graphics.vector.ImageVector {
     return when (name) {
         "restaurant" -> Icons.Default.Restaurant
         "directions_car" -> Icons.Default.DirectionsCar
-        "shopping_cart" -> Icons.Default.ShoppingCart
-        "receipt" -> Icons.Default.Receipt
+        "shopping_bag" -> Icons.Default.ShoppingBag
+        "receipt_long" -> Icons.Default.ReceiptLong
         "home" -> Icons.Default.Home
-        "movie" -> Icons.Default.Movie
-        "favorite" -> Icons.Default.Favorite
+        "theater_comedy" -> Icons.Default.TheaterComedy
+        "local_hospital" -> Icons.Default.LocalHospital
         "school" -> Icons.Default.School
         "checkroom" -> Icons.Default.Checkroom
-        "redeem" -> Icons.Default.Redeem
+        "card_giftcard" -> Icons.Default.CardGiftcard
         "more_horiz" -> Icons.Default.MoreHoriz
+        "payments" -> Icons.Default.Payments
+        "work" -> Icons.Default.Work
+        "trending_up" -> Icons.Default.TrendingUp
         "account_balance_wallet" -> Icons.Default.AccountBalanceWallet
         else -> Icons.Default.Category
     }

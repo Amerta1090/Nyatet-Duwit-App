@@ -12,6 +12,7 @@ import com.nyatetduwit.domain.usecase.transaction.GetRecentTransactionsUseCase
 import com.nyatetduwit.domain.usecase.transaction.GetSumByTypeAndDateRangeUseCase
 import com.nyatetduwit.domain.usecase.transaction.GetTopCategoriesByExpenseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
@@ -38,11 +39,11 @@ data class TopCategoryItem(
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    getTotalBalanceUseCase: GetTotalBalanceUseCase,
-    getSumByTypeAndDateRangeUseCase: GetSumByTypeAndDateRangeUseCase,
-    getTopCategoriesByExpenseUseCase: GetTopCategoriesByExpenseUseCase,
-    getRecentTransactionsUseCase: GetRecentTransactionsUseCase,
-    getCategoriesUseCase: GetCategoriesUseCase,
+    private val getTotalBalanceUseCase: GetTotalBalanceUseCase,
+    private val getSumByTypeAndDateRangeUseCase: GetSumByTypeAndDateRangeUseCase,
+    private val getTopCategoriesByExpenseUseCase: GetTopCategoriesByExpenseUseCase,
+    private val getRecentTransactionsUseCase: GetRecentTransactionsUseCase,
+    private val getCategoriesUseCase: GetCategoriesUseCase,
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
@@ -51,6 +52,7 @@ class DashboardViewModel @Inject constructor(
 
     private val currentMonthStart: Long
     private val currentMonthEnd: Long
+    private var loadDataJob: Job? = null
 
     init {
         val calendar = Calendar.getInstance()
@@ -66,13 +68,12 @@ class DashboardViewModel @Inject constructor(
         currentMonthEnd = calendar.timeInMillis
 
         loadBalanceVisibility()
-        loadDashboardData(
-            getTotalBalanceUseCase = getTotalBalanceUseCase,
-            getSumByTypeAndDateRangeUseCase = getSumByTypeAndDateRangeUseCase,
-            getTopCategoriesByExpenseUseCase = getTopCategoriesByExpenseUseCase,
-            getRecentTransactionsUseCase = getRecentTransactionsUseCase,
-            getCategoriesUseCase = getCategoriesUseCase,
-        )
+        startLoadingData()
+    }
+
+    private fun startLoadingData() {
+        loadDataJob?.cancel()
+        loadDataJob = loadDashboardData()
     }
 
     private fun loadBalanceVisibility() {
@@ -83,13 +84,7 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
-    private fun loadDashboardData(
-        getTotalBalanceUseCase: GetTotalBalanceUseCase,
-        getSumByTypeAndDateRangeUseCase: GetSumByTypeAndDateRangeUseCase,
-        getTopCategoriesByExpenseUseCase: GetTopCategoriesByExpenseUseCase,
-        getRecentTransactionsUseCase: GetRecentTransactionsUseCase,
-        getCategoriesUseCase: GetCategoriesUseCase,
-    ) {
+    private fun loadDashboardData(): Job {
         val totalBalanceFlow = getTotalBalanceUseCase()
         val monthlyIncomeFlow = getSumByTypeAndDateRangeUseCase(TransactionType.INCOME.value, currentMonthStart, currentMonthEnd)
         val monthlyExpenseFlow = getSumByTypeAndDateRangeUseCase(TransactionType.EXPENSE.value, currentMonthStart, currentMonthEnd)
@@ -97,7 +92,7 @@ class DashboardViewModel @Inject constructor(
         val recentTransactionsFlow = getRecentTransactionsUseCase(5)
         val categoriesFlow = getCategoriesUseCase()
 
-        viewModelScope.launch {
+        return viewModelScope.launch {
             combine(
                 totalBalanceFlow,
                 monthlyIncomeFlow,
@@ -153,6 +148,7 @@ class DashboardViewModel @Inject constructor(
 
     fun refresh() {
         _uiState.update { it.copy(isRefreshing = true) }
+        startLoadingData()
         viewModelScope.launch {
             kotlinx.coroutines.delay(500)
             _uiState.update { it.copy(isRefreshing = false) }

@@ -237,11 +237,6 @@ fun DashboardScreen(
     }
 }
 
-private fun Long.savingsRate(expense: Long): Int {
-    if (this == 0L) return 0
-    return ((this - expense).toFloat() / this * 100).toInt().coerceIn(0, 100)
-}
-
 @Composable
 private fun BalanceHero(
     totalBalance: Long,
@@ -361,11 +356,17 @@ private fun IncomeExpenseBar(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
+            val netSavings = income - expense
+            val savingsText = if (netSavings >= 0) {
+                "Sisa ${formatRupiah(netSavings)}"
+            } else {
+                "Defisit ${formatRupiah(-netSavings)}"
+            }
             Text(
-                text = "Menabung ${income.savingsRate(expense)}%",
+                text = savingsText,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Medium,
-                color = NyatetDuwitColor.teal500,
+                color = if (netSavings >= 0) NyatetDuwitColor.teal500 else NyatetDuwitColor.coral500,
             )
             if (total > 0) {
                 Text(

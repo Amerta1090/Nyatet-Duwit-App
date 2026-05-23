@@ -194,7 +194,7 @@ private fun BudgetProgressCard(
                     BudgetWarningLevel.EXCEEDED -> MaterialTheme.colorScheme.error
                     BudgetWarningLevel.WARNING -> Color(0xFFFFA726)
                     BudgetWarningLevel.NORMAL -> {
-                        val color = Color(progress.categoryColor.substring(1).toLong(16) or 0xFF000000)
+                        val color = Color(progress.categoryColor.substring(1).toLong(16) or 0xFF000000L)
                         color
                     }
                 },

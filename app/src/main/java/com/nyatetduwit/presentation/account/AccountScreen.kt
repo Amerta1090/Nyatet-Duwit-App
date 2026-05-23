@@ -159,7 +159,7 @@ private fun AccountItemContent(
                 contentDescription = null,
                 modifier = Modifier.size(32.dp),
                 tint = runCatching {
-                    Color(account.color.substring(1).toLong(16) or 0xFF000000)
+                    Color(account.color.substring(1).toLong(16) or 0xFF000000L)
                 }.getOrElse { MaterialTheme.colorScheme.primary },
             )
             Spacer(modifier = Modifier.width(12.dp))

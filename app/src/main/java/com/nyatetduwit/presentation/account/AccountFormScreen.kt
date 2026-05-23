@@ -220,7 +220,7 @@ private fun ColorSelector(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         colors.forEach { color ->
-            val colorObj = Color(color.substring(1).toLong(16) or 0xFF000000)
+            val colorObj = Color(color.substring(1).toLong(16) or 0xFF000000L)
             Box(
                 modifier = Modifier
                     .size(40.dp)

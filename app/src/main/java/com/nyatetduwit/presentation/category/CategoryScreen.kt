@@ -153,7 +153,7 @@ private fun CategoryItem(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             val color = try {
-                Color(category.color.substring(1).toLong(16) or 0xFF000000)
+                Color(category.color.substring(1).toLong(16) or 0xFF000000L)
             } catch (e: Exception) {
                 MaterialTheme.colorScheme.primary
             }

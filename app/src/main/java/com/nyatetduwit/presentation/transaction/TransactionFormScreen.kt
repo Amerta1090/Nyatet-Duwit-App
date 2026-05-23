@@ -228,7 +228,7 @@ fun TransactionFormScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             val catColor = runCatching {
-                                Color(category.color.substring(1).toLong(16) or 0xFF000000)
+                                Color(category.color.substring(1).toLong(16) or 0xFF000000L)
                             }.getOrElse { MaterialTheme.colorScheme.primary }
                             Surface(
                                 modifier = Modifier.size(36.dp),
@@ -303,7 +303,7 @@ fun TransactionFormScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             val accColor = runCatching {
-                                Color(account.color.substring(1).toLong(16) or 0xFF000000)
+                                Color(account.color.substring(1).toLong(16) or 0xFF000000L)
                             }.getOrElse { MaterialTheme.colorScheme.primary }
                             Icon(
                                 imageVector = getAccountTypeIcon(account.type),

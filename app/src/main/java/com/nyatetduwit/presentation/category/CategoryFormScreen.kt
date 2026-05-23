@@ -182,7 +182,7 @@ private fun ColorPicker(
     ) {
         colors.forEach { color ->
             val colorObj = try {
-                Color(color.substring(1).toLong(16) or 0xFF000000)
+                Color(color.substring(1).toLong(16) or 0xFF000000L)
             } catch (e: Exception) {
                 MaterialTheme.colorScheme.primary
             }

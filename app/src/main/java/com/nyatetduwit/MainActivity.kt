@@ -10,14 +10,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.nyatetduwit.core.navigation.NyatetDuwitNavHost
 import com.nyatetduwit.core.security.AppLockManager
 import com.nyatetduwit.core.theme.NyatetDuwitTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -25,22 +22,15 @@ class MainActivity : ComponentActivity() {
     private val appLockManager: AppLockManager
         get() = (application as NyatetDuwitApp).appLockManager
 
-    private var isOnboardingCompleted: Boolean = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        lifecycleScope.launch {
-            val settingsRepository = (application as NyatetDuwitApp).settingsRepository
-            isOnboardingCompleted = settingsRepository.isOnboardingCompleted.first()
-        }
-
         setContent {
+            val app = (LocalContext.current.applicationContext as NyatetDuwitApp)
+            val isOnboardingCompleted by app.settingsRepository.isOnboardingCompleted.collectAsState(initial = false)
             val isLocked by appLockManager.isLocked.collectAsState(initial = false)
             val navController = rememberNavController()
-            val context = LocalContext.current
-            val app = context.applicationContext as NyatetDuwitApp
             val darkThemePref by app.settingsRepository.isDarkTheme.collectAsState(initial = false)
             val isExplicit by app.settingsRepository.isDarkThemeExplicit.collectAsState(initial = false)
             val finalDarkTheme = if (isExplicit) darkThemePref else isSystemInDarkTheme()
@@ -50,7 +40,7 @@ class MainActivity : ComponentActivity() {
                     if (isLocked) {
                         com.nyatetduwit.presentation.security.LockScreen(
                             onUnlock = { appLockManager.unlock() },
-                            securityManager = (application as NyatetDuwitApp).securityManager,
+                            securityManager = app.securityManager,
                         )
                     } else {
                         NyatetDuwitNavHost(
