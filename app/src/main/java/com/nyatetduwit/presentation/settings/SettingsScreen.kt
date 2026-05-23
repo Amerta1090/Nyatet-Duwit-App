@@ -21,6 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.nyatetduwit.NyatetDuwitApp
 import com.nyatetduwit.core.util.HapticFeedback
 import kotlinx.coroutines.launch
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +38,34 @@ fun SettingsScreen(
     val app = context.applicationContext as NyatetDuwitApp
     val securityManager = app.securityManager
     val scope = rememberCoroutineScope()
+
+    val pdfExportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/pdf")
+    ) { uri: Uri? ->
+        uri?.let {
+            scope.launch {
+                val calendar = Calendar.getInstance()
+                val monthFormat = java.text.SimpleDateFormat("MMMM yyyy", Locale("id"))
+                val monthLabel = monthFormat.format(calendar.time)
+                calendar.set(Calendar.DAY_OF_MONTH, 1)
+                calendar.set(Calendar.HOUR_OF_DAY, 0)
+                calendar.set(Calendar.MINUTE, 0)
+                calendar.set(Calendar.SECOND, 0)
+                calendar.set(Calendar.MILLISECOND, 0)
+                val startDate = calendar.timeInMillis
+                calendar.add(Calendar.MONTH, 1)
+                calendar.add(Calendar.MILLISECOND, -1)
+                val endDate = calendar.timeInMillis
+
+                val result = viewModel.pdfExportManager.exportPdf(context, it, monthLabel, startDate, endDate)
+                result.onSuccess {
+                    Toast.makeText(context, "PDF berhasil diexport", Toast.LENGTH_SHORT).show()
+                }.onFailure { e ->
+                    Toast.makeText(context, "Gagal: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     val csvExportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("text/csv")
@@ -175,6 +204,18 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(4.dp))
             SettingsCard {
                 SettingsActionRow(
+                    icon = Icons.Default.Download,
+                    title = "Export PDF (Bulan Ini)",
+                    description = "Laporan keuangan bulan ini",
+                    onClick = {
+                        HapticFeedback.click(view)
+                        pdfExportLauncher.launch("nyatetduwit_report.pdf")
+                    },
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            SettingsCard {
+                SettingsActionRow(
                     icon = Icons.Default.Backup,
                     title = "Backup Data",
                     description = "Buat file backup terenkripsi",
@@ -194,6 +235,13 @@ fun SettingsScreen(
                         HapticFeedback.click(view)
                         restoreLauncher.launch(arrayOf("*/*"))
                     },
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            SettingsCard {
+                AutoBackupToggle(
+                    isEnabled = uiState.isAutoBackupEnabled,
+                    onToggle = { viewModel.toggleAutoBackup() },
                 )
             }
 
@@ -308,6 +356,25 @@ private fun SettingsNavCard(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+    }
+}
+
+@Composable
+private fun AutoBackupToggle(isEnabled: Boolean, onToggle: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column {
+            Text("Backup Otomatis", style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = if (isEnabled) "Mingguan (setiap 7 hari)" else "Nonaktif",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Switch(checked = isEnabled, onCheckedChange = { onToggle() })
     }
 }
 

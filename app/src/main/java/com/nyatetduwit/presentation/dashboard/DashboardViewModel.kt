@@ -8,9 +8,19 @@ import com.nyatetduwit.domain.model.TransactionType
 import com.nyatetduwit.domain.repository.SettingsRepository
 import com.nyatetduwit.domain.usecase.account.GetTotalBalanceUseCase
 import com.nyatetduwit.domain.usecase.category.GetCategoriesUseCase
+import com.nyatetduwit.domain.usecase.habit.DailyAllowance
+import com.nyatetduwit.domain.usecase.habit.HabitTracker
+import com.nyatetduwit.domain.usecase.habit.ProgressData
+import com.nyatetduwit.domain.usecase.habit.StreakData
+import com.nyatetduwit.domain.usecase.habit.WeeklyCheckInData
+import com.nyatetduwit.domain.usecase.transaction.GetMonthlyExpenseUseCase
+import com.nyatetduwit.domain.usecase.transaction.GetMonthlyIncomeUseCase
 import com.nyatetduwit.domain.usecase.transaction.GetRecentTransactionsUseCase
 import com.nyatetduwit.domain.usecase.transaction.GetSumByTypeAndDateRangeUseCase
 import com.nyatetduwit.domain.usecase.transaction.GetTopCategoriesByExpenseUseCase
+import com.nyatetduwit.domain.usecase.transaction.GetTransactionCountUseCase
+import com.nyatetduwit.domain.model.Budget
+import com.nyatetduwit.domain.repository.BudgetRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -27,6 +37,11 @@ data class DashboardUiState(
     val isBalanceVisible: Boolean = true,
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
+    val weeklyCheckIn: WeeklyCheckInData? = null,
+    val showWeeklyCheckIn: Boolean = false,
+    val streakData: StreakData = StreakData(),
+    val progressData: ProgressData? = null,
+    val dailyAllowance: DailyAllowance? = null,
 )
 
 data class TopCategoryItem(
@@ -45,6 +60,11 @@ class DashboardViewModel @Inject constructor(
     private val getRecentTransactionsUseCase: GetRecentTransactionsUseCase,
     private val getCategoriesUseCase: GetCategoriesUseCase,
     private val settingsRepository: SettingsRepository,
+    private val habitTracker: HabitTracker,
+    private val getMonthlyExpenseUseCase: GetMonthlyExpenseUseCase,
+    private val getMonthlyIncomeUseCase: GetMonthlyIncomeUseCase,
+    private val getTransactionCountUseCase: GetTransactionCountUseCase,
+    private val budgetRepository: BudgetRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
@@ -52,6 +72,8 @@ class DashboardViewModel @Inject constructor(
 
     private val currentMonthStart: Long
     private val currentMonthEnd: Long
+    private val currentWeekStart: Long
+    private val currentWeekEnd: Long
     private var loadDataJob: Job? = null
 
     init {
@@ -66,6 +88,20 @@ class DashboardViewModel @Inject constructor(
         calendar.add(Calendar.MONTH, 1)
         calendar.add(Calendar.MILLISECOND, -1)
         currentMonthEnd = calendar.timeInMillis
+
+        val weekCal = Calendar.getInstance()
+        weekCal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+        weekCal.set(Calendar.HOUR_OF_DAY, 0)
+        weekCal.set(Calendar.MINUTE, 0)
+        weekCal.set(Calendar.SECOND, 0)
+        weekCal.set(Calendar.MILLISECOND, 0)
+        currentWeekStart = weekCal.timeInMillis
+
+        weekCal.add(Calendar.DAY_OF_WEEK, 6)
+        weekCal.set(Calendar.HOUR_OF_DAY, 23)
+        weekCal.set(Calendar.MINUTE, 59)
+        weekCal.set(Calendar.SECOND, 59)
+        currentWeekEnd = weekCal.timeInMillis
 
         loadBalanceVisibility()
         startLoadingData()
@@ -129,9 +165,70 @@ class DashboardViewModel @Inject constructor(
             }.catch {
                 _uiState.update { it.copy(isLoading = false) }
             }.collect { state ->
-                _uiState.update { state }
+                _uiState.update { state.copy(weeklyCheckIn = _uiState.value.weeklyCheckIn, showWeeklyCheckIn = _uiState.value.showWeeklyCheckIn, streakData = _uiState.value.streakData, progressData = _uiState.value.progressData, dailyAllowance = _uiState.value.dailyAllowance) }
             }
+
+            loadV2Features()
         }
+    }
+
+    private suspend fun loadV2Features() {
+        val streak = habitTracker.updateStreak()
+        _uiState.update { it.copy(streakData = streak) }
+
+        val showCheckin = habitTracker.shouldShowWeeklyCheckin()
+        if (showCheckin) {
+            val weekExpense = getMonthlyExpenseUseCase(currentWeekStart, currentWeekEnd)
+            val weekIncome = getMonthlyIncomeUseCase(currentWeekStart, currentWeekEnd)
+            val weekCount = getTransactionCountUseCase(currentWeekStart, currentWeekEnd)
+            val topCats = getTopCategoriesByExpenseUseCase(currentWeekStart, currentWeekEnd, 1).first()
+
+            val previousWeekStart = currentWeekStart - 7 * 24 * 60 * 60 * 1000L
+            val previousWeekEnd = currentWeekStart - 1
+            val prevExpense = getMonthlyExpenseUseCase(previousWeekStart, previousWeekEnd)
+
+            val vsPercent = if (prevExpense > 0) {
+                ((weekExpense - prevExpense) * 100 / prevExpense).toInt()
+            } else 0
+
+            val topCatName = if (topCats.isNotEmpty()) {
+                topCats.first().let { (catId, _) ->
+                    getCategoriesUseCase().first().find { it.id == catId }?.name
+                }
+            } else null
+
+            val weekCal = Calendar.getInstance()
+            val sdf = java.text.SimpleDateFormat("d MMM", java.util.Locale("id"))
+            val weekStartDate = sdf.format(Date(currentWeekStart))
+            val weekEndDate = sdf.format(Date(currentWeekEnd))
+
+            val checkInData = WeeklyCheckInData(
+                weekLabel = "$weekStartDate - $weekEndDate",
+                totalExpense = weekExpense,
+                totalIncome = weekIncome,
+                transactionCount = weekCount,
+                topCategoryName = topCatName,
+                topCategoryAmount = topCats.firstOrNull()?.second ?: 0,
+                vsPreviousWeekPercent = vsPercent,
+                daysActive = getTransactionCountUseCase(currentWeekStart, currentWeekEnd),
+            )
+
+            _uiState.update { it.copy(weeklyCheckIn = checkInData, showWeeklyCheckIn = true) }
+        }
+
+        val budgetTotal = sumOfBudgets()
+        val currentExpense = getMonthlyExpenseUseCase(currentMonthStart, currentMonthEnd)
+        val allowance = habitTracker.getDailyAllowance(budgetTotal, currentExpense)
+        _uiState.update { it.copy(dailyAllowance = allowance) }
+    }
+
+    private suspend fun sumOfBudgets(): Long {
+        return budgetRepository.getAllBudgets().first().sumOf { budget -> budget.amount }
+    }
+
+    fun dismissWeeklyCheckIn() {
+        habitTracker.markWeeklyCheckinShown()
+        _uiState.update { it.copy(showWeeklyCheckIn = false) }
     }
 
     private data class Triple<A, B, C>(val a: A, val b: B, val c: C)

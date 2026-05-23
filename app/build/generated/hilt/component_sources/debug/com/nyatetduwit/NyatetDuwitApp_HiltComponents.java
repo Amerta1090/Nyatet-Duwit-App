@@ -4,6 +4,7 @@ import androidx.hilt.work.HiltWrapper_WorkerFactoryModule;
 import com.nyatetduwit.core.di.DataStoreModule;
 import com.nyatetduwit.core.di.DatabaseModule;
 import com.nyatetduwit.core.di.RepositoryModule;
+import com.nyatetduwit.core.worker.AutoBackupWorker_HiltModule;
 import com.nyatetduwit.core.worker.RecurringTransactionWorker_HiltModule;
 import com.nyatetduwit.core.worker.ReminderWorker_HiltModule;
 import com.nyatetduwit.presentation.account.AccountViewModel_HiltModules;
@@ -143,6 +144,7 @@ public final class NyatetDuwitApp_HiltComponents {
   @Component(
       modules = {
           ApplicationContextModule.class,
+          AutoBackupWorker_HiltModule.class,
           DataStoreModule.class,
           DatabaseModule.class,
           HiltWrapper_FragmentGetContextFix_FragmentGetContextFixModule.class,

@@ -1,11 +1,15 @@
 package com.nyatetduwit.presentation.settings
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nyatetduwit.core.worker.ReminderScheduler
 import com.nyatetduwit.data.local.ExportManager
+import com.nyatetduwit.data.local.PdfExportManager
 import com.nyatetduwit.data.local.RestorePreview
 import com.nyatetduwit.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,12 +23,16 @@ data class SettingsUiState(
     val isLoading: Boolean = false,
     val statusMessage: String? = null,
     val restorePreview: RestorePreview? = null,
+    val isAutoBackupEnabled: Boolean = false,
 )
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val settingsRepository: SettingsRepository,
     val exportManager: ExportManager,
+    val pdfExportManager: PdfExportManager,
+    private val reminderScheduler: ReminderScheduler,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -41,6 +49,11 @@ class SettingsViewModel @Inject constructor(
                 _uiState.update { it.copy(isBalanceVisible = isVisible) }
             }
         }
+        viewModelScope.launch {
+            settingsRepository.getAutoBackupEnabled().collect { enabled ->
+                _uiState.update { it.copy(isAutoBackupEnabled = enabled) }
+            }
+        }
     }
 
     fun toggleDarkTheme() {
@@ -54,6 +67,18 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val newValue = !_uiState.value.isBalanceVisible
             settingsRepository.setBalanceVisible(newValue)
+        }
+    }
+
+    fun toggleAutoBackup() {
+        viewModelScope.launch {
+            val newValue = !_uiState.value.isAutoBackupEnabled
+            settingsRepository.setAutoBackupEnabled(newValue)
+            if (newValue) {
+                reminderScheduler.scheduleAutoBackup(context)
+            } else {
+                reminderScheduler.cancelAutoBackup(context)
+            }
         }
     }
 

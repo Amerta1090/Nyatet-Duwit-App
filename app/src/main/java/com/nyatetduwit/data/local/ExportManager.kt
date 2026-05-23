@@ -8,12 +8,16 @@ import com.nyatetduwit.data.local.dao.CategoryDao
 import com.nyatetduwit.data.local.dao.RecurringTransactionDao
 import com.nyatetduwit.data.local.dao.TemplateDao
 import com.nyatetduwit.data.local.dao.TransactionDao
+import com.nyatetduwit.data.local.dao.TransactionSplitDao
+import com.nyatetduwit.data.local.dao.TransactionTagDao
 import com.nyatetduwit.data.local.entity.AccountEntity
 import com.nyatetduwit.data.local.entity.BudgetEntity
 import com.nyatetduwit.data.local.entity.CategoryEntity
 import com.nyatetduwit.data.local.entity.RecurringTransactionEntity
 import com.nyatetduwit.data.local.entity.TemplateEntity
 import com.nyatetduwit.data.local.entity.TransactionEntity
+import com.nyatetduwit.data.local.entity.TransactionSplitEntity
+import com.nyatetduwit.data.local.entity.TransactionTagEntity
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -30,6 +34,8 @@ class ExportManager @Inject constructor(
     private val budgetDao: BudgetDao,
     private val recurringTransactionDao: RecurringTransactionDao,
     private val templateDao: TemplateDao,
+    private val transactionSplitDao: TransactionSplitDao,
+    private val transactionTagDao: TransactionTagDao,
 ) {
 
     suspend fun exportCsv(context: Context, uri: Uri): Result<Unit> = runCatching {
@@ -39,7 +45,7 @@ class ExportManager @Inject constructor(
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale("id"))
 
         val csv = buildString {
-            appendLine("Tanggal,Tipe,Nominal,Kategori,Akun,Catatan")
+            appendLine("Tanggal,Tipe,Nominal,Kategori,Akun,Catatan,Tags")
             transactions
                 .filter { !it.isDeleted }
                 .forEach { t ->
@@ -57,8 +63,10 @@ class ExportManager @Inject constructor(
                         ?: if (t.type == "transfer") "Transfer" else "-"
                     val accountName = account?.name ?: t.accountId
                     val notes = (t.notes ?: "").replace("\"", "\"\"")
+                    val tags = transactionTagDao.getTagsByTransactionSync(t.id)
+                        .joinToString(";") { it.tagName }
                     appendLine(
-                        "$dateStr,$typeLabel,$nominal,$categoryName,$accountName,\"$notes\""
+                        "$dateStr,$typeLabel,$nominal,$categoryName,$accountName,\"$notes\",\"$tags\""
                     )
                 }
         }
@@ -98,6 +106,8 @@ class ExportManager @Inject constructor(
             transactionCount = backup.transactions.size,
             accountCount = backup.accounts.size,
             categoryCount = backup.categories.size,
+            splitCount = backup.splits.size,
+            tagCount = backup.tags.size,
             createdAt = backup.timestamp,
         )
 
@@ -119,6 +129,8 @@ class ExportManager @Inject constructor(
             transactionCount = backup.transactions.size,
             accountCount = backup.accounts.size,
             categoryCount = backup.categories.size,
+            splitCount = backup.splits.size,
+            tagCount = backup.tags.size,
             createdAt = backup.timestamp,
         )
     }
@@ -150,6 +162,8 @@ class ExportManager @Inject constructor(
         val budgets = budgetDao.getAllBudgetsSync()
         val recurring = recurringTransactionDao.getAllRecurringSync()
         val templates = templateDao.getAllTemplatesSync()
+        val splits = transactionSplitDao.getAllSplitsSync()
+        val tags = transactionTagDao.getAllTagsSync()
 
         val root = JSONObject()
         root.put("version", BACKUP_VERSION)
@@ -172,6 +186,12 @@ class ExportManager @Inject constructor(
         })
         root.put("templates", JSONArray().apply {
             templates.forEach { put(templateToJson(it)) }
+        })
+        root.put("splits", JSONArray().apply {
+            splits.forEach { put(splitToJson(it)) }
+        })
+        root.put("tags", JSONArray().apply {
+            tags.forEach { put(tagToJson(it)) }
         })
 
         return root.toString()
@@ -218,6 +238,18 @@ class ExportManager @Inject constructor(
             }
         } ?: emptyList()
 
+        val splits = root.optJSONArray("splits")?.let { arr ->
+            (0 until arr.length()).map { i ->
+                jsonToSplit(arr.getJSONObject(i))
+            }
+        } ?: emptyList()
+
+        val tags = root.optJSONArray("tags")?.let { arr ->
+            (0 until arr.length()).map { i ->
+                jsonToTag(arr.getJSONObject(i))
+            }
+        } ?: emptyList()
+
         return BackupData(
             version = version,
             timestamp = timestamp,
@@ -227,10 +259,14 @@ class ExportManager @Inject constructor(
             budgets = budgets,
             recurring = recurring,
             templates = templates,
+            splits = splits,
+            tags = tags,
         )
     }
 
     private suspend fun clearAllData() {
+        transactionSplitDao.deleteAll()
+        transactionTagDao.deleteAll()
         transactionDao.deleteAll()
         budgetDao.deleteAll()
         recurringTransactionDao.deleteAll()
@@ -246,6 +282,8 @@ class ExportManager @Inject constructor(
         if (data.budgets.isNotEmpty()) budgetDao.insertAll(data.budgets)
         if (data.recurring.isNotEmpty()) recurringTransactionDao.insertAll(data.recurring)
         if (data.templates.isNotEmpty()) templateDao.insertAll(data.templates)
+        if (data.splits.isNotEmpty()) transactionSplitDao.insertAll(data.splits)
+        if (data.tags.isNotEmpty()) transactionTagDao.insertAll(data.tags)
     }
 
     private fun accountToJson(a: AccountEntity) = JSONObject().apply {
@@ -311,6 +349,7 @@ class ExportManager @Inject constructor(
         put("updated_at", t.updatedAt)
         put("is_deleted", t.isDeleted)
         put("deleted_at", t.deletedAt ?: JSONObject.NULL as Any)
+        put("attachment_path", t.attachmentPath ?: JSONObject.NULL as Any)
     }
 
     private fun jsonToTransaction(obj: JSONObject) = TransactionEntity(
@@ -326,6 +365,7 @@ class ExportManager @Inject constructor(
         updatedAt = obj.optLong("updated_at", System.currentTimeMillis()),
         isDeleted = obj.optBoolean("is_deleted", false),
         deletedAt = if (obj.isNull("deleted_at")) null else obj.optString("deleted_at").toLongOrNull(),
+        attachmentPath = if (obj.isNull("attachment_path")) null else obj.optString("attachment_path"),
     )
 
     private fun budgetToJson(b: BudgetEntity) = JSONObject().apply {
@@ -408,8 +448,36 @@ class ExportManager @Inject constructor(
         createdAt = obj.optLong("created_at", System.currentTimeMillis()),
     )
 
+    private fun splitToJson(s: TransactionSplitEntity) = JSONObject().apply {
+        put("id", s.id)
+        put("transaction_id", s.transactionId)
+        put("category_id", s.categoryId)
+        put("amount", s.amount)
+        put("notes", s.notes ?: JSONObject.NULL as Any)
+    }
+
+    private fun jsonToSplit(obj: JSONObject) = TransactionSplitEntity(
+        id = obj.getString("id"),
+        transactionId = obj.getString("transaction_id"),
+        categoryId = obj.getString("category_id"),
+        amount = obj.optLong("amount", 0L),
+        notes = if (obj.isNull("notes")) null else obj.optString("notes"),
+    )
+
+    private fun tagToJson(t: TransactionTagEntity) = JSONObject().apply {
+        put("id", t.id)
+        put("transaction_id", t.transactionId)
+        put("tag_name", t.tagName)
+    }
+
+    private fun jsonToTag(obj: JSONObject) = TransactionTagEntity(
+        id = obj.getString("id"),
+        transactionId = obj.getString("transaction_id"),
+        tagName = obj.getString("tag_name"),
+    )
+
     companion object {
-        private const val BACKUP_VERSION = 1
+        private const val BACKUP_VERSION = 2
     }
 }
 
@@ -417,6 +485,8 @@ data class RestorePreview(
     val transactionCount: Int,
     val accountCount: Int,
     val categoryCount: Int,
+    val splitCount: Int = 0,
+    val tagCount: Int = 0,
     val createdAt: Long,
 )
 
@@ -429,4 +499,6 @@ data class BackupData(
     val budgets: List<BudgetEntity>,
     val recurring: List<RecurringTransactionEntity>,
     val templates: List<TemplateEntity>,
+    val splits: List<TransactionSplitEntity> = emptyList(),
+    val tags: List<TransactionTagEntity> = emptyList(),
 )

@@ -26,4 +26,20 @@ class ReminderScheduler @Inject constructor() {
     fun cancelReminder(context: Context) {
         WorkManager.getInstance(context).cancelUniqueWork(ReminderWorker.WORK_NAME)
     }
+
+    fun scheduleAutoBackup(context: Context, intervalDays: Long = 7) {
+        val workRequest = PeriodicWorkRequestBuilder<AutoBackupWorker>(
+            intervalDays, TimeUnit.DAYS,
+        ).build()
+
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "auto_backup",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            workRequest,
+        )
+    }
+
+    fun cancelAutoBackup(context: Context) {
+        WorkManager.getInstance(context).cancelUniqueWork("auto_backup")
+    }
 }

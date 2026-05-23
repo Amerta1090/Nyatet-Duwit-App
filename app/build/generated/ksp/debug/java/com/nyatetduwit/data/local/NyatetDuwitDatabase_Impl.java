@@ -23,11 +23,16 @@ import com.nyatetduwit.data.local.dao.TemplateDao;
 import com.nyatetduwit.data.local.dao.TemplateDao_Impl;
 import com.nyatetduwit.data.local.dao.TransactionDao;
 import com.nyatetduwit.data.local.dao.TransactionDao_Impl;
+import com.nyatetduwit.data.local.dao.TransactionSplitDao;
+import com.nyatetduwit.data.local.dao.TransactionSplitDao_Impl;
+import com.nyatetduwit.data.local.dao.TransactionTagDao;
+import com.nyatetduwit.data.local.dao.TransactionTagDao_Impl;
 import java.lang.Class;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.SuppressWarnings;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -50,20 +55,29 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
 
   private volatile TemplateDao _templateDao;
 
+  private volatile TransactionSplitDao _transactionSplitDao;
+
+  private volatile TransactionTagDao _transactionTagDao;
+
   @Override
   @NonNull
   protected SupportSQLiteOpenHelper createOpenHelper(@NonNull final DatabaseConfiguration config) {
-    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(4) {
+    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(5) {
       @Override
       public void createAllTables(@NonNull final SupportSQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS `accounts` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `balance` INTEGER NOT NULL, `icon` TEXT NOT NULL, `color` TEXT NOT NULL, `is_hidden` INTEGER NOT NULL, `order_index` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS `categories` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `icon` TEXT NOT NULL, `color` TEXT NOT NULL, `parent_id` TEXT, `is_default` INTEGER NOT NULL, `order_index` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, PRIMARY KEY(`id`))");
-        db.execSQL("CREATE TABLE IF NOT EXISTS `transactions` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `amount` INTEGER NOT NULL, `account_id` TEXT NOT NULL, `category_id` TEXT, `to_account_id` TEXT, `notes` TEXT, `date_time` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `is_deleted` INTEGER NOT NULL, `deleted_at` INTEGER, PRIMARY KEY(`id`))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `transactions` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `amount` INTEGER NOT NULL, `account_id` TEXT NOT NULL, `category_id` TEXT, `to_account_id` TEXT, `notes` TEXT, `date_time` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `is_deleted` INTEGER NOT NULL, `deleted_at` INTEGER, `attachment_path` TEXT, PRIMARY KEY(`id`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS `budgets` (`id` TEXT NOT NULL, `category_id` TEXT, `amount` INTEGER NOT NULL, `period` TEXT NOT NULL, `start_date` INTEGER NOT NULL, `end_date` INTEGER NOT NULL, `is_active` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS `recurring_transactions` (`id` TEXT NOT NULL, `template_transaction_id` TEXT NOT NULL, `frequency` TEXT NOT NULL, `start_date` INTEGER NOT NULL, `end_date` INTEGER, `next_due` INTEGER NOT NULL, `is_active` INTEGER NOT NULL, `last_processed` INTEGER, `skipped_dates` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS `templates` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `amount` INTEGER NOT NULL, `category_id` TEXT, `account_id` TEXT, `notes` TEXT, `usage_count` INTEGER NOT NULL, `last_used` INTEGER, `is_pinned` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, PRIMARY KEY(`id`))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `transaction_splits` (`id` TEXT NOT NULL, `transaction_id` TEXT NOT NULL, `category_id` TEXT NOT NULL, `amount` INTEGER NOT NULL, `notes` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_transaction_splits_transaction_id` ON `transaction_splits` (`transaction_id`)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `transaction_tags` (`id` TEXT NOT NULL, `transaction_id` TEXT NOT NULL, `tag_name` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_transaction_tags_transaction_id` ON `transaction_tags` (`transaction_id`)");
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_transaction_tags_tag_name` ON `transaction_tags` (`tag_name`)");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '701dbabad926016a4c700b51ee16b861')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '156c739fa1100c345edc2fd3ed573b25')");
       }
 
       @Override
@@ -74,6 +88,8 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
         db.execSQL("DROP TABLE IF EXISTS `budgets`");
         db.execSQL("DROP TABLE IF EXISTS `recurring_transactions`");
         db.execSQL("DROP TABLE IF EXISTS `templates`");
+        db.execSQL("DROP TABLE IF EXISTS `transaction_splits`");
+        db.execSQL("DROP TABLE IF EXISTS `transaction_tags`");
         final List<? extends RoomDatabase.Callback> _callbacks = mCallbacks;
         if (_callbacks != null) {
           for (RoomDatabase.Callback _callback : _callbacks) {
@@ -95,6 +111,7 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
       @Override
       public void onOpen(@NonNull final SupportSQLiteDatabase db) {
         mDatabase = db;
+        db.execSQL("PRAGMA foreign_keys = ON");
         internalInitInvalidationTracker(db);
         final List<? extends RoomDatabase.Callback> _callbacks = mCallbacks;
         if (_callbacks != null) {
@@ -156,7 +173,7 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
                   + " Expected:\n" + _infoCategories + "\n"
                   + " Found:\n" + _existingCategories);
         }
-        final HashMap<String, TableInfo.Column> _columnsTransactions = new HashMap<String, TableInfo.Column>(12);
+        final HashMap<String, TableInfo.Column> _columnsTransactions = new HashMap<String, TableInfo.Column>(13);
         _columnsTransactions.put("id", new TableInfo.Column("id", "TEXT", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsTransactions.put("type", new TableInfo.Column("type", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsTransactions.put("amount", new TableInfo.Column("amount", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -169,6 +186,7 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
         _columnsTransactions.put("updated_at", new TableInfo.Column("updated_at", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsTransactions.put("is_deleted", new TableInfo.Column("is_deleted", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsTransactions.put("deleted_at", new TableInfo.Column("deleted_at", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTransactions.put("attachment_path", new TableInfo.Column("attachment_path", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysTransactions = new HashSet<TableInfo.ForeignKey>(0);
         final HashSet<TableInfo.Index> _indicesTransactions = new HashSet<TableInfo.Index>(0);
         final TableInfo _infoTransactions = new TableInfo("transactions", _columnsTransactions, _foreignKeysTransactions, _indicesTransactions);
@@ -239,9 +257,42 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
                   + " Expected:\n" + _infoTemplates + "\n"
                   + " Found:\n" + _existingTemplates);
         }
+        final HashMap<String, TableInfo.Column> _columnsTransactionSplits = new HashMap<String, TableInfo.Column>(5);
+        _columnsTransactionSplits.put("id", new TableInfo.Column("id", "TEXT", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTransactionSplits.put("transaction_id", new TableInfo.Column("transaction_id", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTransactionSplits.put("category_id", new TableInfo.Column("category_id", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTransactionSplits.put("amount", new TableInfo.Column("amount", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTransactionSplits.put("notes", new TableInfo.Column("notes", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        final HashSet<TableInfo.ForeignKey> _foreignKeysTransactionSplits = new HashSet<TableInfo.ForeignKey>(1);
+        _foreignKeysTransactionSplits.add(new TableInfo.ForeignKey("transactions", "CASCADE", "NO ACTION", Arrays.asList("transaction_id"), Arrays.asList("id")));
+        final HashSet<TableInfo.Index> _indicesTransactionSplits = new HashSet<TableInfo.Index>(1);
+        _indicesTransactionSplits.add(new TableInfo.Index("index_transaction_splits_transaction_id", false, Arrays.asList("transaction_id"), Arrays.asList("ASC")));
+        final TableInfo _infoTransactionSplits = new TableInfo("transaction_splits", _columnsTransactionSplits, _foreignKeysTransactionSplits, _indicesTransactionSplits);
+        final TableInfo _existingTransactionSplits = TableInfo.read(db, "transaction_splits");
+        if (!_infoTransactionSplits.equals(_existingTransactionSplits)) {
+          return new RoomOpenHelper.ValidationResult(false, "transaction_splits(com.nyatetduwit.data.local.entity.TransactionSplitEntity).\n"
+                  + " Expected:\n" + _infoTransactionSplits + "\n"
+                  + " Found:\n" + _existingTransactionSplits);
+        }
+        final HashMap<String, TableInfo.Column> _columnsTransactionTags = new HashMap<String, TableInfo.Column>(3);
+        _columnsTransactionTags.put("id", new TableInfo.Column("id", "TEXT", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTransactionTags.put("transaction_id", new TableInfo.Column("transaction_id", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTransactionTags.put("tag_name", new TableInfo.Column("tag_name", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        final HashSet<TableInfo.ForeignKey> _foreignKeysTransactionTags = new HashSet<TableInfo.ForeignKey>(1);
+        _foreignKeysTransactionTags.add(new TableInfo.ForeignKey("transactions", "CASCADE", "NO ACTION", Arrays.asList("transaction_id"), Arrays.asList("id")));
+        final HashSet<TableInfo.Index> _indicesTransactionTags = new HashSet<TableInfo.Index>(2);
+        _indicesTransactionTags.add(new TableInfo.Index("index_transaction_tags_transaction_id", false, Arrays.asList("transaction_id"), Arrays.asList("ASC")));
+        _indicesTransactionTags.add(new TableInfo.Index("index_transaction_tags_tag_name", false, Arrays.asList("tag_name"), Arrays.asList("ASC")));
+        final TableInfo _infoTransactionTags = new TableInfo("transaction_tags", _columnsTransactionTags, _foreignKeysTransactionTags, _indicesTransactionTags);
+        final TableInfo _existingTransactionTags = TableInfo.read(db, "transaction_tags");
+        if (!_infoTransactionTags.equals(_existingTransactionTags)) {
+          return new RoomOpenHelper.ValidationResult(false, "transaction_tags(com.nyatetduwit.data.local.entity.TransactionTagEntity).\n"
+                  + " Expected:\n" + _infoTransactionTags + "\n"
+                  + " Found:\n" + _existingTransactionTags);
+        }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "701dbabad926016a4c700b51ee16b861", "b2c6b5f6afc2ea5422c2f9416f338ae8");
+    }, "156c739fa1100c345edc2fd3ed573b25", "b0f7c47049fa083272257986eeff0b4b");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;
@@ -252,24 +303,36 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
   protected InvalidationTracker createInvalidationTracker() {
     final HashMap<String, String> _shadowTablesMap = new HashMap<String, String>(0);
     final HashMap<String, Set<String>> _viewTables = new HashMap<String, Set<String>>(0);
-    return new InvalidationTracker(this, _shadowTablesMap, _viewTables, "accounts","categories","transactions","budgets","recurring_transactions","templates");
+    return new InvalidationTracker(this, _shadowTablesMap, _viewTables, "accounts","categories","transactions","budgets","recurring_transactions","templates","transaction_splits","transaction_tags");
   }
 
   @Override
   public void clearAllTables() {
     super.assertNotMainThread();
     final SupportSQLiteDatabase _db = super.getOpenHelper().getWritableDatabase();
+    final boolean _supportsDeferForeignKeys = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP;
     try {
+      if (!_supportsDeferForeignKeys) {
+        _db.execSQL("PRAGMA foreign_keys = FALSE");
+      }
       super.beginTransaction();
+      if (_supportsDeferForeignKeys) {
+        _db.execSQL("PRAGMA defer_foreign_keys = TRUE");
+      }
       _db.execSQL("DELETE FROM `accounts`");
       _db.execSQL("DELETE FROM `categories`");
       _db.execSQL("DELETE FROM `transactions`");
       _db.execSQL("DELETE FROM `budgets`");
       _db.execSQL("DELETE FROM `recurring_transactions`");
       _db.execSQL("DELETE FROM `templates`");
+      _db.execSQL("DELETE FROM `transaction_splits`");
+      _db.execSQL("DELETE FROM `transaction_tags`");
       super.setTransactionSuccessful();
     } finally {
       super.endTransaction();
+      if (!_supportsDeferForeignKeys) {
+        _db.execSQL("PRAGMA foreign_keys = TRUE");
+      }
       _db.query("PRAGMA wal_checkpoint(FULL)").close();
       if (!_db.inTransaction()) {
         _db.execSQL("VACUUM");
@@ -287,6 +350,8 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
     _typeConvertersMap.put(BudgetDao.class, BudgetDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(RecurringTransactionDao.class, RecurringTransactionDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(TemplateDao.class, TemplateDao_Impl.getRequiredConverters());
+    _typeConvertersMap.put(TransactionSplitDao.class, TransactionSplitDao_Impl.getRequiredConverters());
+    _typeConvertersMap.put(TransactionTagDao.class, TransactionTagDao_Impl.getRequiredConverters());
     return _typeConvertersMap;
   }
 
@@ -385,6 +450,34 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
           _templateDao = new TemplateDao_Impl(this);
         }
         return _templateDao;
+      }
+    }
+  }
+
+  @Override
+  public TransactionSplitDao transactionSplitDao() {
+    if (_transactionSplitDao != null) {
+      return _transactionSplitDao;
+    } else {
+      synchronized(this) {
+        if(_transactionSplitDao == null) {
+          _transactionSplitDao = new TransactionSplitDao_Impl(this);
+        }
+        return _transactionSplitDao;
+      }
+    }
+  }
+
+  @Override
+  public TransactionTagDao transactionTagDao() {
+    if (_transactionTagDao != null) {
+      return _transactionTagDao;
+    } else {
+      synchronized(this) {
+        if(_transactionTagDao == null) {
+          _transactionTagDao = new TransactionTagDao_Impl(this);
+        }
+        return _transactionTagDao;
       }
     }
   }

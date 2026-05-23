@@ -23,4 +23,12 @@ interface SettingsRepository {
     suspend fun setReminderFrequency(frequency: Int)
     suspend fun setLastTransactionDate(timestamp: Long)
     suspend fun setOnboardingCompleted(completed: Boolean)
+    fun getStreak(): kotlinx.coroutines.flow.Flow<Int>
+    suspend fun setStreak(streak: Int)
+    fun getLastActiveDate(): kotlinx.coroutines.flow.Flow<Long>
+    suspend fun setLastActiveDate(date: Long)
+    fun getAutoBackupEnabled(): kotlinx.coroutines.flow.Flow<Boolean>
+    suspend fun setAutoBackupEnabled(enabled: Boolean)
+    fun getLastBackupDate(): kotlinx.coroutines.flow.Flow<Long>
+    suspend fun setLastBackupDate(date: Long)
 }

@@ -23,6 +23,7 @@ import hilt_aggregated_deps._com_nyatetduwit_NyatetDuwitApp_GeneratedInjector;
 import hilt_aggregated_deps._com_nyatetduwit_core_di_DataStoreModule;
 import hilt_aggregated_deps._com_nyatetduwit_core_di_DatabaseModule;
 import hilt_aggregated_deps._com_nyatetduwit_core_di_RepositoryModule;
+import hilt_aggregated_deps._com_nyatetduwit_core_worker_AutoBackupWorker_HiltModule;
 import hilt_aggregated_deps._com_nyatetduwit_core_worker_RecurringTransactionWorker_HiltModule;
 import hilt_aggregated_deps._com_nyatetduwit_core_worker_ReminderWorker_HiltModule;
 import hilt_aggregated_deps._com_nyatetduwit_presentation_account_AccountViewModel_HiltModules_BindsModule;
@@ -95,6 +96,7 @@ import hilt_aggregated_deps._dagger_hilt_android_internal_modules_HiltWrapper_Ac
         _com_nyatetduwit_core_di_DataStoreModule.class,
         _com_nyatetduwit_core_di_DatabaseModule.class,
         _com_nyatetduwit_core_di_RepositoryModule.class,
+        _com_nyatetduwit_core_worker_AutoBackupWorker_HiltModule.class,
         _com_nyatetduwit_core_worker_RecurringTransactionWorker_HiltModule.class,
         _com_nyatetduwit_core_worker_ReminderWorker_HiltModule.class,
         _com_nyatetduwit_presentation_account_AccountViewModel_HiltModules_BindsModule.class,

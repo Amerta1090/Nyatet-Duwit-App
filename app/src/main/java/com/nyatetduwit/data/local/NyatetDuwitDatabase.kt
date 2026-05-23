@@ -8,12 +8,16 @@ import com.nyatetduwit.data.local.dao.CategoryDao
 import com.nyatetduwit.data.local.dao.RecurringTransactionDao
 import com.nyatetduwit.data.local.dao.TemplateDao
 import com.nyatetduwit.data.local.dao.TransactionDao
+import com.nyatetduwit.data.local.dao.TransactionSplitDao
+import com.nyatetduwit.data.local.dao.TransactionTagDao
 import com.nyatetduwit.data.local.entity.AccountEntity
 import com.nyatetduwit.data.local.entity.BudgetEntity
 import com.nyatetduwit.data.local.entity.CategoryEntity
 import com.nyatetduwit.data.local.entity.RecurringTransactionEntity
 import com.nyatetduwit.data.local.entity.TemplateEntity
 import com.nyatetduwit.data.local.entity.TransactionEntity
+import com.nyatetduwit.data.local.entity.TransactionSplitEntity
+import com.nyatetduwit.data.local.entity.TransactionTagEntity
 
 @Database(
     entities = [
@@ -23,8 +27,10 @@ import com.nyatetduwit.data.local.entity.TransactionEntity
         BudgetEntity::class,
         RecurringTransactionEntity::class,
         TemplateEntity::class,
+        TransactionSplitEntity::class,
+        TransactionTagEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true
 )
 abstract class NyatetDuwitDatabase : RoomDatabase() {
@@ -34,4 +40,6 @@ abstract class NyatetDuwitDatabase : RoomDatabase() {
     abstract fun budgetDao(): BudgetDao
     abstract fun recurringTransactionDao(): RecurringTransactionDao
     abstract fun templateDao(): TemplateDao
+    abstract fun transactionSplitDao(): TransactionSplitDao
+    abstract fun transactionTagDao(): TransactionTagDao
 }

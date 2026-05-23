@@ -6,6 +6,8 @@ import com.nyatetduwit.data.local.dao.CategoryDao;
 import com.nyatetduwit.data.local.dao.RecurringTransactionDao;
 import com.nyatetduwit.data.local.dao.TemplateDao;
 import com.nyatetduwit.data.local.dao.TransactionDao;
+import com.nyatetduwit.data.local.dao.TransactionSplitDao;
+import com.nyatetduwit.data.local.dao.TransactionTagDao;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
 import dagger.internal.QualifierMetadata;
@@ -41,35 +43,46 @@ public final class ExportManager_Factory implements Factory<ExportManager> {
 
   private final Provider<TemplateDao> templateDaoProvider;
 
+  private final Provider<TransactionSplitDao> transactionSplitDaoProvider;
+
+  private final Provider<TransactionTagDao> transactionTagDaoProvider;
+
   public ExportManager_Factory(Provider<TransactionDao> transactionDaoProvider,
       Provider<AccountDao> accountDaoProvider, Provider<CategoryDao> categoryDaoProvider,
       Provider<BudgetDao> budgetDaoProvider,
       Provider<RecurringTransactionDao> recurringTransactionDaoProvider,
-      Provider<TemplateDao> templateDaoProvider) {
+      Provider<TemplateDao> templateDaoProvider,
+      Provider<TransactionSplitDao> transactionSplitDaoProvider,
+      Provider<TransactionTagDao> transactionTagDaoProvider) {
     this.transactionDaoProvider = transactionDaoProvider;
     this.accountDaoProvider = accountDaoProvider;
     this.categoryDaoProvider = categoryDaoProvider;
     this.budgetDaoProvider = budgetDaoProvider;
     this.recurringTransactionDaoProvider = recurringTransactionDaoProvider;
     this.templateDaoProvider = templateDaoProvider;
+    this.transactionSplitDaoProvider = transactionSplitDaoProvider;
+    this.transactionTagDaoProvider = transactionTagDaoProvider;
   }
 
   @Override
   public ExportManager get() {
-    return newInstance(transactionDaoProvider.get(), accountDaoProvider.get(), categoryDaoProvider.get(), budgetDaoProvider.get(), recurringTransactionDaoProvider.get(), templateDaoProvider.get());
+    return newInstance(transactionDaoProvider.get(), accountDaoProvider.get(), categoryDaoProvider.get(), budgetDaoProvider.get(), recurringTransactionDaoProvider.get(), templateDaoProvider.get(), transactionSplitDaoProvider.get(), transactionTagDaoProvider.get());
   }
 
   public static ExportManager_Factory create(Provider<TransactionDao> transactionDaoProvider,
       Provider<AccountDao> accountDaoProvider, Provider<CategoryDao> categoryDaoProvider,
       Provider<BudgetDao> budgetDaoProvider,
       Provider<RecurringTransactionDao> recurringTransactionDaoProvider,
-      Provider<TemplateDao> templateDaoProvider) {
-    return new ExportManager_Factory(transactionDaoProvider, accountDaoProvider, categoryDaoProvider, budgetDaoProvider, recurringTransactionDaoProvider, templateDaoProvider);
+      Provider<TemplateDao> templateDaoProvider,
+      Provider<TransactionSplitDao> transactionSplitDaoProvider,
+      Provider<TransactionTagDao> transactionTagDaoProvider) {
+    return new ExportManager_Factory(transactionDaoProvider, accountDaoProvider, categoryDaoProvider, budgetDaoProvider, recurringTransactionDaoProvider, templateDaoProvider, transactionSplitDaoProvider, transactionTagDaoProvider);
   }
 
   public static ExportManager newInstance(TransactionDao transactionDao, AccountDao accountDao,
       CategoryDao categoryDao, BudgetDao budgetDao, RecurringTransactionDao recurringTransactionDao,
-      TemplateDao templateDao) {
-    return new ExportManager(transactionDao, accountDao, categoryDao, budgetDao, recurringTransactionDao, templateDao);
+      TemplateDao templateDao, TransactionSplitDao transactionSplitDao,
+      TransactionTagDao transactionTagDao) {
+    return new ExportManager(transactionDao, accountDao, categoryDao, budgetDao, recurringTransactionDao, templateDao, transactionSplitDao, transactionTagDao);
   }
 }

@@ -56,7 +56,7 @@ public final class TransactionDao_Impl implements TransactionDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR REPLACE INTO `transactions` (`id`,`type`,`amount`,`account_id`,`category_id`,`to_account_id`,`notes`,`date_time`,`created_at`,`updated_at`,`is_deleted`,`deleted_at`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+        return "INSERT OR REPLACE INTO `transactions` (`id`,`type`,`amount`,`account_id`,`category_id`,`to_account_id`,`notes`,`date_time`,`created_at`,`updated_at`,`is_deleted`,`deleted_at`,`attachment_path`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -90,6 +90,11 @@ public final class TransactionDao_Impl implements TransactionDao {
           statement.bindNull(12);
         } else {
           statement.bindLong(12, entity.getDeletedAt());
+        }
+        if (entity.getAttachmentPath() == null) {
+          statement.bindNull(13);
+        } else {
+          statement.bindString(13, entity.getAttachmentPath());
         }
       }
     };
@@ -110,7 +115,7 @@ public final class TransactionDao_Impl implements TransactionDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "UPDATE OR ABORT `transactions` SET `id` = ?,`type` = ?,`amount` = ?,`account_id` = ?,`category_id` = ?,`to_account_id` = ?,`notes` = ?,`date_time` = ?,`created_at` = ?,`updated_at` = ?,`is_deleted` = ?,`deleted_at` = ? WHERE `id` = ?";
+        return "UPDATE OR ABORT `transactions` SET `id` = ?,`type` = ?,`amount` = ?,`account_id` = ?,`category_id` = ?,`to_account_id` = ?,`notes` = ?,`date_time` = ?,`created_at` = ?,`updated_at` = ?,`is_deleted` = ?,`deleted_at` = ?,`attachment_path` = ? WHERE `id` = ?";
       }
 
       @Override
@@ -145,7 +150,12 @@ public final class TransactionDao_Impl implements TransactionDao {
         } else {
           statement.bindLong(12, entity.getDeletedAt());
         }
-        statement.bindString(13, entity.getId());
+        if (entity.getAttachmentPath() == null) {
+          statement.bindNull(13);
+        } else {
+          statement.bindString(13, entity.getAttachmentPath());
+        }
+        statement.bindString(14, entity.getId());
       }
     };
     this.__preparedStmtOfSoftDelete = new SharedSQLiteStatement(__db) {
@@ -397,6 +407,7 @@ public final class TransactionDao_Impl implements TransactionDao {
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final int _cursorIndexOfIsDeleted = CursorUtil.getColumnIndexOrThrow(_cursor, "is_deleted");
           final int _cursorIndexOfDeletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "deleted_at");
+          final int _cursorIndexOfAttachmentPath = CursorUtil.getColumnIndexOrThrow(_cursor, "attachment_path");
           final List<TransactionEntity> _result = new ArrayList<TransactionEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final TransactionEntity _item;
@@ -442,7 +453,13 @@ public final class TransactionDao_Impl implements TransactionDao {
             } else {
               _tmpDeletedAt = _cursor.getLong(_cursorIndexOfDeletedAt);
             }
-            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt);
+            final String _tmpAttachmentPath;
+            if (_cursor.isNull(_cursorIndexOfAttachmentPath)) {
+              _tmpAttachmentPath = null;
+            } else {
+              _tmpAttachmentPath = _cursor.getString(_cursorIndexOfAttachmentPath);
+            }
+            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt,_tmpAttachmentPath);
             _result.add(_item);
           }
           return _result;
@@ -487,6 +504,7 @@ public final class TransactionDao_Impl implements TransactionDao {
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final int _cursorIndexOfIsDeleted = CursorUtil.getColumnIndexOrThrow(_cursor, "is_deleted");
           final int _cursorIndexOfDeletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "deleted_at");
+          final int _cursorIndexOfAttachmentPath = CursorUtil.getColumnIndexOrThrow(_cursor, "attachment_path");
           final TransactionEntity _result;
           if (_cursor.moveToFirst()) {
             final String _tmpId;
@@ -531,7 +549,13 @@ public final class TransactionDao_Impl implements TransactionDao {
             } else {
               _tmpDeletedAt = _cursor.getLong(_cursorIndexOfDeletedAt);
             }
-            _result = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt);
+            final String _tmpAttachmentPath;
+            if (_cursor.isNull(_cursorIndexOfAttachmentPath)) {
+              _tmpAttachmentPath = null;
+            } else {
+              _tmpAttachmentPath = _cursor.getString(_cursorIndexOfAttachmentPath);
+            }
+            _result = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt,_tmpAttachmentPath);
           } else {
             _result = null;
           }
@@ -572,6 +596,7 @@ public final class TransactionDao_Impl implements TransactionDao {
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final int _cursorIndexOfIsDeleted = CursorUtil.getColumnIndexOrThrow(_cursor, "is_deleted");
           final int _cursorIndexOfDeletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "deleted_at");
+          final int _cursorIndexOfAttachmentPath = CursorUtil.getColumnIndexOrThrow(_cursor, "attachment_path");
           final List<TransactionEntity> _result = new ArrayList<TransactionEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final TransactionEntity _item;
@@ -617,7 +642,13 @@ public final class TransactionDao_Impl implements TransactionDao {
             } else {
               _tmpDeletedAt = _cursor.getLong(_cursorIndexOfDeletedAt);
             }
-            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt);
+            final String _tmpAttachmentPath;
+            if (_cursor.isNull(_cursorIndexOfAttachmentPath)) {
+              _tmpAttachmentPath = null;
+            } else {
+              _tmpAttachmentPath = _cursor.getString(_cursorIndexOfAttachmentPath);
+            }
+            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt,_tmpAttachmentPath);
             _result.add(_item);
           }
           return _result;
@@ -661,6 +692,7 @@ public final class TransactionDao_Impl implements TransactionDao {
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final int _cursorIndexOfIsDeleted = CursorUtil.getColumnIndexOrThrow(_cursor, "is_deleted");
           final int _cursorIndexOfDeletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "deleted_at");
+          final int _cursorIndexOfAttachmentPath = CursorUtil.getColumnIndexOrThrow(_cursor, "attachment_path");
           final List<TransactionEntity> _result = new ArrayList<TransactionEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final TransactionEntity _item;
@@ -706,7 +738,13 @@ public final class TransactionDao_Impl implements TransactionDao {
             } else {
               _tmpDeletedAt = _cursor.getLong(_cursorIndexOfDeletedAt);
             }
-            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt);
+            final String _tmpAttachmentPath;
+            if (_cursor.isNull(_cursorIndexOfAttachmentPath)) {
+              _tmpAttachmentPath = null;
+            } else {
+              _tmpAttachmentPath = _cursor.getString(_cursorIndexOfAttachmentPath);
+            }
+            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt,_tmpAttachmentPath);
             _result.add(_item);
           }
           return _result;
@@ -753,6 +791,7 @@ public final class TransactionDao_Impl implements TransactionDao {
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final int _cursorIndexOfIsDeleted = CursorUtil.getColumnIndexOrThrow(_cursor, "is_deleted");
           final int _cursorIndexOfDeletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "deleted_at");
+          final int _cursorIndexOfAttachmentPath = CursorUtil.getColumnIndexOrThrow(_cursor, "attachment_path");
           final List<TransactionEntity> _result = new ArrayList<TransactionEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final TransactionEntity _item;
@@ -798,7 +837,13 @@ public final class TransactionDao_Impl implements TransactionDao {
             } else {
               _tmpDeletedAt = _cursor.getLong(_cursorIndexOfDeletedAt);
             }
-            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt);
+            final String _tmpAttachmentPath;
+            if (_cursor.isNull(_cursorIndexOfAttachmentPath)) {
+              _tmpAttachmentPath = null;
+            } else {
+              _tmpAttachmentPath = _cursor.getString(_cursorIndexOfAttachmentPath);
+            }
+            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt,_tmpAttachmentPath);
             _result.add(_item);
           }
           return _result;
@@ -842,6 +887,7 @@ public final class TransactionDao_Impl implements TransactionDao {
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final int _cursorIndexOfIsDeleted = CursorUtil.getColumnIndexOrThrow(_cursor, "is_deleted");
           final int _cursorIndexOfDeletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "deleted_at");
+          final int _cursorIndexOfAttachmentPath = CursorUtil.getColumnIndexOrThrow(_cursor, "attachment_path");
           final List<TransactionEntity> _result = new ArrayList<TransactionEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final TransactionEntity _item;
@@ -887,7 +933,13 @@ public final class TransactionDao_Impl implements TransactionDao {
             } else {
               _tmpDeletedAt = _cursor.getLong(_cursorIndexOfDeletedAt);
             }
-            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt);
+            final String _tmpAttachmentPath;
+            if (_cursor.isNull(_cursorIndexOfAttachmentPath)) {
+              _tmpAttachmentPath = null;
+            } else {
+              _tmpAttachmentPath = _cursor.getString(_cursorIndexOfAttachmentPath);
+            }
+            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt,_tmpAttachmentPath);
             _result.add(_item);
           }
           return _result;
@@ -1050,6 +1102,7 @@ public final class TransactionDao_Impl implements TransactionDao {
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final int _cursorIndexOfIsDeleted = CursorUtil.getColumnIndexOrThrow(_cursor, "is_deleted");
           final int _cursorIndexOfDeletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "deleted_at");
+          final int _cursorIndexOfAttachmentPath = CursorUtil.getColumnIndexOrThrow(_cursor, "attachment_path");
           final List<TransactionEntity> _result = new ArrayList<TransactionEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final TransactionEntity _item;
@@ -1095,7 +1148,13 @@ public final class TransactionDao_Impl implements TransactionDao {
             } else {
               _tmpDeletedAt = _cursor.getLong(_cursorIndexOfDeletedAt);
             }
-            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt);
+            final String _tmpAttachmentPath;
+            if (_cursor.isNull(_cursorIndexOfAttachmentPath)) {
+              _tmpAttachmentPath = null;
+            } else {
+              _tmpAttachmentPath = _cursor.getString(_cursorIndexOfAttachmentPath);
+            }
+            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt,_tmpAttachmentPath);
             _result.add(_item);
           }
           return _result;
@@ -1278,6 +1337,7 @@ public final class TransactionDao_Impl implements TransactionDao {
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final int _cursorIndexOfIsDeleted = CursorUtil.getColumnIndexOrThrow(_cursor, "is_deleted");
           final int _cursorIndexOfDeletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "deleted_at");
+          final int _cursorIndexOfAttachmentPath = CursorUtil.getColumnIndexOrThrow(_cursor, "attachment_path");
           final List<TransactionEntity> _result = new ArrayList<TransactionEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final TransactionEntity _item;
@@ -1323,7 +1383,13 @@ public final class TransactionDao_Impl implements TransactionDao {
             } else {
               _tmpDeletedAt = _cursor.getLong(_cursorIndexOfDeletedAt);
             }
-            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt);
+            final String _tmpAttachmentPath;
+            if (_cursor.isNull(_cursorIndexOfAttachmentPath)) {
+              _tmpAttachmentPath = null;
+            } else {
+              _tmpAttachmentPath = _cursor.getString(_cursorIndexOfAttachmentPath);
+            }
+            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt,_tmpAttachmentPath);
             _result.add(_item);
           }
           return _result;
@@ -1431,6 +1497,7 @@ public final class TransactionDao_Impl implements TransactionDao {
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final int _cursorIndexOfIsDeleted = CursorUtil.getColumnIndexOrThrow(_cursor, "is_deleted");
           final int _cursorIndexOfDeletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "deleted_at");
+          final int _cursorIndexOfAttachmentPath = CursorUtil.getColumnIndexOrThrow(_cursor, "attachment_path");
           final List<TransactionEntity> _result = new ArrayList<TransactionEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final TransactionEntity _item;
@@ -1476,7 +1543,13 @@ public final class TransactionDao_Impl implements TransactionDao {
             } else {
               _tmpDeletedAt = _cursor.getLong(_cursorIndexOfDeletedAt);
             }
-            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt);
+            final String _tmpAttachmentPath;
+            if (_cursor.isNull(_cursorIndexOfAttachmentPath)) {
+              _tmpAttachmentPath = null;
+            } else {
+              _tmpAttachmentPath = _cursor.getString(_cursorIndexOfAttachmentPath);
+            }
+            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt,_tmpAttachmentPath);
             _result.add(_item);
           }
           return _result;
@@ -1617,6 +1690,7 @@ public final class TransactionDao_Impl implements TransactionDao {
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final int _cursorIndexOfIsDeleted = CursorUtil.getColumnIndexOrThrow(_cursor, "is_deleted");
           final int _cursorIndexOfDeletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "deleted_at");
+          final int _cursorIndexOfAttachmentPath = CursorUtil.getColumnIndexOrThrow(_cursor, "attachment_path");
           final List<TransactionEntity> _result = new ArrayList<TransactionEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final TransactionEntity _item;
@@ -1662,7 +1736,13 @@ public final class TransactionDao_Impl implements TransactionDao {
             } else {
               _tmpDeletedAt = _cursor.getLong(_cursorIndexOfDeletedAt);
             }
-            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt);
+            final String _tmpAttachmentPath;
+            if (_cursor.isNull(_cursorIndexOfAttachmentPath)) {
+              _tmpAttachmentPath = null;
+            } else {
+              _tmpAttachmentPath = _cursor.getString(_cursorIndexOfAttachmentPath);
+            }
+            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt,_tmpAttachmentPath);
             _result.add(_item);
           }
           return _result;
@@ -1760,6 +1840,7 @@ public final class TransactionDao_Impl implements TransactionDao {
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final int _cursorIndexOfIsDeleted = CursorUtil.getColumnIndexOrThrow(_cursor, "is_deleted");
           final int _cursorIndexOfDeletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "deleted_at");
+          final int _cursorIndexOfAttachmentPath = CursorUtil.getColumnIndexOrThrow(_cursor, "attachment_path");
           final TransactionEntity _result;
           if (_cursor.moveToFirst()) {
             final String _tmpId;
@@ -1804,7 +1885,13 @@ public final class TransactionDao_Impl implements TransactionDao {
             } else {
               _tmpDeletedAt = _cursor.getLong(_cursorIndexOfDeletedAt);
             }
-            _result = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt);
+            final String _tmpAttachmentPath;
+            if (_cursor.isNull(_cursorIndexOfAttachmentPath)) {
+              _tmpAttachmentPath = null;
+            } else {
+              _tmpAttachmentPath = _cursor.getString(_cursorIndexOfAttachmentPath);
+            }
+            _result = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt,_tmpAttachmentPath);
           } else {
             _result = null;
           }
@@ -1916,6 +2003,7 @@ public final class TransactionDao_Impl implements TransactionDao {
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final int _cursorIndexOfIsDeleted = CursorUtil.getColumnIndexOrThrow(_cursor, "is_deleted");
           final int _cursorIndexOfDeletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "deleted_at");
+          final int _cursorIndexOfAttachmentPath = CursorUtil.getColumnIndexOrThrow(_cursor, "attachment_path");
           final List<TransactionEntity> _result = new ArrayList<TransactionEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final TransactionEntity _item;
@@ -1961,7 +2049,13 @@ public final class TransactionDao_Impl implements TransactionDao {
             } else {
               _tmpDeletedAt = _cursor.getLong(_cursorIndexOfDeletedAt);
             }
-            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt);
+            final String _tmpAttachmentPath;
+            if (_cursor.isNull(_cursorIndexOfAttachmentPath)) {
+              _tmpAttachmentPath = null;
+            } else {
+              _tmpAttachmentPath = _cursor.getString(_cursorIndexOfAttachmentPath);
+            }
+            _item = new TransactionEntity(_tmpId,_tmpType,_tmpAmount,_tmpAccountId,_tmpCategoryId,_tmpToAccountId,_tmpNotes,_tmpDateTime,_tmpCreatedAt,_tmpUpdatedAt,_tmpIsDeleted,_tmpDeletedAt,_tmpAttachmentPath);
             _result.add(_item);
           }
           return _result;

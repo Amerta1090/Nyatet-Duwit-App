@@ -1,6 +1,10 @@
 package com.nyatetduwit.presentation.transaction
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -8,13 +12,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.nyatetduwit.core.theme.NyatetDuwitRadius
 import com.nyatetduwit.core.theme.NyatetDuwitSpacing
 import com.nyatetduwit.domain.model.Account
 import com.nyatetduwit.domain.model.Category
 import com.nyatetduwit.domain.model.Transaction
+import com.nyatetduwit.domain.model.TransactionSplit
+import com.nyatetduwit.domain.model.TransactionTag
 import com.nyatetduwit.domain.model.TransactionType
 import com.nyatetduwit.presentation.account.formatRupiah
 import java.text.SimpleDateFormat
@@ -79,6 +88,9 @@ fun TransactionDetailScreen(
                     account = uiState.account,
                     toAccount = uiState.toAccount,
                     category = uiState.category,
+                    splits = uiState.splits,
+                    tags = uiState.tags,
+                    splitCategories = uiState.splitCategories,
                     modifier = Modifier.fillMaxSize().padding(paddingValues),
                 )
             }
@@ -110,6 +122,9 @@ fun TransactionDetailContent(
     account: Account?,
     toAccount: Account?,
     category: Category?,
+    splits: List<TransactionSplit>,
+    tags: List<TransactionTag>,
+    splitCategories: Map<String, Category?>,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -161,7 +176,7 @@ fun TransactionDetailContent(
             )
         }
 
-        if (transaction.type != TransactionType.TRANSFER) {
+        if (transaction.type != TransactionType.TRANSFER && splits.isEmpty()) {
             DetailRow(
                 icon = Icons.Default.Category,
                 label = "Kategori",
@@ -169,11 +184,82 @@ fun TransactionDetailContent(
             )
         }
 
+        if (splits.isNotEmpty()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                ),
+            ) {
+                Column(modifier = Modifier.padding(NyatetDuwitSpacing.md)) {
+                    Text(
+                        text = "Split Transaksi",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Spacer(modifier = Modifier.height(NyatetDuwitSpacing.sm))
+                    splits.forEach { split ->
+                        val splitCat = splitCategories[split.categoryId]
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text(
+                                text = splitCat?.name ?: split.categoryId,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            Text(
+                                text = formatRupiah(split.amount),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        if (tags.isNotEmpty()) {
+            Column {
+                Text(
+                    text = "Tags",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xs))
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.xs)) {
+                    items(tags) { tag ->
+                        Surface(
+                            shape = RoundedCornerShape(NyatetDuwitRadius.full),
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                        ) {
+                            Text(
+                                text = "#${tag.tagName}",
+                                modifier = Modifier.padding(
+                                    horizontal = NyatetDuwitSpacing.sm,
+                                    vertical = NyatetDuwitSpacing.xxs,
+                                ),
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         transaction.notes?.let { notes ->
             DetailRow(
                 icon = Icons.Default.Description,
                 label = "Catatan",
                 value = notes,
+            )
+        }
+
+        transaction.attachmentPath?.let {
+            DetailRow(
+                icon = Icons.Default.AttachFile,
+                label = "Lampiran",
+                value = "File terlampir",
             )
         }
 

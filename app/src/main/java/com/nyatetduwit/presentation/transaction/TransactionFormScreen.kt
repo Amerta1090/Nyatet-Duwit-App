@@ -1,5 +1,8 @@
 package com.nyatetduwit.presentation.transaction
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -20,17 +23,24 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
+import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -54,8 +64,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -64,7 +76,6 @@ import com.nyatetduwit.core.theme.NyatetDuwitRadius
 import com.nyatetduwit.core.theme.NyatetDuwitSpacing
 import com.nyatetduwit.core.util.formatRupiah
 import com.nyatetduwit.domain.model.Account
-import com.nyatetduwit.domain.model.AccountType
 import com.nyatetduwit.domain.model.Category
 import com.nyatetduwit.domain.model.Template
 import com.nyatetduwit.domain.model.TransactionType
@@ -83,11 +94,20 @@ fun TransactionFormScreen(
     val uiState by viewModel.uiState.collectAsState()
     val formState = uiState.formState
     val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
 
     var showCategorySheet by remember { mutableStateOf(false) }
     var showAccountSheet by remember { mutableStateOf(false) }
+    var showToAccountSheet by remember { mutableStateOf(false) }
     var showNotesSheet by remember { mutableStateOf(false) }
     var notesDraft by remember { mutableStateOf("") }
+    var showSplitCategorySheet by remember { mutableStateOf<Int?>(null) }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { viewModel.setAttachmentPath(it.toString()) }
+    }
 
     LaunchedEffect(transactionId) {
         transactionId?.let { viewModel.loadTransactionForEdit(it) }
@@ -162,15 +182,120 @@ fun TransactionFormScreen(
 
             Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xl))
 
-            CustomNumpad(
-                onNumberClick = { viewModel.appendToAmount(it) },
-                onBackspaceClick = { viewModel.backspaceAmount() },
-                onPresetClick = { viewModel.setAmount(it) },
-                currentAmount = formState.amount,
-                modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.sm),
+            if (formState.type != TransactionType.TRANSFER) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = NyatetDuwitSpacing.lg),
+                    horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
+                ) {
+                    AssistChip(
+                        onClick = { viewModel.toggleSplit() },
+                        label = { Text(if (formState.enableSplit) "Split Aktif" else "Split") },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.AccountTree,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        },
+                    )
+                    if (formState.enableSplit) {
+                        AssistChip(
+                            onClick = { viewModel.addSplit() },
+                            label = { Text("+ Tambah Split") },
+                        )
+                    }
+                    if (formState.attachmentPath != null) {
+                        AssistChip(
+                            onClick = { viewModel.setAttachmentPath(null) },
+                            label = { Text("Ada Lampiran") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.AttachFile,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                            },
+                        )
+                    } else {
+                        AssistChip(
+                            onClick = { imagePickerLauncher.launch("image/*") },
+                            label = { Text("Lampiran") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.AttachFile,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                            },
+                        )
+                    }
+                }
+            }
+
+            if (formState.enableSplit && formState.splits.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.md))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = NyatetDuwitSpacing.lg),
+                    verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
+                ) {
+                    val splitTotal = formState.splits.sumOf { it.amount }
+                    Text(
+                        text = "Split: ${formatRupiah(splitTotal)} / ${formatRupiah(formState.amount)}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (splitTotal != formState.amount) NyatetDuwitColor.red500
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    formState.splits.forEachIndexed { index, split ->
+                        SplitRow(
+                            split = split,
+                            categories = uiState.categories,
+                            onCategoryClick = { showSplitCategorySheet = index },
+                            onAmountChange = { newAmount ->
+                                viewModel.updateSplit(index, split.copy(amount = newAmount))
+                            },
+                            onRemove = { viewModel.removeSplit(index) },
+                            canRemove = formState.splits.size > 1,
+                        )
+                    }
+                }
+            }
+
+            if (!formState.enableSplit || formState.type == TransactionType.TRANSFER) {
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.lg))
+                CustomNumpad(
+                    onNumberClick = { viewModel.appendToAmount(it) },
+                    onBackspaceClick = { viewModel.backspaceAmount() },
+                    onPresetClick = { viewModel.setAmount(it) },
+                    currentAmount = formState.amount,
+                    modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.sm),
+                )
+            } else {
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.lg))
+                CustomNumpad(
+                    onNumberClick = { viewModel.appendToAmount(it) },
+                    onBackspaceClick = { viewModel.backspaceAmount() },
+                    onPresetClick = { viewModel.setAmount(it) },
+                    currentAmount = formState.amount,
+                    modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.sm),
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(0.5f))
+
+            TagInputSection(
+                tags = formState.tags,
+                tagInput = formState.tagInput,
+                onTagInputChange = { viewModel.setTagInput(it) },
+                onAddTag = { viewModel.addTag(it) },
+                onRemoveTag = { viewModel.removeTag(it) },
+                modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.lg),
             )
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(0.5f))
 
             BottomActionBar(
                 amount = formState.amount,
@@ -182,6 +307,7 @@ fun TransactionFormScreen(
                 onSave = { viewModel.saveTransaction(transactionId) },
                 onCategoryClick = { showCategorySheet = true },
                 onAccountClick = { showAccountSheet = true },
+                onToAccountClick = if (formState.type == TransactionType.TRANSFER) {{ showToAccountSheet = true }} else null,
                 onNotesClick = {
                     notesDraft = formState.notes ?: ""
                     showNotesSheet = true
@@ -213,52 +339,14 @@ fun TransactionFormScreen(
                     verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.xs),
                 ) {
                     items(uiState.categories) { category ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(NyatetDuwitRadius.md))
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = ripple(),
-                                ) {
-                                    viewModel.setCategoryId(category.id)
-                                    showCategorySheet = false
-                                }
-                                .padding(NyatetDuwitSpacing.md),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            val catColor = runCatching {
-                                Color(category.color.substring(1).toLong(16) or 0xFF000000L)
-                            }.getOrElse { MaterialTheme.colorScheme.primary }
-                            Surface(
-                                modifier = Modifier.size(36.dp),
-                                shape = MaterialTheme.shapes.small,
-                                color = catColor.copy(alpha = 0.15f),
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = getCategoryIcon(category.icon),
-                                        contentDescription = null,
-                                        tint = catColor,
-                                        modifier = Modifier.size(20.dp),
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.width(NyatetDuwitSpacing.md))
-                            Text(
-                                text = category.name,
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.weight(1f),
-                            )
-                            if (category.id == formState.categoryId) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp),
-                                )
-                            }
-                        }
+                        CategoryPickerItem(
+                            category = category,
+                            isSelected = category.id == formState.categoryId,
+                            onClick = {
+                                viewModel.setCategoryId(category.id)
+                                showCategorySheet = false
+                            },
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(NyatetDuwitSpacing.lg))
@@ -288,56 +376,93 @@ fun TransactionFormScreen(
                     verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.xs),
                 ) {
                     items(uiState.accounts) { account ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(NyatetDuwitRadius.md))
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = ripple(),
-                                ) {
-                                    viewModel.setAccountId(account.id)
-                                    showAccountSheet = false
+                        AccountPickerItem(
+                            account = account,
+                            isSelected = account.id == formState.accountId,
+                            onClick = {
+                                viewModel.setAccountId(account.id)
+                                showAccountSheet = false
+                            },
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.lg))
+            }
+        }
+    }
+
+    if (showToAccountSheet && formState.type == TransactionType.TRANSFER) {
+        val sheetState = rememberModalBottomSheetState()
+        ModalBottomSheet(
+            onDismissRequest = { showToAccountSheet = false },
+            sheetState = sheetState,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(NyatetDuwitSpacing.lg),
+            ) {
+                Text(
+                    text = "Pilih Akun Tujuan",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.md))
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 400.dp),
+                    verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.xs),
+                ) {
+                    items(uiState.accounts.filter { it.id != formState.accountId }) { account ->
+                        AccountPickerItem(
+                            account = account,
+                            isSelected = account.id == formState.toAccountId,
+                            onClick = {
+                                viewModel.setToAccountId(account.id)
+                                showToAccountSheet = false
+                            },
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.lg))
+            }
+        }
+    }
+
+    if (showSplitCategorySheet != null) {
+        val splitIndex = showSplitCategorySheet!!
+        val sheetState = rememberModalBottomSheetState()
+        ModalBottomSheet(
+            onDismissRequest = { showSplitCategorySheet = null },
+            sheetState = sheetState,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(NyatetDuwitSpacing.lg),
+            ) {
+                Text(
+                    text = "Pilih Kategori Split",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.md))
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 400.dp),
+                    verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.xs),
+                ) {
+                    items(uiState.categories) { category ->
+                        val currentSplit = formState.splits.getOrNull(splitIndex)
+                        CategoryPickerItem(
+                            category = category,
+                            isSelected = category.id == currentSplit?.categoryId,
+                            onClick = {
+                                val current = formState.splits.getOrNull(splitIndex)
+                                if (current != null) {
+                                    viewModel.updateSplit(splitIndex, current.copy(categoryId = category.id))
                                 }
-                                .padding(NyatetDuwitSpacing.md),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            val accColor = runCatching {
-                                Color(account.color.substring(1).toLong(16) or 0xFF000000L)
-                            }.getOrElse { MaterialTheme.colorScheme.primary }
-                            Icon(
-                                imageVector = getAccountTypeIcon(account.type),
-                                contentDescription = null,
-                                tint = accColor,
-                                modifier = Modifier.size(24.dp),
-                            )
-                            Spacer(modifier = Modifier.width(NyatetDuwitSpacing.md))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = account.name,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                )
-                                Text(
-                                    text = getAccountTypeLabel(account.type),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                            Text(
-                                text = formatRupiah(account.balance),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            if (account.id == formState.accountId) {
-                                Spacer(modifier = Modifier.width(NyatetDuwitSpacing.sm))
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp),
-                                )
-                            }
-                        }
+                                showSplitCategorySheet = null
+                            },
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(NyatetDuwitSpacing.lg))
@@ -396,6 +521,214 @@ fun TransactionFormScreen(
                 }
             },
         )
+    }
+}
+
+@Composable
+private fun SplitRow(
+    split: SplitEntry,
+    categories: List<Category>,
+    onCategoryClick: () -> Unit,
+    onAmountChange: (Long) -> Unit,
+    onRemove: () -> Unit,
+    canRemove: Boolean,
+) {
+    val category = categories.find { it.id == split.categoryId }
+    val catColor = category?.let {
+        runCatching { Color(it.color.substring(1).toLong(16) or 0xFF000000L) }.getOrNull()
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
+    ) {
+        Surface(
+            modifier = Modifier
+                .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = ripple(),
+                ) { onCategoryClick() }
+                .padding(NyatetDuwitSpacing.md),
+            shape = RoundedCornerShape(NyatetDuwitRadius.md),
+            color = catColor?.copy(alpha = 0.15f) ?: MaterialTheme.colorScheme.surfaceVariant,
+        ) {
+            Text(
+                text = category?.name ?: "Pilih",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.sm),
+            )
+        }
+        OutlinedTextField(
+            value = if (split.amount == 0L) "" else split.amount.toString(),
+            onValueChange = { onAmountChange(it.toLongOrNull() ?: 0L) },
+            modifier = Modifier.weight(1f),
+            singleLine = true,
+            placeholder = { Text("Nominal") },
+        )
+        if (canRemove) {
+            IconButton(onClick = onRemove) {
+                Icon(Icons.Default.Close, contentDescription = "Hapus", modifier = Modifier.size(20.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun CategoryPickerItem(
+    category: Category,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(),
+            ) { onClick() }
+            .padding(NyatetDuwitSpacing.md),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        val catColor = runCatching {
+            Color(category.color.substring(1).toLong(16) or 0xFF000000L)
+        }.getOrElse { MaterialTheme.colorScheme.primary }
+        Surface(
+            modifier = Modifier.size(36.dp),
+            shape = MaterialTheme.shapes.small,
+            color = catColor.copy(alpha = 0.15f),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = getCategoryIcon(category.icon),
+                    contentDescription = null,
+                    tint = catColor,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(NyatetDuwitSpacing.md))
+        Text(
+            text = category.name,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f),
+        )
+        if (isSelected) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun AccountPickerItem(
+    account: Account,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(),
+            ) { onClick() }
+            .padding(NyatetDuwitSpacing.md),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        val accColor = runCatching {
+            Color(account.color.substring(1).toLong(16) or 0xFF000000L)
+        }.getOrElse { MaterialTheme.colorScheme.primary }
+        Icon(
+            imageVector = getAccountTypeIcon(account.type),
+            contentDescription = null,
+            tint = accColor,
+            modifier = Modifier.size(24.dp),
+        )
+        Spacer(modifier = Modifier.width(NyatetDuwitSpacing.md))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = account.name,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            Text(
+                text = getAccountTypeLabel(account.type),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Text(
+            text = formatRupiah(account.balance),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        if (isSelected) {
+            Spacer(modifier = Modifier.width(NyatetDuwitSpacing.sm))
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun TagInputSection(
+    tags: List<String>,
+    tagInput: String,
+    onTagInputChange: (String) -> Unit,
+    onAddTag: (String) -> Unit,
+    onRemoveTag: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
+        ) {
+            OutlinedTextField(
+                value = tagInput,
+                onValueChange = { onTagInputChange(it) },
+                placeholder = { Text("#tag") },
+                modifier = Modifier.weight(1f),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { onAddTag(tagInput) }),
+            )
+            TextButton(onClick = { onAddTag(tagInput) }) {
+                Text("Tambah")
+            }
+        }
+        if (tags.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xs))
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.xs),
+            ) {
+                items(tags) { tag ->
+                    InputChip(
+                        selected = false,
+                        onClick = { onRemoveTag(tag) },
+                        label = { Text("#$tag") },
+                        trailingIcon = {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Hapus tag",
+                                modifier = Modifier.size(16.dp),
+                            )
+                        },
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -545,6 +878,7 @@ private fun BottomActionBar(
     onSave: () -> Unit,
     onCategoryClick: () -> Unit,
     onAccountClick: () -> Unit,
+    onToAccountClick: (() -> Unit)? = null,
     onNotesClick: () -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
@@ -575,6 +909,14 @@ private fun BottomActionBar(
                 onClick = onAccountClick,
                 modifier = Modifier.weight(1f),
             )
+            if (type == TransactionType.TRANSFER && onToAccountClick != null) {
+                PickerChip(
+                    label = selectedToAccount?.name ?: "Tujuan",
+                    isSelected = selectedToAccount != null,
+                    onClick = onToAccountClick,
+                    modifier = Modifier.weight(1f),
+                )
+            }
             PickerChip(
                 label = if (hasNotes) "Ada catatan" else "Catatan",
                 isSelected = hasNotes,
@@ -658,10 +1000,7 @@ private fun PickerChip(
     ) {
         Icon(
             imageVector = when {
-                label == "Kategori" || label in listOf("Makan & Minuman", "Transport", "Belanja",
-                    "Tagihan", "Rumah & Kos", "Hiburan", "Kesehatan", "Edukasi",
-                    "Fashion", "Sosial & Hadiah", "Lainnya", "Gaji", "Freelance",
-                    "Investasi", "Hadiah") -> Icons.Default.Description
+                label == "Kategori" || label == "Tujuan" -> Icons.Default.Description
                 label == "Akun" -> Icons.Default.AccountBalanceWallet
                 label == "Catatan" || label == "Ada catatan" -> Icons.Default.Description
                 else -> Icons.Default.Description

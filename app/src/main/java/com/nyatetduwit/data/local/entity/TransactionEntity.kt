@@ -42,4 +42,7 @@ data class TransactionEntity(
 
     @ColumnInfo(name = "deleted_at")
     val deletedAt: Long? = null,
+
+    @ColumnInfo(name = "attachment_path")
+    val attachmentPath: String? = null,
 )

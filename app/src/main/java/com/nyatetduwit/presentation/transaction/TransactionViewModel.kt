@@ -6,6 +6,8 @@ import com.nyatetduwit.domain.model.Account
 import com.nyatetduwit.domain.model.Category
 import com.nyatetduwit.domain.model.Template
 import com.nyatetduwit.domain.model.Transaction
+import com.nyatetduwit.domain.model.TransactionSplit
+import com.nyatetduwit.domain.model.TransactionTag
 import com.nyatetduwit.domain.model.TransactionType
 import com.nyatetduwit.domain.repository.SettingsRepository
 import com.nyatetduwit.domain.usecase.account.GetAccountsUseCase
@@ -15,7 +17,11 @@ import com.nyatetduwit.domain.usecase.template.GetTemplateByIdUseCase
 import com.nyatetduwit.domain.usecase.template.IncrementTemplateUsageUseCase
 import com.nyatetduwit.domain.usecase.transaction.AddTransactionUseCase
 import com.nyatetduwit.domain.usecase.transaction.BalanceUpdateService
+import com.nyatetduwit.domain.usecase.transaction.GetSplitsByTransactionUseCase
+import com.nyatetduwit.domain.usecase.transaction.GetTagsByTransactionUseCase
 import com.nyatetduwit.domain.usecase.transaction.GetTransactionByIdUseCase
+import com.nyatetduwit.domain.usecase.transaction.SaveSplitsUseCase
+import com.nyatetduwit.domain.usecase.transaction.SaveTagsUseCase
 import com.nyatetduwit.domain.usecase.transaction.UpdateTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -35,6 +41,18 @@ data class TransactionFormState(
     val isError: Boolean = false,
     val errorMessage: String? = null,
     val isSuccess: Boolean = false,
+    val enableSplit: Boolean = false,
+    val splits: List<SplitEntry> = emptyList(),
+    val tags: List<String> = emptyList(),
+    val tagInput: String = "",
+    val attachmentPath: String? = null,
+)
+
+data class SplitEntry(
+    val id: String = UUID.randomUUID().toString(),
+    val categoryId: String = "",
+    val amount: Long = 0L,
+    val notes: String? = null,
 )
 
 data class TransactionUiState(
@@ -42,6 +60,9 @@ data class TransactionUiState(
     val categories: List<Category> = emptyList(),
     val templates: List<Template> = emptyList(),
     val formState: TransactionFormState = TransactionFormState(),
+    val existingSplits: List<TransactionSplit> = emptyList(),
+    val existingTags: List<TransactionTag> = emptyList(),
+    val allTagNames: List<String> = emptyList(),
 )
 
 @HiltViewModel
@@ -56,6 +77,10 @@ class TransactionViewModel @Inject constructor(
     private val getTemplateByIdUseCase: GetTemplateByIdUseCase,
     private val incrementTemplateUsageUseCase: IncrementTemplateUsageUseCase,
     private val settingsRepository: SettingsRepository,
+    private val getSplitsByTransactionUseCase: GetSplitsByTransactionUseCase,
+    private val getTagsByTransactionUseCase: GetTagsByTransactionUseCase,
+    private val saveSplitsUseCase: SaveSplitsUseCase,
+    private val saveTagsUseCase: SaveTagsUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionUiState())
@@ -70,6 +95,13 @@ class TransactionViewModel @Inject constructor(
         loadAccounts()
         loadCategories()
         loadTemplates()
+        loadAllTags()
+    }
+
+    private fun loadAllTags() {
+        viewModelScope.launch {
+            val repo = _uiState.value.allTagNames
+        }
     }
 
     private fun loadTemplates() {
@@ -94,8 +126,15 @@ class TransactionViewModel @Inject constructor(
                                 categoryId = it.categoryId,
                                 notes = it.notes,
                                 dateTime = it.dateTime,
+                                attachmentPath = it.attachmentPath,
                             )
                         )
+                    }
+                    getSplitsByTransactionUseCase(transactionId).collect { splits ->
+                        _uiState.update { it.copy(existingSplits = splits) }
+                    }
+                    getTagsByTransactionUseCase(transactionId).collect { tags ->
+                        _uiState.update { it.copy(existingTags = tags) }
                     }
                 }
             }
@@ -151,7 +190,9 @@ class TransactionViewModel @Inject constructor(
             currentState.copy(
                 formState = currentState.formState.copy(
                     type = type,
-                    categoryId = if (type == TransactionType.TRANSFER) null else currentState.formState.categoryId
+                    categoryId = if (type == TransactionType.TRANSFER) null else currentState.formState.categoryId,
+                    enableSplit = false,
+                    splits = emptyList(),
                 )
             )
         }
@@ -221,6 +262,95 @@ class TransactionViewModel @Inject constructor(
         }
     }
 
+    fun setAttachmentPath(path: String?) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                formState = currentState.formState.copy(attachmentPath = path)
+            )
+        }
+    }
+
+    fun toggleSplit() {
+        val current = _uiState.value.formState
+        if (current.enableSplit) {
+            _uiState.update { state ->
+                state.copy(formState = state.formState.copy(enableSplit = false, splits = emptyList()))
+            }
+        } else {
+            _uiState.update { state ->
+                state.copy(
+                    formState = state.formState.copy(
+                        enableSplit = true,
+                        splits = listOf(
+                            SplitEntry(categoryId = state.formState.categoryId ?: "", amount = state.formState.amount)
+                        )
+                    )
+                )
+            }
+        }
+    }
+
+    fun updateSplit(index: Int, split: SplitEntry) {
+        _uiState.update { state ->
+            val newSplits = state.formState.splits.toMutableList()
+            if (index in newSplits.indices) {
+                newSplits[index] = split
+            }
+            state.copy(formState = state.formState.copy(splits = newSplits))
+        }
+    }
+
+    fun addSplit() {
+        _uiState.update { state ->
+            state.copy(
+                formState = state.formState.copy(
+                    splits = state.formState.splits + SplitEntry()
+                )
+            )
+        }
+    }
+
+    fun removeSplit(index: Int) {
+        _uiState.update { state ->
+            val newSplits = state.formState.splits.toMutableList()
+            if (index in newSplits.indices && newSplits.size > 1) {
+                newSplits.removeAt(index)
+            }
+            state.copy(formState = state.formState.copy(splits = newSplits))
+        }
+    }
+
+    fun setTagInput(input: String) {
+        _uiState.update { state ->
+            state.copy(formState = state.formState.copy(tagInput = input))
+        }
+    }
+
+    fun addTag(tag: String) {
+        val trimmed = tag.trim().lowercase().removePrefix("#")
+        if (trimmed.isBlank()) return
+        _uiState.update { state ->
+            val currentTags = state.formState.tags
+            if (trimmed in currentTags) return@update state
+            state.copy(
+                formState = state.formState.copy(
+                    tags = currentTags + trimmed,
+                    tagInput = "",
+                )
+            )
+        }
+    }
+
+    fun removeTag(tag: String) {
+        _uiState.update { state ->
+            state.copy(
+                formState = state.formState.copy(
+                    tags = state.formState.tags - tag
+                )
+            )
+        }
+    }
+
     fun applyTemplate(template: Template) {
         viewModelScope.launch {
             incrementTemplateUsageUseCase(template.id)
@@ -233,6 +363,8 @@ class TransactionViewModel @Inject constructor(
                         toAccountId = "",
                         categoryId = template.categoryId,
                         notes = template.notes,
+                        enableSplit = false,
+                        splits = emptyList(),
                     )
                 )
             }
@@ -264,20 +396,37 @@ class TransactionViewModel @Inject constructor(
                 return@launch
             }
 
+            if (formState.enableSplit && formState.splits.isNotEmpty()) {
+                val splitTotal = formState.splits.sumOf { it.amount }
+                if (splitTotal != formState.amount) {
+                    _uiState.update { it.copy(formState = formState.copy(isError = true, errorMessage = "Total split (${formatAmount(splitTotal)}) harus sama dengan nominal (${formatAmount(formState.amount)})")) }
+                    return@launch
+                }
+                val firstSplit = formState.splits.firstOrNull()
+                if (firstSplit != null && firstSplit.categoryId.isEmpty()) {
+                    _uiState.update { it.copy(formState = formState.copy(isError = true, errorMessage = "Pilih kategori untuk setiap split")) }
+                    return@launch
+                }
+            }
+
             _uiState.update { it.copy(formState = formState.copy(isLoading = true, isError = false)) }
 
             try {
+                val transactionId = existingId ?: UUID.randomUUID().toString()
                 val transaction = Transaction(
-                    id = existingId ?: UUID.randomUUID().toString(),
+                    id = transactionId,
                     type = formState.type,
                     amount = formState.amount,
                     accountId = formState.accountId,
-                    categoryId = if (formState.type != TransactionType.TRANSFER) formState.categoryId else null,
+                    categoryId = if (formState.type != TransactionType.TRANSFER && !formState.enableSplit) formState.categoryId
+                        else if (formState.type != TransactionType.TRANSFER && formState.enableSplit && formState.splits.isNotEmpty()) null
+                        else null,
                     toAccountId = if (formState.type == TransactionType.TRANSFER) formState.toAccountId else null,
                     notes = formState.notes,
                     dateTime = formState.dateTime,
                     createdAt = 0,
                     updatedAt = 0,
+                    attachmentPath = formState.attachmentPath,
                 )
 
                 if (existingId != null) {
@@ -292,6 +441,34 @@ class TransactionViewModel @Inject constructor(
 
                 balanceUpdateService.onTransactionAdded(transaction)
                 settingsRepository.setLastTransactionDate(System.currentTimeMillis())
+
+                if (formState.enableSplit && formState.splits.isNotEmpty()) {
+                    val splits = formState.splits.map { split ->
+                        TransactionSplit(
+                            id = UUID.randomUUID().toString(),
+                            transactionId = transactionId,
+                            categoryId = split.categoryId,
+                            amount = split.amount,
+                            notes = split.notes,
+                        )
+                    }
+                    saveSplitsUseCase(transactionId, splits)
+                } else if (existingId != null) {
+                    saveSplitsUseCase(existingId, emptyList())
+                }
+
+                if (formState.tags.isNotEmpty()) {
+                    val tags = formState.tags.map { tagName ->
+                        TransactionTag(
+                            id = UUID.randomUUID().toString(),
+                            transactionId = transactionId,
+                            tagName = tagName,
+                        )
+                    }
+                    saveTagsUseCase(transactionId, tags)
+                } else if (existingId != null) {
+                    saveTagsUseCase(existingId, emptyList())
+                }
 
                 _uiState.update {
                     it.copy(
@@ -313,6 +490,10 @@ class TransactionViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun formatAmount(amount: Long): String {
+        return "Rp ${java.text.NumberFormat.getNumberInstance(java.util.Locale("id")).format(amount)}"
     }
 
     fun deleteTransaction(transaction: Transaction) {

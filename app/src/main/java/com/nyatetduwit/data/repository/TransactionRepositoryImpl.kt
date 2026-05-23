@@ -178,6 +178,7 @@ class TransactionRepositoryImpl @Inject constructor(
             updatedAt = updatedAt,
             isDeleted = isDeleted,
             deletedAt = deletedAt,
+            attachmentPath = attachmentPath,
         )
     }
 
@@ -195,6 +196,7 @@ class TransactionRepositoryImpl @Inject constructor(
             updatedAt = System.currentTimeMillis(),
             isDeleted = isDeleted,
             deletedAt = deletedAt,
+            attachmentPath = attachmentPath,
         )
     }
 }

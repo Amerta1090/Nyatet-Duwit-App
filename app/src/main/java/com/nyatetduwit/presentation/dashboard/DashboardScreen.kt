@@ -63,6 +63,9 @@ import com.nyatetduwit.core.util.HapticFeedback
 import com.nyatetduwit.core.util.formatRupiah
 import com.nyatetduwit.domain.model.Transaction
 import com.nyatetduwit.domain.model.TransactionType
+import com.nyatetduwit.presentation.checkin.AntiBoncosCard
+import com.nyatetduwit.presentation.checkin.ProgressFeedbackCard
+import com.nyatetduwit.presentation.checkin.WeeklyCheckInCard
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -213,6 +216,39 @@ fun DashboardScreen(
                                 }
                             }
                         }
+                    }
+                }
+
+                if (uiState.showWeeklyCheckIn && uiState.weeklyCheckIn != null) {
+                    item(key = "weekly_checkin") {
+                        WeeklyCheckInCard(
+                            checkInData = uiState.weeklyCheckIn,
+                            onDismiss = { viewModel.dismissWeeklyCheckIn() },
+                        )
+                    }
+                }
+
+                if (uiState.dailyAllowance != null) {
+                    item(key = "anti_boncos") {
+                        val allowance = uiState.dailyAllowance!!
+                        AntiBoncosCard(
+                            dailyAllowance = allowance.dailyAllowance,
+                            remainingBudget = allowance.remainingBudget,
+                            remainingDays = allowance.remainingDays,
+                            isWarning = allowance.isWarning,
+                            isDanger = allowance.isDanger,
+                        )
+                    }
+                }
+
+                if (uiState.streakData.currentStreak > 0) {
+                    item(key = "progress_feedback") {
+                        ProgressFeedbackCard(
+                            totalTransactions = uiState.recentTransactions.size,
+                            currentMonthExpense = uiState.monthlyExpense,
+                            daysActiveThisMonth = 0,
+                            streakDays = uiState.streakData.currentStreak,
+                        )
                     }
                 }
 

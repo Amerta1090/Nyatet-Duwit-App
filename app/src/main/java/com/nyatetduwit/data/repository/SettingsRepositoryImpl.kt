@@ -26,6 +26,10 @@ class SettingsRepositoryImpl @Inject constructor(
         val REMINDER_FREQUENCY = intPreferencesKey("reminder_frequency")
         val LAST_TRANSACTION_DATE = longPreferencesKey("last_transaction_date")
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+        val STREAK = intPreferencesKey("streak_count")
+        val LAST_ACTIVE_DATE = longPreferencesKey("last_active_date")
+        val AUTO_BACKUP_ENABLED = booleanPreferencesKey("auto_backup_enabled")
+        val LAST_BACKUP_DATE = longPreferencesKey("last_backup_date")
     }
 
     override val isBalanceVisible: Flow<Boolean> = dataStore.data
@@ -92,5 +96,33 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setOnboardingCompleted(completed: Boolean) {
         dataStore.edit { preferences -> preferences[Keys.ONBOARDING_COMPLETED] = completed }
+    }
+
+    override fun getStreak(): Flow<Int> = dataStore.data
+        .map { preferences -> preferences[Keys.STREAK] ?: 0 }
+
+    override suspend fun setStreak(streak: Int) {
+        dataStore.edit { preferences -> preferences[Keys.STREAK] = streak }
+    }
+
+    override fun getLastActiveDate(): Flow<Long> = dataStore.data
+        .map { preferences -> preferences[Keys.LAST_ACTIVE_DATE] ?: 0L }
+
+    override suspend fun setLastActiveDate(date: Long) {
+        dataStore.edit { preferences -> preferences[Keys.LAST_ACTIVE_DATE] = date }
+    }
+
+    override fun getAutoBackupEnabled(): Flow<Boolean> = dataStore.data
+        .map { preferences -> preferences[Keys.AUTO_BACKUP_ENABLED] ?: false }
+
+    override suspend fun setAutoBackupEnabled(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[Keys.AUTO_BACKUP_ENABLED] = enabled }
+    }
+
+    override fun getLastBackupDate(): Flow<Long> = dataStore.data
+        .map { preferences -> preferences[Keys.LAST_BACKUP_DATE] ?: 0L }
+
+    override suspend fun setLastBackupDate(date: Long) {
+        dataStore.edit { preferences -> preferences[Keys.LAST_BACKUP_DATE] = date }
     }
 }

@@ -10,6 +10,8 @@ import com.nyatetduwit.data.local.dao.CategoryDao
 import com.nyatetduwit.data.local.dao.RecurringTransactionDao
 import com.nyatetduwit.data.local.dao.TemplateDao
 import com.nyatetduwit.data.local.dao.TransactionDao
+import com.nyatetduwit.data.local.dao.TransactionSplitDao
+import com.nyatetduwit.data.local.dao.TransactionTagDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -66,6 +68,16 @@ object DatabaseModule {
     }
 
     @Provides
+    fun provideTransactionSplitDao(database: NyatetDuwitDatabase): TransactionSplitDao {
+        return database.transactionSplitDao()
+    }
+
+    @Provides
+    fun provideTransactionTagDao(database: NyatetDuwitDatabase): TransactionTagDao {
+        return database.transactionTagDao()
+    }
+
+    @Provides
     @Singleton
     fun provideExportManager(
         transactionDao: TransactionDao,
@@ -74,6 +86,8 @@ object DatabaseModule {
         budgetDao: BudgetDao,
         recurringTransactionDao: RecurringTransactionDao,
         templateDao: TemplateDao,
+        transactionSplitDao: TransactionSplitDao,
+        transactionTagDao: TransactionTagDao,
     ): ExportManager {
         return ExportManager(
             transactionDao = transactionDao,
@@ -82,6 +96,8 @@ object DatabaseModule {
             budgetDao = budgetDao,
             recurringTransactionDao = recurringTransactionDao,
             templateDao = templateDao,
+            transactionSplitDao = transactionSplitDao,
+            transactionTagDao = transactionTagDao,
         )
     }
 }

@@ -7,6 +7,8 @@ import com.nyatetduwit.data.repository.RecurringTransactionRepositoryImpl
 import com.nyatetduwit.data.repository.SettingsRepositoryImpl
 import com.nyatetduwit.data.repository.TemplateRepositoryImpl
 import com.nyatetduwit.data.repository.TransactionRepositoryImpl
+import com.nyatetduwit.data.repository.TransactionSplitRepositoryImpl
+import com.nyatetduwit.data.repository.TransactionTagRepositoryImpl
 import com.nyatetduwit.domain.repository.AccountRepository
 import com.nyatetduwit.domain.repository.BudgetRepository
 import com.nyatetduwit.domain.repository.CategoryRepository
@@ -14,6 +16,8 @@ import com.nyatetduwit.domain.repository.RecurringTransactionRepository
 import com.nyatetduwit.domain.repository.SettingsRepository
 import com.nyatetduwit.domain.repository.TemplateRepository
 import com.nyatetduwit.domain.repository.TransactionRepository
+import com.nyatetduwit.domain.repository.TransactionSplitRepository
+import com.nyatetduwit.domain.repository.TransactionTagRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -51,4 +55,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindTemplateRepository(impl: TemplateRepositoryImpl): TemplateRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTransactionSplitRepository(impl: TransactionSplitRepositoryImpl): TransactionSplitRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTransactionTagRepository(impl: TransactionTagRepositoryImpl): TransactionTagRepository
 }

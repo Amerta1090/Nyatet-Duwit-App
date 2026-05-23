@@ -13,6 +13,7 @@ data class Transaction(
     val updatedAt: Long,
     val isDeleted: Boolean = false,
     val deletedAt: Long? = null,
+    val attachmentPath: String? = null,
 )
 
 enum class TransactionType(val value: String) {
