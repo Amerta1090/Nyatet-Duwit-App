@@ -2,6 +2,8 @@ package com.nyatetduwit.presentation.recurring;
 
 import com.nyatetduwit.domain.repository.RecurringTransactionRepository;
 import com.nyatetduwit.domain.repository.TransactionRepository;
+import com.nyatetduwit.domain.usecase.account.GetAccountsUseCase;
+import com.nyatetduwit.domain.usecase.category.GetCategoriesUseCase;
 import com.nyatetduwit.domain.usecase.recurring.AddRecurringTransactionUseCase;
 import com.nyatetduwit.domain.usecase.recurring.DeactivateRecurringTransactionUseCase;
 import com.nyatetduwit.domain.usecase.recurring.DeleteRecurringTransactionUseCase;
@@ -50,6 +52,10 @@ public final class RecurringTransactionViewModel_Factory implements Factory<Recu
 
   private final Provider<SkipRecurringInstanceUseCase> skipRecurringInstanceUseCaseProvider;
 
+  private final Provider<GetAccountsUseCase> getAccountsUseCaseProvider;
+
+  private final Provider<GetCategoriesUseCase> getCategoriesUseCaseProvider;
+
   public RecurringTransactionViewModel_Factory(
       Provider<GetRecurringTransactionsUseCase> getRecurringTransactionsUseCaseProvider,
       Provider<GetAllRecurringTransactionsUseCase> getAllRecurringTransactionsUseCaseProvider,
@@ -59,7 +65,9 @@ public final class RecurringTransactionViewModel_Factory implements Factory<Recu
       Provider<UpdateRecurringTransactionUseCase> updateRecurringTransactionUseCaseProvider,
       Provider<DeleteRecurringTransactionUseCase> deleteRecurringTransactionUseCaseProvider,
       Provider<DeactivateRecurringTransactionUseCase> deactivateRecurringTransactionUseCaseProvider,
-      Provider<SkipRecurringInstanceUseCase> skipRecurringInstanceUseCaseProvider) {
+      Provider<SkipRecurringInstanceUseCase> skipRecurringInstanceUseCaseProvider,
+      Provider<GetAccountsUseCase> getAccountsUseCaseProvider,
+      Provider<GetCategoriesUseCase> getCategoriesUseCaseProvider) {
     this.getRecurringTransactionsUseCaseProvider = getRecurringTransactionsUseCaseProvider;
     this.getAllRecurringTransactionsUseCaseProvider = getAllRecurringTransactionsUseCaseProvider;
     this.recurringTransactionRepositoryProvider = recurringTransactionRepositoryProvider;
@@ -69,11 +77,13 @@ public final class RecurringTransactionViewModel_Factory implements Factory<Recu
     this.deleteRecurringTransactionUseCaseProvider = deleteRecurringTransactionUseCaseProvider;
     this.deactivateRecurringTransactionUseCaseProvider = deactivateRecurringTransactionUseCaseProvider;
     this.skipRecurringInstanceUseCaseProvider = skipRecurringInstanceUseCaseProvider;
+    this.getAccountsUseCaseProvider = getAccountsUseCaseProvider;
+    this.getCategoriesUseCaseProvider = getCategoriesUseCaseProvider;
   }
 
   @Override
   public RecurringTransactionViewModel get() {
-    return newInstance(getRecurringTransactionsUseCaseProvider.get(), getAllRecurringTransactionsUseCaseProvider.get(), recurringTransactionRepositoryProvider.get(), transactionRepositoryProvider.get(), addRecurringTransactionUseCaseProvider.get(), updateRecurringTransactionUseCaseProvider.get(), deleteRecurringTransactionUseCaseProvider.get(), deactivateRecurringTransactionUseCaseProvider.get(), skipRecurringInstanceUseCaseProvider.get());
+    return newInstance(getRecurringTransactionsUseCaseProvider.get(), getAllRecurringTransactionsUseCaseProvider.get(), recurringTransactionRepositoryProvider.get(), transactionRepositoryProvider.get(), addRecurringTransactionUseCaseProvider.get(), updateRecurringTransactionUseCaseProvider.get(), deleteRecurringTransactionUseCaseProvider.get(), deactivateRecurringTransactionUseCaseProvider.get(), skipRecurringInstanceUseCaseProvider.get(), getAccountsUseCaseProvider.get(), getCategoriesUseCaseProvider.get());
   }
 
   public static RecurringTransactionViewModel_Factory create(
@@ -85,8 +95,10 @@ public final class RecurringTransactionViewModel_Factory implements Factory<Recu
       Provider<UpdateRecurringTransactionUseCase> updateRecurringTransactionUseCaseProvider,
       Provider<DeleteRecurringTransactionUseCase> deleteRecurringTransactionUseCaseProvider,
       Provider<DeactivateRecurringTransactionUseCase> deactivateRecurringTransactionUseCaseProvider,
-      Provider<SkipRecurringInstanceUseCase> skipRecurringInstanceUseCaseProvider) {
-    return new RecurringTransactionViewModel_Factory(getRecurringTransactionsUseCaseProvider, getAllRecurringTransactionsUseCaseProvider, recurringTransactionRepositoryProvider, transactionRepositoryProvider, addRecurringTransactionUseCaseProvider, updateRecurringTransactionUseCaseProvider, deleteRecurringTransactionUseCaseProvider, deactivateRecurringTransactionUseCaseProvider, skipRecurringInstanceUseCaseProvider);
+      Provider<SkipRecurringInstanceUseCase> skipRecurringInstanceUseCaseProvider,
+      Provider<GetAccountsUseCase> getAccountsUseCaseProvider,
+      Provider<GetCategoriesUseCase> getCategoriesUseCaseProvider) {
+    return new RecurringTransactionViewModel_Factory(getRecurringTransactionsUseCaseProvider, getAllRecurringTransactionsUseCaseProvider, recurringTransactionRepositoryProvider, transactionRepositoryProvider, addRecurringTransactionUseCaseProvider, updateRecurringTransactionUseCaseProvider, deleteRecurringTransactionUseCaseProvider, deactivateRecurringTransactionUseCaseProvider, skipRecurringInstanceUseCaseProvider, getAccountsUseCaseProvider, getCategoriesUseCaseProvider);
   }
 
   public static RecurringTransactionViewModel newInstance(
@@ -98,7 +110,8 @@ public final class RecurringTransactionViewModel_Factory implements Factory<Recu
       UpdateRecurringTransactionUseCase updateRecurringTransactionUseCase,
       DeleteRecurringTransactionUseCase deleteRecurringTransactionUseCase,
       DeactivateRecurringTransactionUseCase deactivateRecurringTransactionUseCase,
-      SkipRecurringInstanceUseCase skipRecurringInstanceUseCase) {
-    return new RecurringTransactionViewModel(getRecurringTransactionsUseCase, getAllRecurringTransactionsUseCase, recurringTransactionRepository, transactionRepository, addRecurringTransactionUseCase, updateRecurringTransactionUseCase, deleteRecurringTransactionUseCase, deactivateRecurringTransactionUseCase, skipRecurringInstanceUseCase);
+      SkipRecurringInstanceUseCase skipRecurringInstanceUseCase,
+      GetAccountsUseCase getAccountsUseCase, GetCategoriesUseCase getCategoriesUseCase) {
+    return new RecurringTransactionViewModel(getRecurringTransactionsUseCase, getAllRecurringTransactionsUseCase, recurringTransactionRepository, transactionRepository, addRecurringTransactionUseCase, updateRecurringTransactionUseCase, deleteRecurringTransactionUseCase, deactivateRecurringTransactionUseCase, skipRecurringInstanceUseCase, getAccountsUseCase, getCategoriesUseCase);
   }
 }

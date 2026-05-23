@@ -11,6 +11,7 @@ import com.nyatetduwit.domain.repository.SettingsRepository
 import com.nyatetduwit.domain.usecase.account.GetAccountsUseCase
 import com.nyatetduwit.domain.usecase.category.GetCategoriesByTypeUseCase
 import com.nyatetduwit.domain.usecase.template.GetPinnedTemplatesUseCase
+import com.nyatetduwit.domain.usecase.template.GetTemplateByIdUseCase
 import com.nyatetduwit.domain.usecase.template.IncrementTemplateUsageUseCase
 import com.nyatetduwit.domain.usecase.transaction.AddTransactionUseCase
 import com.nyatetduwit.domain.usecase.transaction.BalanceUpdateService
@@ -52,6 +53,7 @@ class TransactionViewModel @Inject constructor(
     private val getTransactionByIdUseCase: GetTransactionByIdUseCase,
     private val balanceUpdateService: BalanceUpdateService,
     private val getPinnedTemplatesUseCase: GetPinnedTemplatesUseCase,
+    private val getTemplateByIdUseCase: GetTemplateByIdUseCase,
     private val incrementTemplateUsageUseCase: IncrementTemplateUsageUseCase,
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
@@ -96,6 +98,14 @@ class TransactionViewModel @Inject constructor(
                         )
                     }
                 }
+            }
+        }
+    }
+
+    fun loadTemplateForApply(templateId: String) {
+        viewModelScope.launch {
+            getTemplateByIdUseCase(templateId).collect { template ->
+                template?.let { applyTemplate(it) }
             }
         }
     }

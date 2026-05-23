@@ -78,6 +78,7 @@ import com.nyatetduwit.domain.usecase.recurring.UpdateRecurringTransactionUseCas
 import com.nyatetduwit.domain.usecase.template.CreateTemplateFromTransactionUseCase;
 import com.nyatetduwit.domain.usecase.template.DeleteTemplateUseCase;
 import com.nyatetduwit.domain.usecase.template.GetPinnedTemplatesUseCase;
+import com.nyatetduwit.domain.usecase.template.GetTemplateByIdUseCase;
 import com.nyatetduwit.domain.usecase.template.GetTemplatesUseCase;
 import com.nyatetduwit.domain.usecase.template.IncrementTemplateUsageUseCase;
 import com.nyatetduwit.domain.usecase.template.ToggleTemplatePinUseCase;
@@ -502,65 +503,65 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_nyatetduwit_presentation_account_AccountViewModel = "com.nyatetduwit.presentation.account.AccountViewModel";
-
-      static String com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel = "com.nyatetduwit.presentation.recurring.RecurringTransactionViewModel";
-
-      static String com_nyatetduwit_presentation_monthlysummary_MonthlySummaryViewModel = "com.nyatetduwit.presentation.monthlysummary.MonthlySummaryViewModel";
-
-      static String com_nyatetduwit_presentation_remindersettings_ReminderSettingsViewModel = "com.nyatetduwit.presentation.remindersettings.ReminderSettingsViewModel";
-
-      static String com_nyatetduwit_presentation_transaction_TransactionViewModel = "com.nyatetduwit.presentation.transaction.TransactionViewModel";
+      static String com_nyatetduwit_presentation_template_TemplateViewModel = "com.nyatetduwit.presentation.template.TemplateViewModel";
 
       static String com_nyatetduwit_presentation_dashboard_DashboardViewModel = "com.nyatetduwit.presentation.dashboard.DashboardViewModel";
 
-      static String com_nyatetduwit_presentation_settings_SettingsViewModel = "com.nyatetduwit.presentation.settings.SettingsViewModel";
+      static String com_nyatetduwit_presentation_transaction_TransactionListViewModel = "com.nyatetduwit.presentation.transaction.TransactionListViewModel";
 
       static String com_nyatetduwit_presentation_category_CategoryViewModel = "com.nyatetduwit.presentation.category.CategoryViewModel";
 
-      static String com_nyatetduwit_presentation_template_TemplateViewModel = "com.nyatetduwit.presentation.template.TemplateViewModel";
-
-      static String com_nyatetduwit_presentation_transaction_TransactionListViewModel = "com.nyatetduwit.presentation.transaction.TransactionListViewModel";
-
-      static String com_nyatetduwit_presentation_transaction_TransactionDetailViewModel = "com.nyatetduwit.presentation.transaction.TransactionDetailViewModel";
+      static String com_nyatetduwit_presentation_settings_SettingsViewModel = "com.nyatetduwit.presentation.settings.SettingsViewModel";
 
       static String com_nyatetduwit_presentation_budget_BudgetViewModel = "com.nyatetduwit.presentation.budget.BudgetViewModel";
 
-      @KeepFieldType
-      AccountViewModel com_nyatetduwit_presentation_account_AccountViewModel2;
+      static String com_nyatetduwit_presentation_remindersettings_ReminderSettingsViewModel = "com.nyatetduwit.presentation.remindersettings.ReminderSettingsViewModel";
 
-      @KeepFieldType
-      RecurringTransactionViewModel com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel2;
+      static String com_nyatetduwit_presentation_account_AccountViewModel = "com.nyatetduwit.presentation.account.AccountViewModel";
 
-      @KeepFieldType
-      MonthlySummaryViewModel com_nyatetduwit_presentation_monthlysummary_MonthlySummaryViewModel2;
+      static String com_nyatetduwit_presentation_transaction_TransactionDetailViewModel = "com.nyatetduwit.presentation.transaction.TransactionDetailViewModel";
 
-      @KeepFieldType
-      ReminderSettingsViewModel com_nyatetduwit_presentation_remindersettings_ReminderSettingsViewModel2;
+      static String com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel = "com.nyatetduwit.presentation.recurring.RecurringTransactionViewModel";
 
-      @KeepFieldType
-      TransactionViewModel com_nyatetduwit_presentation_transaction_TransactionViewModel2;
+      static String com_nyatetduwit_presentation_transaction_TransactionViewModel = "com.nyatetduwit.presentation.transaction.TransactionViewModel";
 
-      @KeepFieldType
-      DashboardViewModel com_nyatetduwit_presentation_dashboard_DashboardViewModel2;
-
-      @KeepFieldType
-      SettingsViewModel com_nyatetduwit_presentation_settings_SettingsViewModel2;
-
-      @KeepFieldType
-      CategoryViewModel com_nyatetduwit_presentation_category_CategoryViewModel2;
+      static String com_nyatetduwit_presentation_monthlysummary_MonthlySummaryViewModel = "com.nyatetduwit.presentation.monthlysummary.MonthlySummaryViewModel";
 
       @KeepFieldType
       TemplateViewModel com_nyatetduwit_presentation_template_TemplateViewModel2;
 
       @KeepFieldType
+      DashboardViewModel com_nyatetduwit_presentation_dashboard_DashboardViewModel2;
+
+      @KeepFieldType
       TransactionListViewModel com_nyatetduwit_presentation_transaction_TransactionListViewModel2;
+
+      @KeepFieldType
+      CategoryViewModel com_nyatetduwit_presentation_category_CategoryViewModel2;
+
+      @KeepFieldType
+      SettingsViewModel com_nyatetduwit_presentation_settings_SettingsViewModel2;
+
+      @KeepFieldType
+      BudgetViewModel com_nyatetduwit_presentation_budget_BudgetViewModel2;
+
+      @KeepFieldType
+      ReminderSettingsViewModel com_nyatetduwit_presentation_remindersettings_ReminderSettingsViewModel2;
+
+      @KeepFieldType
+      AccountViewModel com_nyatetduwit_presentation_account_AccountViewModel2;
 
       @KeepFieldType
       TransactionDetailViewModel com_nyatetduwit_presentation_transaction_TransactionDetailViewModel2;
 
       @KeepFieldType
-      BudgetViewModel com_nyatetduwit_presentation_budget_BudgetViewModel2;
+      RecurringTransactionViewModel com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel2;
+
+      @KeepFieldType
+      TransactionViewModel com_nyatetduwit_presentation_transaction_TransactionViewModel2;
+
+      @KeepFieldType
+      MonthlySummaryViewModel com_nyatetduwit_presentation_monthlysummary_MonthlySummaryViewModel2;
     }
   }
 
@@ -789,6 +790,10 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
       return new GetPinnedTemplatesUseCase(singletonCImpl.bindTemplateRepositoryProvider.get());
     }
 
+    private GetTemplateByIdUseCase getTemplateByIdUseCase() {
+      return new GetTemplateByIdUseCase(singletonCImpl.bindTemplateRepositoryProvider.get());
+    }
+
     private IncrementTemplateUsageUseCase incrementTemplateUsageUseCase() {
       return new IncrementTemplateUsageUseCase(singletonCImpl.bindTemplateRepositoryProvider.get());
     }
@@ -822,65 +827,65 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_nyatetduwit_presentation_transaction_TransactionListViewModel = "com.nyatetduwit.presentation.transaction.TransactionListViewModel";
-
-      static String com_nyatetduwit_presentation_remindersettings_ReminderSettingsViewModel = "com.nyatetduwit.presentation.remindersettings.ReminderSettingsViewModel";
-
-      static String com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel = "com.nyatetduwit.presentation.recurring.RecurringTransactionViewModel";
-
-      static String com_nyatetduwit_presentation_budget_BudgetViewModel = "com.nyatetduwit.presentation.budget.BudgetViewModel";
-
-      static String com_nyatetduwit_presentation_transaction_TransactionDetailViewModel = "com.nyatetduwit.presentation.transaction.TransactionDetailViewModel";
+      static String com_nyatetduwit_presentation_category_CategoryViewModel = "com.nyatetduwit.presentation.category.CategoryViewModel";
 
       static String com_nyatetduwit_presentation_template_TemplateViewModel = "com.nyatetduwit.presentation.template.TemplateViewModel";
 
-      static String com_nyatetduwit_presentation_settings_SettingsViewModel = "com.nyatetduwit.presentation.settings.SettingsViewModel";
-
-      static String com_nyatetduwit_presentation_account_AccountViewModel = "com.nyatetduwit.presentation.account.AccountViewModel";
-
-      static String com_nyatetduwit_presentation_category_CategoryViewModel = "com.nyatetduwit.presentation.category.CategoryViewModel";
-
       static String com_nyatetduwit_presentation_dashboard_DashboardViewModel = "com.nyatetduwit.presentation.dashboard.DashboardViewModel";
 
-      static String com_nyatetduwit_presentation_monthlysummary_MonthlySummaryViewModel = "com.nyatetduwit.presentation.monthlysummary.MonthlySummaryViewModel";
+      static String com_nyatetduwit_presentation_budget_BudgetViewModel = "com.nyatetduwit.presentation.budget.BudgetViewModel";
+
+      static String com_nyatetduwit_presentation_settings_SettingsViewModel = "com.nyatetduwit.presentation.settings.SettingsViewModel";
 
       static String com_nyatetduwit_presentation_transaction_TransactionViewModel = "com.nyatetduwit.presentation.transaction.TransactionViewModel";
 
-      @KeepFieldType
-      TransactionListViewModel com_nyatetduwit_presentation_transaction_TransactionListViewModel2;
+      static String com_nyatetduwit_presentation_account_AccountViewModel = "com.nyatetduwit.presentation.account.AccountViewModel";
 
-      @KeepFieldType
-      ReminderSettingsViewModel com_nyatetduwit_presentation_remindersettings_ReminderSettingsViewModel2;
+      static String com_nyatetduwit_presentation_transaction_TransactionDetailViewModel = "com.nyatetduwit.presentation.transaction.TransactionDetailViewModel";
 
-      @KeepFieldType
-      RecurringTransactionViewModel com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel2;
+      static String com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel = "com.nyatetduwit.presentation.recurring.RecurringTransactionViewModel";
 
-      @KeepFieldType
-      BudgetViewModel com_nyatetduwit_presentation_budget_BudgetViewModel2;
+      static String com_nyatetduwit_presentation_remindersettings_ReminderSettingsViewModel = "com.nyatetduwit.presentation.remindersettings.ReminderSettingsViewModel";
 
-      @KeepFieldType
-      TransactionDetailViewModel com_nyatetduwit_presentation_transaction_TransactionDetailViewModel2;
+      static String com_nyatetduwit_presentation_transaction_TransactionListViewModel = "com.nyatetduwit.presentation.transaction.TransactionListViewModel";
 
-      @KeepFieldType
-      TemplateViewModel com_nyatetduwit_presentation_template_TemplateViewModel2;
-
-      @KeepFieldType
-      SettingsViewModel com_nyatetduwit_presentation_settings_SettingsViewModel2;
-
-      @KeepFieldType
-      AccountViewModel com_nyatetduwit_presentation_account_AccountViewModel2;
+      static String com_nyatetduwit_presentation_monthlysummary_MonthlySummaryViewModel = "com.nyatetduwit.presentation.monthlysummary.MonthlySummaryViewModel";
 
       @KeepFieldType
       CategoryViewModel com_nyatetduwit_presentation_category_CategoryViewModel2;
 
       @KeepFieldType
+      TemplateViewModel com_nyatetduwit_presentation_template_TemplateViewModel2;
+
+      @KeepFieldType
       DashboardViewModel com_nyatetduwit_presentation_dashboard_DashboardViewModel2;
 
       @KeepFieldType
-      MonthlySummaryViewModel com_nyatetduwit_presentation_monthlysummary_MonthlySummaryViewModel2;
+      BudgetViewModel com_nyatetduwit_presentation_budget_BudgetViewModel2;
+
+      @KeepFieldType
+      SettingsViewModel com_nyatetduwit_presentation_settings_SettingsViewModel2;
 
       @KeepFieldType
       TransactionViewModel com_nyatetduwit_presentation_transaction_TransactionViewModel2;
+
+      @KeepFieldType
+      AccountViewModel com_nyatetduwit_presentation_account_AccountViewModel2;
+
+      @KeepFieldType
+      TransactionDetailViewModel com_nyatetduwit_presentation_transaction_TransactionDetailViewModel2;
+
+      @KeepFieldType
+      RecurringTransactionViewModel com_nyatetduwit_presentation_recurring_RecurringTransactionViewModel2;
+
+      @KeepFieldType
+      ReminderSettingsViewModel com_nyatetduwit_presentation_remindersettings_ReminderSettingsViewModel2;
+
+      @KeepFieldType
+      TransactionListViewModel com_nyatetduwit_presentation_transaction_TransactionListViewModel2;
+
+      @KeepFieldType
+      MonthlySummaryViewModel com_nyatetduwit_presentation_monthlysummary_MonthlySummaryViewModel2;
     }
 
     private static final class SwitchingProvider<T> implements Provider<T> {
@@ -920,7 +925,7 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
           return (T) new MonthlySummaryViewModel(viewModelCImpl.getSumByTypeAndDateRangeUseCase(), viewModelCImpl.getTopCategoriesByExpenseUseCase(), viewModelCImpl.getDailyExpenseTrendUseCase(), viewModelCImpl.getBiggestExpenseUseCase(), viewModelCImpl.getMonthComparisonUseCase(), viewModelCImpl.getActiveDaysCountUseCase(), viewModelCImpl.getTransactionCountUseCase(), viewModelCImpl.getCategoriesUseCase());
 
           case 5: // com.nyatetduwit.presentation.recurring.RecurringTransactionViewModel 
-          return (T) new RecurringTransactionViewModel(viewModelCImpl.getRecurringTransactionsUseCase(), viewModelCImpl.getAllRecurringTransactionsUseCase(), singletonCImpl.bindRecurringTransactionRepositoryProvider.get(), singletonCImpl.bindTransactionRepositoryProvider.get(), viewModelCImpl.addRecurringTransactionUseCase(), viewModelCImpl.updateRecurringTransactionUseCase(), viewModelCImpl.deleteRecurringTransactionUseCase(), viewModelCImpl.deactivateRecurringTransactionUseCase(), viewModelCImpl.skipRecurringInstanceUseCase());
+          return (T) new RecurringTransactionViewModel(viewModelCImpl.getRecurringTransactionsUseCase(), viewModelCImpl.getAllRecurringTransactionsUseCase(), singletonCImpl.bindRecurringTransactionRepositoryProvider.get(), singletonCImpl.bindTransactionRepositoryProvider.get(), viewModelCImpl.addRecurringTransactionUseCase(), viewModelCImpl.updateRecurringTransactionUseCase(), viewModelCImpl.deleteRecurringTransactionUseCase(), viewModelCImpl.deactivateRecurringTransactionUseCase(), viewModelCImpl.skipRecurringInstanceUseCase(), viewModelCImpl.getAccountsUseCase(), viewModelCImpl.getCategoriesUseCase());
 
           case 6: // com.nyatetduwit.presentation.remindersettings.ReminderSettingsViewModel 
           return (T) new ReminderSettingsViewModel(singletonCImpl.bindSettingsRepositoryProvider.get());
@@ -938,7 +943,7 @@ public final class DaggerNyatetDuwitApp_HiltComponents_SingletonC {
           return (T) new TransactionListViewModel(viewModelCImpl.searchAndFilterTransactionsUseCase(), viewModelCImpl.softDeleteTransactionUseCase(), viewModelCImpl.restoreTransactionUseCase(), viewModelCImpl.getAccountsUseCase(), viewModelCImpl.getCategoriesUseCase(), viewModelCImpl.createTemplateFromTransactionUseCase());
 
           case 11: // com.nyatetduwit.presentation.transaction.TransactionViewModel 
-          return (T) new TransactionViewModel(viewModelCImpl.getAccountsUseCase(), viewModelCImpl.getCategoriesByTypeUseCase(), viewModelCImpl.addTransactionUseCase(), viewModelCImpl.updateTransactionUseCase(), viewModelCImpl.getTransactionByIdUseCase(), viewModelCImpl.balanceUpdateService(), viewModelCImpl.getPinnedTemplatesUseCase(), viewModelCImpl.incrementTemplateUsageUseCase(), singletonCImpl.bindSettingsRepositoryProvider.get());
+          return (T) new TransactionViewModel(viewModelCImpl.getAccountsUseCase(), viewModelCImpl.getCategoriesByTypeUseCase(), viewModelCImpl.addTransactionUseCase(), viewModelCImpl.updateTransactionUseCase(), viewModelCImpl.getTransactionByIdUseCase(), viewModelCImpl.balanceUpdateService(), viewModelCImpl.getPinnedTemplatesUseCase(), viewModelCImpl.getTemplateByIdUseCase(), viewModelCImpl.incrementTemplateUsageUseCase(), singletonCImpl.bindSettingsRepositoryProvider.get());
 
           default: throw new AssertionError(id);
         }

@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 interface SettingsRepository {
     val isBalanceVisible: Flow<Boolean>
     val isDarkTheme: Flow<Boolean>
+    val isDarkThemeExplicit: Flow<Boolean>
     val isBiometricEnabled: Flow<Boolean>
     val lockTimeoutMinutes: Flow<Int>
     val isReminderEnabled: Flow<Boolean>

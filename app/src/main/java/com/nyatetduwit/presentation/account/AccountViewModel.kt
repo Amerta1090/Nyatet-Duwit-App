@@ -116,7 +116,7 @@ class AccountViewModel @Inject constructor(
         }
     }
 
-    fun saveAccount() {
+    fun saveAccount(onSuccess: () -> Unit = {}) {
         val formState = _uiState.value.formState
         if (formState.name.isBlank()) {
             _uiState.update { it.copy(error = "Nama akun tidak boleh kosong") }
@@ -151,6 +151,7 @@ class AccountViewModel @Inject constructor(
                         isLoading = false,
                     )
                 }
+                onSuccess()
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(error = e.message, isLoading = false)

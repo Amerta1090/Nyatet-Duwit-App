@@ -2,6 +2,7 @@ package com.nyatetduwit.presentation.transaction
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -10,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.nyatetduwit.core.theme.NyatetDuwitSpacing
 import com.nyatetduwit.domain.model.Account
 import com.nyatetduwit.domain.model.Category
 import com.nyatetduwit.domain.model.Transaction
@@ -38,7 +40,7 @@ fun TransactionDetailScreen(
                 title = { Text("Detail Transaksi") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
                 actions = {
@@ -48,7 +50,7 @@ fun TransactionDetailScreen(
                     IconButton(onClick = {
                         uiState.transaction?.let { viewModel.deleteTransaction(it) }
                     }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete")
+                        Icon(Icons.Default.Delete, contentDescription = "Hapus")
                     }
                 },
             )
@@ -111,8 +113,8 @@ fun TransactionDetailContent(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = modifier.padding(NyatetDuwitSpacing.lg),
+        verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.md),
     ) {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -125,7 +127,7 @@ fun TransactionDetailContent(
             ),
         ) {
             Column(
-                modifier = Modifier.padding(24.dp),
+                modifier = Modifier.padding(NyatetDuwitSpacing.xxl),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
@@ -136,7 +138,7 @@ fun TransactionDetailContent(
                     },
                     style = MaterialTheme.typography.labelLarge,
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.sm))
                 Text(
                     text = formatTransactionAmount(transaction),
                     style = MaterialTheme.typography.headlineLarge,
@@ -177,7 +179,7 @@ fun TransactionDetailContent(
 
         DetailRow(
             icon = Icons.Default.Schedule,
-            label = "Tanggal & Waktu",
+            label = "Tanggal dan Waktu",
             value = formatDateTime(transaction.dateTime),
         )
 
@@ -198,7 +200,7 @@ fun DetailRow(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.md),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(

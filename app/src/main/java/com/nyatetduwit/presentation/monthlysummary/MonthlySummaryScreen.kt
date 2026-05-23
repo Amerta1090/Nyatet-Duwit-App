@@ -95,84 +95,82 @@ fun MonthlySummaryScreen(
             )
         },
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(NyatetDuwitSpacing.lg),
-            verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.lg),
-        ) {
-            item {
-                MonthSelector(
-                    year = uiState.selectedYear,
-                    month = uiState.selectedMonth,
-                    onPreviousMonth = { viewModel.goToPreviousMonth() },
-                    onNextMonth = { viewModel.goToNextMonth() },
-                )
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
             }
-
-            item {
-                SummaryCards(
-                    totalIncome = uiState.totalIncome,
-                    totalExpense = uiState.totalExpense,
-                    netSavings = uiState.netSavings,
-                    comparison = uiState.comparison,
-                )
-            }
-
-            item {
-                StatsRow(
-                    activeDays = uiState.activeDays,
-                    transactionCount = uiState.transactionCount,
-                )
-            }
-
-            if (uiState.topCategories.isNotEmpty()) {
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentPadding = PaddingValues(NyatetDuwitSpacing.lg),
+                verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.lg),
+            ) {
                 item {
-                    Text(
-                        text = "Kategori Pengeluaran Teratas",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                }
-
-                items(uiState.topCategories) { category ->
-                    TopCategoryRow(item = category)
-                }
-            }
-
-            if (uiState.dailyTrend.isNotEmpty()) {
-                item {
-                    Text(
-                        text = "Tren Pengeluaran Harian",
-                        style = MaterialTheme.typography.titleMedium,
+                    MonthSelector(
+                        year = uiState.selectedYear,
+                        month = uiState.selectedMonth,
+                        onPreviousMonth = { viewModel.goToPreviousMonth() },
+                        onNextMonth = { viewModel.goToNextMonth() },
                     )
                 }
 
                 item {
-                    SpendingTrendChart(dailyTrend = uiState.dailyTrend)
-                }
-            }
-
-            if (uiState.biggestExpense != null) {
-                item {
-                    Text(
-                        text = "Transaksi Terbesar Bulan Ini",
-                        style = MaterialTheme.typography.titleMedium,
+                    SummaryCards(
+                        totalIncome = uiState.totalIncome,
+                        totalExpense = uiState.totalExpense,
+                        netSavings = uiState.netSavings,
+                        comparison = uiState.comparison,
                     )
                 }
 
                 item {
-                    BiggestExpenseCard(transaction = uiState.biggestExpense!!)
+                    StatsRow(
+                        activeDays = uiState.activeDays,
+                        transactionCount = uiState.transactionCount,
+                    )
                 }
-            }
 
-            if (uiState.isLoading) {
-                item {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator()
+                if (uiState.topCategories.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Kategori Pengeluaran Teratas",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+
+                    items(uiState.topCategories) { category ->
+                        TopCategoryRow(item = category)
+                    }
+                }
+
+                if (uiState.dailyTrend.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Tren Pengeluaran Harian",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+
+                    item {
+                        SpendingTrendChart(dailyTrend = uiState.dailyTrend)
+                    }
+                }
+
+                if (uiState.biggestExpense != null) {
+                    item {
+                        Text(
+                            text = "Transaksi Terbesar Bulan Ini",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+
+                    item {
+                        BiggestExpenseCard(transaction = uiState.biggestExpense!!)
                     }
                 }
             }

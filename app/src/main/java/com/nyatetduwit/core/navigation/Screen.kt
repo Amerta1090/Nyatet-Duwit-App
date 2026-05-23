@@ -16,9 +16,11 @@ sealed class Screen(val route: String) {
         fun createRoute(categoryId: String? = null) =
             if (categoryId != null) "category_form/$categoryId" else "category_form/null"
     }
-    data object TransactionForm : Screen("transaction_form/{transactionId}") {
-        fun createRoute(transactionId: String? = null) =
-            if (transactionId != null) "transaction_form/$transactionId" else "transaction_form/null"
+    data object TransactionForm : Screen("transaction_form/{transactionId}?templateId={templateId}") {
+        fun createRoute(transactionId: String? = null, templateId: String? = null) =
+            if (templateId != null) "transaction_form/${transactionId ?: "null"}?templateId=$templateId"
+            else if (transactionId != null) "transaction_form/$transactionId"
+            else "transaction_form/null"
     }
     data object TransactionDetail : Screen("transaction_detail/{transactionId}") {
         fun createRoute(transactionId: String) = "transaction_detail/$transactionId"

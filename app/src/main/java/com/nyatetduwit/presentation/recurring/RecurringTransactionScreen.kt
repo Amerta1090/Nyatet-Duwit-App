@@ -49,16 +49,26 @@ fun RecurringTransactionScreen(
             )
         },
     ) { paddingValues ->
-        if (recurringTransactions.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center,
-            ) {
-                EmptyRecurringState(onAddRecurring = onAddRecurring)
+        when {
+            uiState.isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(paddingValues),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
             }
-        } else {
+            recurringTransactions.isEmpty() -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    EmptyRecurringState(onAddRecurring = onAddRecurring)
+                }
+            }
+            else -> {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -72,9 +82,10 @@ fun RecurringTransactionScreen(
                         dateFormat = dateFormat,
                         nf = nf,
                         onSkip = { viewModel.skipInstance(recurring.id) },
-                        onPause = { viewModel.deactivateRecurring(recurring.id, onNavigateBack) },
+                        onPause = { viewModel.deactivateRecurring(recurring.id, {}) },
                     )
                 }
+            }
             }
         }
     }
@@ -124,9 +135,10 @@ private fun RecurringTransactionCard(
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = "Rp ${nf.format(recurring.id.hashCode().toLong() % 10000000)}",
+                        text = if (recurring.isActive) "Aktif" else "Nonaktif",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (recurring.isActive) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 IconButton(onClick = { showActions = !showActions }) {

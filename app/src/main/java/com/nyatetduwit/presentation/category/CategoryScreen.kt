@@ -28,6 +28,7 @@ fun CategoryScreen(
 ) {
     val expenseCategories by viewModel.expenseCategories.collectAsState()
     val incomeCategories by viewModel.incomeCategories.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     var showDeleteDialog by remember { mutableStateOf<Category?>(null) }
 
     Scaffold(
@@ -47,7 +48,28 @@ fun CategoryScreen(
             )
         },
     ) { paddingValues ->
-        LazyColumn(
+        when {
+            uiState.isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(paddingValues),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            expenseCategories.isEmpty() && incomeCategories.isEmpty() -> {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(paddingValues),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "Belum ada kategori",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
+            }
+            else -> {
+                LazyColumn(
             modifier = Modifier.padding(paddingValues),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -83,6 +105,8 @@ fun CategoryScreen(
                         onEdit = { onEditCategory(category.id) },
                         onDelete = { showDeleteDialog = category },
                     )
+                }
+            }
                 }
             }
         }

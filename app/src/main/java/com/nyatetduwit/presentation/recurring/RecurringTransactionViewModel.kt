@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.nyatetduwit.domain.model.*
 import com.nyatetduwit.domain.repository.RecurringTransactionRepository
 import com.nyatetduwit.domain.repository.TransactionRepository
+import com.nyatetduwit.domain.usecase.account.GetAccountsUseCase
+import com.nyatetduwit.domain.usecase.category.GetCategoriesUseCase
 import com.nyatetduwit.domain.usecase.recurring.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -24,6 +26,8 @@ class RecurringTransactionViewModel @Inject constructor(
     private val deleteRecurringTransactionUseCase: DeleteRecurringTransactionUseCase,
     private val deactivateRecurringTransactionUseCase: DeactivateRecurringTransactionUseCase,
     private val skipRecurringInstanceUseCase: SkipRecurringInstanceUseCase,
+    private val getAccountsUseCase: GetAccountsUseCase,
+    private val getCategoriesUseCase: GetCategoriesUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecurringTransactionUiState())
@@ -33,6 +37,12 @@ class RecurringTransactionViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val allRecurringTransactions: StateFlow<List<RecurringTransaction>> = getAllRecurringTransactionsUseCase()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val accounts: StateFlow<List<Account>> = getAccountsUseCase()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val categories: StateFlow<List<Category>> = getCategoriesUseCase()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {

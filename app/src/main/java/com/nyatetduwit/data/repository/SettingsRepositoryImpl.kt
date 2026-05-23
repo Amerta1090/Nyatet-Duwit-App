@@ -34,6 +34,9 @@ class SettingsRepositoryImpl @Inject constructor(
     override val isDarkTheme: Flow<Boolean> = dataStore.data
         .map { preferences -> preferences[Keys.DARK_THEME] ?: false }
 
+    override val isDarkThemeExplicit: Flow<Boolean> = dataStore.data
+        .map { preferences -> preferences.contains(Keys.DARK_THEME) }
+
     override val isBiometricEnabled: Flow<Boolean> = dataStore.data
         .map { preferences -> preferences[Keys.BIOMETRIC_ENABLED] ?: true }
 

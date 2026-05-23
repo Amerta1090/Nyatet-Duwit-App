@@ -160,14 +160,23 @@ fun NyatetDuwitNavHost(
 
         composable(
             route = Screen.TransactionForm.route,
-            arguments = listOf(navArgument("transactionId") {
-                type = NavType.StringType
-                nullable = true
-            }),
+            arguments = listOf(
+                navArgument("transactionId") {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument("templateId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ),
         ) { backStackEntry ->
             val transactionId = backStackEntry.arguments?.getString("transactionId")
+            val templateId = backStackEntry.arguments?.getString("templateId")
             TransactionFormScreen(
                 transactionId = if (transactionId == "null") null else transactionId,
+                templateId = if (templateId == "null") null else templateId,
                 onNavigateBack = { navController.popBackStack() },
             )
         }
@@ -218,7 +227,7 @@ fun NyatetDuwitNavHost(
             TemplateScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onTemplateClick = { templateId ->
-                    navController.navigate(Screen.TransactionForm.createRoute(null))
+                    navController.navigate(Screen.TransactionForm.createRoute(templateId = templateId))
                 },
             )
         }

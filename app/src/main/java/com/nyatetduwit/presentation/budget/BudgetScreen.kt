@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.nyatetduwit.domain.model.Budget
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -27,6 +28,7 @@ fun BudgetScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val budgets by viewModel.budgets.collectAsState()
+    var showDeleteBudget by remember { mutableStateOf<Budget?>(null) }
 
     Scaffold(
         topBar = {
@@ -45,37 +47,67 @@ fun BudgetScreen(
             )
         },
     ) { paddingValues ->
-        if (uiState.budgetProgress.isEmpty() && budgets.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center,
-            ) {
-                EmptyBudgetState(onAddBudget = onAddBudget)
+        when {
+            uiState.isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(paddingValues),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(uiState.budgetProgress, key = { it.budgetId }) { progress ->
-                    BudgetProgressCard(
-                        progress = progress,
-                        onEdit = { onEditBudget(progress.budgetId) },
-                        onDelete = {
-                            val budget = budgets.find { it.id == progress.budgetId }
-                            if (budget != null) {
-                                viewModel.deleteBudget(budget) {}
-                            }
-                        },
-                    )
+            uiState.budgetProgress.isEmpty() && budgets.isEmpty() -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    EmptyBudgetState(onAddBudget = onAddBudget)
+                }
+            }
+            else -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    items(uiState.budgetProgress, key = { it.budgetId }) { progress ->
+                        BudgetProgressCard(
+                            progress = progress,
+                            onEdit = { onEditBudget(progress.budgetId) },
+                            onDelete = {
+                                showDeleteBudget = budgets.find { it.id == progress.budgetId }
+                            },
+                        )
+                    }
                 }
             }
         }
+    }
+
+    showDeleteBudget?.let { budget ->
+        AlertDialog(
+            onDismissRequest = { showDeleteBudget = null },
+            title = { Text("Hapus Budget?") },
+            text = { Text("Budget ini akan dihapus. Lanjutkan?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteBudget(budget) { showDeleteBudget = null }
+                    },
+                ) {
+                    Text("Hapus", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteBudget = null }) {
+                    Text("Batal")
+                }
+            },
+        )
     }
 
     uiState.error?.let { error ->
@@ -98,7 +130,6 @@ private fun BudgetProgressCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
     val nf = NumberFormat.getNumberInstance(Locale("id", "ID"))
 
     Card(
@@ -129,7 +160,7 @@ private fun BudgetProgressCard(
                     IconButton(onClick = onEdit) {
                         Icon(Icons.Default.Edit, "Edit", modifier = Modifier.size(20.dp))
                     }
-                    IconButton(onClick = { showDeleteDialog = true }) {
+                    IconButton(onClick = onDelete) {
                         Icon(Icons.Default.Delete, "Delete", modifier = Modifier.size(20.dp))
                     }
                 }
@@ -221,29 +252,6 @@ private fun BudgetProgressCard(
                 )
             }
         }
-    }
-
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Hapus Budget?") },
-            text = { Text("Budget untuk ${progress.categoryName} akan dihapus. Lanjutkan?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDelete()
-                        showDeleteDialog = false
-                    },
-                ) {
-                    Text("Hapus", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Batal")
-                }
-            },
-        )
     }
 }
 

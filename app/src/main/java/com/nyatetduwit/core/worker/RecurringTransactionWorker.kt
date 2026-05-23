@@ -10,6 +10,7 @@ import com.nyatetduwit.domain.repository.RecurringTransactionRepository
 import com.nyatetduwit.domain.repository.TransactionRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.first
 import java.util.Calendar
 import java.util.UUID
 
@@ -30,23 +31,21 @@ class RecurringTransactionWorker @AssistedInject constructor(
                     continue
                 }
 
-                val templateTransaction = transactionRepository.getTransactionById(recurring.templateTransactionId)
-                templateTransaction.collect { template ->
-                    if (template != null) {
-                        val newTransaction = Transaction(
-                            id = UUID.randomUUID().toString(),
-                            type = template.type,
-                            amount = template.amount,
-                            accountId = template.accountId,
-                            categoryId = template.categoryId,
-                            toAccountId = template.toAccountId,
-                            notes = template.notes ?: "Recurring: ${getFrequencyLabel(recurring.frequency)}",
-                            dateTime = recurring.nextDue,
-                            createdAt = System.currentTimeMillis(),
-                            updatedAt = System.currentTimeMillis(),
-                        )
-                        transactionRepository.addTransaction(newTransaction)
-                    }
+                val template = transactionRepository.getTransactionById(recurring.templateTransactionId).first()
+                if (template != null) {
+                    val newTransaction = Transaction(
+                        id = UUID.randomUUID().toString(),
+                        type = template.type,
+                        amount = template.amount,
+                        accountId = template.accountId,
+                        categoryId = template.categoryId,
+                        toAccountId = template.toAccountId,
+                        notes = template.notes ?: "Recurring: ${getFrequencyLabel(recurring.frequency)}",
+                        dateTime = recurring.nextDue,
+                        createdAt = System.currentTimeMillis(),
+                        updatedAt = System.currentTimeMillis(),
+                    )
+                    transactionRepository.addTransaction(newTransaction)
                 }
 
                 val nextDue = calculateNextDue(recurring.frequency, recurring.nextDue)

@@ -152,8 +152,7 @@ fun AccountSetupStep(
                         accountViewModel.onBalanceChange(balance.toLongOrNull() ?: 0L)
                         accountViewModel.onIconChange(getDefaultIcon(selectedType))
                         accountViewModel.onColorChange("#4F6B4E")
-                        accountViewModel.saveAccount()
-                        onComplete()
+                        accountViewModel.saveAccount(onSuccess = onComplete)
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),

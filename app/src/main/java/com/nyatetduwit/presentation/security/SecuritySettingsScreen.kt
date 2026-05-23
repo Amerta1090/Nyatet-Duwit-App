@@ -15,6 +15,9 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.nyatetduwit.NyatetDuwitApp
 import com.nyatetduwit.core.util.HapticFeedback
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,8 +30,10 @@ fun SecuritySettingsScreen(
     val app = context.applicationContext as NyatetDuwitApp
     val securityManager = app.securityManager
     val appLockManager = app.appLockManager
+    val settingsRepository = app.settingsRepository
 
-    var isBiometricEnabled by remember { mutableStateOf(securityManager.isBiometricAvailable()) }
+    val isBiometricEnabled by settingsRepository.isBiometricEnabled
+        .collectAsState(securityManager.isBiometricAvailable())
     var isPinSet by remember { mutableStateOf(securityManager.isPinSet()) }
     var lockTimeout by remember { mutableIntStateOf(appLockManager.getLockTimeoutMinutes()) }
 
@@ -81,9 +86,11 @@ fun SecuritySettingsScreen(
                         }
                         Switch(
                             checked = isBiometricEnabled && securityManager.isBiometricAvailable(),
-                            onCheckedChange = {
+                            onCheckedChange = { enabled ->
                                 HapticFeedback.click(view)
-                                isBiometricEnabled = it
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    settingsRepository.setBiometricEnabled(enabled)
+                                }
                             },
                             enabled = securityManager.isBiometricAvailable(),
                         )

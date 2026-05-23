@@ -4,6 +4,7 @@ import com.nyatetduwit.domain.repository.SettingsRepository;
 import com.nyatetduwit.domain.usecase.account.GetAccountsUseCase;
 import com.nyatetduwit.domain.usecase.category.GetCategoriesByTypeUseCase;
 import com.nyatetduwit.domain.usecase.template.GetPinnedTemplatesUseCase;
+import com.nyatetduwit.domain.usecase.template.GetTemplateByIdUseCase;
 import com.nyatetduwit.domain.usecase.template.IncrementTemplateUsageUseCase;
 import com.nyatetduwit.domain.usecase.transaction.AddTransactionUseCase;
 import com.nyatetduwit.domain.usecase.transaction.BalanceUpdateService;
@@ -46,6 +47,8 @@ public final class TransactionViewModel_Factory implements Factory<TransactionVi
 
   private final Provider<GetPinnedTemplatesUseCase> getPinnedTemplatesUseCaseProvider;
 
+  private final Provider<GetTemplateByIdUseCase> getTemplateByIdUseCaseProvider;
+
   private final Provider<IncrementTemplateUsageUseCase> incrementTemplateUsageUseCaseProvider;
 
   private final Provider<SettingsRepository> settingsRepositoryProvider;
@@ -57,6 +60,7 @@ public final class TransactionViewModel_Factory implements Factory<TransactionVi
       Provider<GetTransactionByIdUseCase> getTransactionByIdUseCaseProvider,
       Provider<BalanceUpdateService> balanceUpdateServiceProvider,
       Provider<GetPinnedTemplatesUseCase> getPinnedTemplatesUseCaseProvider,
+      Provider<GetTemplateByIdUseCase> getTemplateByIdUseCaseProvider,
       Provider<IncrementTemplateUsageUseCase> incrementTemplateUsageUseCaseProvider,
       Provider<SettingsRepository> settingsRepositoryProvider) {
     this.getAccountsUseCaseProvider = getAccountsUseCaseProvider;
@@ -66,13 +70,14 @@ public final class TransactionViewModel_Factory implements Factory<TransactionVi
     this.getTransactionByIdUseCaseProvider = getTransactionByIdUseCaseProvider;
     this.balanceUpdateServiceProvider = balanceUpdateServiceProvider;
     this.getPinnedTemplatesUseCaseProvider = getPinnedTemplatesUseCaseProvider;
+    this.getTemplateByIdUseCaseProvider = getTemplateByIdUseCaseProvider;
     this.incrementTemplateUsageUseCaseProvider = incrementTemplateUsageUseCaseProvider;
     this.settingsRepositoryProvider = settingsRepositoryProvider;
   }
 
   @Override
   public TransactionViewModel get() {
-    return newInstance(getAccountsUseCaseProvider.get(), getCategoriesByTypeUseCaseProvider.get(), addTransactionUseCaseProvider.get(), updateTransactionUseCaseProvider.get(), getTransactionByIdUseCaseProvider.get(), balanceUpdateServiceProvider.get(), getPinnedTemplatesUseCaseProvider.get(), incrementTemplateUsageUseCaseProvider.get(), settingsRepositoryProvider.get());
+    return newInstance(getAccountsUseCaseProvider.get(), getCategoriesByTypeUseCaseProvider.get(), addTransactionUseCaseProvider.get(), updateTransactionUseCaseProvider.get(), getTransactionByIdUseCaseProvider.get(), balanceUpdateServiceProvider.get(), getPinnedTemplatesUseCaseProvider.get(), getTemplateByIdUseCaseProvider.get(), incrementTemplateUsageUseCaseProvider.get(), settingsRepositoryProvider.get());
   }
 
   public static TransactionViewModel_Factory create(
@@ -83,9 +88,10 @@ public final class TransactionViewModel_Factory implements Factory<TransactionVi
       Provider<GetTransactionByIdUseCase> getTransactionByIdUseCaseProvider,
       Provider<BalanceUpdateService> balanceUpdateServiceProvider,
       Provider<GetPinnedTemplatesUseCase> getPinnedTemplatesUseCaseProvider,
+      Provider<GetTemplateByIdUseCase> getTemplateByIdUseCaseProvider,
       Provider<IncrementTemplateUsageUseCase> incrementTemplateUsageUseCaseProvider,
       Provider<SettingsRepository> settingsRepositoryProvider) {
-    return new TransactionViewModel_Factory(getAccountsUseCaseProvider, getCategoriesByTypeUseCaseProvider, addTransactionUseCaseProvider, updateTransactionUseCaseProvider, getTransactionByIdUseCaseProvider, balanceUpdateServiceProvider, getPinnedTemplatesUseCaseProvider, incrementTemplateUsageUseCaseProvider, settingsRepositoryProvider);
+    return new TransactionViewModel_Factory(getAccountsUseCaseProvider, getCategoriesByTypeUseCaseProvider, addTransactionUseCaseProvider, updateTransactionUseCaseProvider, getTransactionByIdUseCaseProvider, balanceUpdateServiceProvider, getPinnedTemplatesUseCaseProvider, getTemplateByIdUseCaseProvider, incrementTemplateUsageUseCaseProvider, settingsRepositoryProvider);
   }
 
   public static TransactionViewModel newInstance(GetAccountsUseCase getAccountsUseCase,
@@ -95,8 +101,9 @@ public final class TransactionViewModel_Factory implements Factory<TransactionVi
       GetTransactionByIdUseCase getTransactionByIdUseCase,
       BalanceUpdateService balanceUpdateService,
       GetPinnedTemplatesUseCase getPinnedTemplatesUseCase,
+      GetTemplateByIdUseCase getTemplateByIdUseCase,
       IncrementTemplateUsageUseCase incrementTemplateUsageUseCase,
       SettingsRepository settingsRepository) {
-    return new TransactionViewModel(getAccountsUseCase, getCategoriesByTypeUseCase, addTransactionUseCase, updateTransactionUseCase, getTransactionByIdUseCase, balanceUpdateService, getPinnedTemplatesUseCase, incrementTemplateUsageUseCase, settingsRepository);
+    return new TransactionViewModel(getAccountsUseCase, getCategoriesByTypeUseCase, addTransactionUseCase, updateTransactionUseCase, getTransactionByIdUseCase, balanceUpdateService, getPinnedTemplatesUseCase, getTemplateByIdUseCase, incrementTemplateUsageUseCase, settingsRepository);
   }
 }

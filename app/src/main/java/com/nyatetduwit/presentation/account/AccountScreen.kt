@@ -29,6 +29,7 @@ fun AccountScreen(
 ) {
     val accounts by viewModel.accounts.collectAsState()
     val totalBalance by viewModel.totalBalance.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     var showDeleteDialog by remember { mutableStateOf<Account?>(null) }
     val lazyListState = rememberLazyListState()
 
@@ -51,12 +52,22 @@ fun AccountScreen(
             )
         },
     ) { paddingValues ->
-        if (accounts.isEmpty()) {
-            EmptyAccountState(
-                modifier = Modifier.padding(paddingValues),
-                onAddAccount = onAddAccount,
-            )
-        } else {
+        when {
+            uiState.isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(paddingValues),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            accounts.isEmpty() -> {
+                EmptyAccountState(
+                    modifier = Modifier.padding(paddingValues),
+                    onAddAccount = onAddAccount,
+                )
+            }
+            else -> {
             LazyColumn(
                 state = lazyListState,
                 modifier = Modifier
@@ -74,6 +85,7 @@ fun AccountScreen(
                         onEdit = { onEditAccount(account.id) },
                         onDelete = { showDeleteDialog = account },
                     )
+                }
                 }
             }
         }
