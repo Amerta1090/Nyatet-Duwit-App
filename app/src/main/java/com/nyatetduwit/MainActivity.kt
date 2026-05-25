@@ -33,9 +33,11 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val darkThemePref by app.settingsRepository.isDarkTheme.collectAsState(initial = false)
             val isExplicit by app.settingsRepository.isDarkThemeExplicit.collectAsState(initial = false)
+            val accentColorPref by app.settingsRepository.accentColor.collectAsState(initial = "teal")
+            val amoledPref by app.settingsRepository.isAmoledDark.collectAsState(initial = false)
             val finalDarkTheme = if (isExplicit) darkThemePref else isSystemInDarkTheme()
 
-            NyatetDuwitTheme(darkTheme = finalDarkTheme) {
+            NyatetDuwitTheme(darkTheme = finalDarkTheme, accentName = accentColorPref, amoledDark = amoledPref) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     if (isLocked) {
                         com.nyatetduwit.presentation.security.LockScreen(

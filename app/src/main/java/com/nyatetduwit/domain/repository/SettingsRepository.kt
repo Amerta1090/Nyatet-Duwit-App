@@ -23,12 +23,16 @@ interface SettingsRepository {
     suspend fun setReminderFrequency(frequency: Int)
     suspend fun setLastTransactionDate(timestamp: Long)
     suspend fun setOnboardingCompleted(completed: Boolean)
-    fun getStreak(): kotlinx.coroutines.flow.Flow<Int>
+    fun getStreak(): Flow<Int>
     suspend fun setStreak(streak: Int)
-    fun getLastActiveDate(): kotlinx.coroutines.flow.Flow<Long>
+    fun getLastActiveDate(): Flow<Long>
     suspend fun setLastActiveDate(date: Long)
-    fun getAutoBackupEnabled(): kotlinx.coroutines.flow.Flow<Boolean>
+    fun getAutoBackupEnabled(): Flow<Boolean>
     suspend fun setAutoBackupEnabled(enabled: Boolean)
-    fun getLastBackupDate(): kotlinx.coroutines.flow.Flow<Long>
+    fun getLastBackupDate(): Flow<Long>
     suspend fun setLastBackupDate(date: Long)
+    val accentColor: Flow<String>
+    suspend fun setAccentColor(color: String)
+    val isAmoledDark: Flow<Boolean>
+    suspend fun setAmoledDark(enabled: Boolean)
 }

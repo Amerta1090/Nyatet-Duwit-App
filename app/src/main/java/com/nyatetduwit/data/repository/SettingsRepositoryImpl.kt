@@ -5,12 +5,12 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.nyatetduwit.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
-
-import androidx.datastore.preferences.core.longPreferencesKey
 
 class SettingsRepositoryImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>
@@ -30,6 +30,8 @@ class SettingsRepositoryImpl @Inject constructor(
         val LAST_ACTIVE_DATE = longPreferencesKey("last_active_date")
         val AUTO_BACKUP_ENABLED = booleanPreferencesKey("auto_backup_enabled")
         val LAST_BACKUP_DATE = longPreferencesKey("last_backup_date")
+        val ACCENT_COLOR = stringPreferencesKey("accent_color")
+        val AMOLED_DARK = booleanPreferencesKey("amoled_dark")
     }
 
     override val isBalanceVisible: Flow<Boolean> = dataStore.data
@@ -124,5 +126,19 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setLastBackupDate(date: Long) {
         dataStore.edit { preferences -> preferences[Keys.LAST_BACKUP_DATE] = date }
+    }
+
+    override val accentColor: Flow<String> = dataStore.data
+        .map { preferences -> preferences[Keys.ACCENT_COLOR] ?: "teal" }
+
+    override suspend fun setAccentColor(color: String) {
+        dataStore.edit { preferences -> preferences[Keys.ACCENT_COLOR] = color }
+    }
+
+    override val isAmoledDark: Flow<Boolean> = dataStore.data
+        .map { preferences -> preferences[Keys.AMOLED_DARK] ?: false }
+
+    override suspend fun setAmoledDark(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[Keys.AMOLED_DARK] = enabled }
     }
 }

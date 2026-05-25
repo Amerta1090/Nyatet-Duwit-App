@@ -43,4 +43,18 @@ sealed class Screen(val route: String) {
     data object SecuritySettings : Screen("security_settings")
     data object Settings : Screen("settings")
     data object About : Screen("about")
+    data object Goals : Screen("goals")
+    data object GoalForm : Screen("goal_form/{goalId}") {
+        fun createRoute(goalId: String? = null) =
+            if (goalId != null) "goal_form/$goalId" else "goal_form/null"
+    }
+    data object Debts : Screen("debts")
+    data object DebtForm : Screen("debt_form/{debtId}") {
+        fun createRoute(debtId: String? = null) =
+            if (debtId != null) "debt_form/$debtId" else "debt_form/null"
+    }
+    data object DebtDetail : Screen("debt_detail/{debtId}") {
+        fun createRoute(debtId: String) = "debt_detail/$debtId"
+    }
+    data object CashflowTrend : Screen("cashflow_trend")
 }

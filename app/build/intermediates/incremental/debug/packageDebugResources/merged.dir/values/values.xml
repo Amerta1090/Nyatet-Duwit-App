@@ -2,5 +2,6 @@
 <resources>
     <color name="ic_launcher_background">#4F6B4E</color>
     <string name="app_name">NyatetDuwit</string>
+    <string name="widget_description">Lihat saldo dan catat transaksi cepat</string>
     <style name="Theme.NyatetDuwit" parent="android:Theme.Material.Light.NoActionBar"/>
 </resources>

@@ -9,8 +9,11 @@ import com.nyatetduwit.core.worker.RecurringTransactionWorker_HiltModule;
 import com.nyatetduwit.core.worker.ReminderWorker_HiltModule;
 import com.nyatetduwit.presentation.account.AccountViewModel_HiltModules;
 import com.nyatetduwit.presentation.budget.BudgetViewModel_HiltModules;
+import com.nyatetduwit.presentation.cashflow.CashflowTrendViewModel_HiltModules;
 import com.nyatetduwit.presentation.category.CategoryViewModel_HiltModules;
 import com.nyatetduwit.presentation.dashboard.DashboardViewModel_HiltModules;
+import com.nyatetduwit.presentation.debt.DebtViewModel_HiltModules;
+import com.nyatetduwit.presentation.goal.GoalViewModel_HiltModules;
 import com.nyatetduwit.presentation.monthlysummary.MonthlySummaryViewModel_HiltModules;
 import com.nyatetduwit.presentation.recurring.RecurringTransactionViewModel_HiltModules;
 import com.nyatetduwit.presentation.remindersettings.ReminderSettingsViewModel_HiltModules;
@@ -178,8 +181,11 @@ public final class NyatetDuwitApp_HiltComponents {
       modules = {
           AccountViewModel_HiltModules.KeyModule.class,
           BudgetViewModel_HiltModules.KeyModule.class,
+          CashflowTrendViewModel_HiltModules.KeyModule.class,
           CategoryViewModel_HiltModules.KeyModule.class,
           DashboardViewModel_HiltModules.KeyModule.class,
+          DebtViewModel_HiltModules.KeyModule.class,
+          GoalViewModel_HiltModules.KeyModule.class,
           HiltWrapper_ActivityRetainedComponentManager_LifecycleModule.class,
           HiltWrapper_SavedStateHandleModule.class,
           MonthlySummaryViewModel_HiltModules.KeyModule.class,
@@ -229,8 +235,11 @@ public final class NyatetDuwitApp_HiltComponents {
       modules = {
           AccountViewModel_HiltModules.BindsModule.class,
           BudgetViewModel_HiltModules.BindsModule.class,
+          CashflowTrendViewModel_HiltModules.BindsModule.class,
           CategoryViewModel_HiltModules.BindsModule.class,
           DashboardViewModel_HiltModules.BindsModule.class,
+          DebtViewModel_HiltModules.BindsModule.class,
+          GoalViewModel_HiltModules.BindsModule.class,
           HiltWrapper_HiltViewModelFactory_ViewModelModule.class,
           MonthlySummaryViewModel_HiltModules.BindsModule.class,
           RecurringTransactionViewModel_HiltModules.BindsModule.class,

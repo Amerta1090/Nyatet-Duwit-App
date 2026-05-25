@@ -24,6 +24,8 @@ data class SettingsUiState(
     val statusMessage: String? = null,
     val restorePreview: RestorePreview? = null,
     val isAutoBackupEnabled: Boolean = false,
+    val accentColor: String = "teal",
+    val isAmoledDark: Boolean = false,
 )
 
 @HiltViewModel
@@ -54,6 +56,16 @@ class SettingsViewModel @Inject constructor(
                 _uiState.update { it.copy(isAutoBackupEnabled = enabled) }
             }
         }
+        viewModelScope.launch {
+            settingsRepository.accentColor.collect { color ->
+                _uiState.update { it.copy(accentColor = color) }
+            }
+        }
+        viewModelScope.launch {
+            settingsRepository.isAmoledDark.collect { amoled ->
+                _uiState.update { it.copy(isAmoledDark = amoled) }
+            }
+        }
     }
 
     fun toggleDarkTheme() {
@@ -79,6 +91,18 @@ class SettingsViewModel @Inject constructor(
             } else {
                 reminderScheduler.cancelAutoBackup(context)
             }
+        }
+    }
+
+    fun setAccentColor(color: String) {
+        viewModelScope.launch {
+            settingsRepository.setAccentColor(color)
+        }
+    }
+
+    fun toggleAmoledDark() {
+        viewModelScope.launch {
+            settingsRepository.setAmoledDark(!_uiState.value.isAmoledDark)
         }
     }
 

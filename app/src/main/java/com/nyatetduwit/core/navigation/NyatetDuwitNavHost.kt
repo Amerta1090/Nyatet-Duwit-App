@@ -11,9 +11,15 @@ import com.nyatetduwit.presentation.account.AccountFormScreen
 import com.nyatetduwit.presentation.account.AccountScreen
 import com.nyatetduwit.presentation.budget.BudgetFormScreen
 import com.nyatetduwit.presentation.budget.BudgetScreen
+import com.nyatetduwit.presentation.cashflow.CashflowTrendScreen
 import com.nyatetduwit.presentation.category.CategoryFormScreen
 import com.nyatetduwit.presentation.category.CategoryScreen
 import com.nyatetduwit.presentation.dashboard.DashboardScreen
+import com.nyatetduwit.presentation.debt.DebtDetailScreen
+import com.nyatetduwit.presentation.debt.DebtFormScreen
+import com.nyatetduwit.presentation.debt.DebtScreen
+import com.nyatetduwit.presentation.goal.GoalFormScreen
+import com.nyatetduwit.presentation.goal.GoalScreen
 import com.nyatetduwit.presentation.recurring.RecurringTransactionFormScreen
 import com.nyatetduwit.presentation.recurring.RecurringTransactionScreen
 import com.nyatetduwit.presentation.monthlysummary.MonthlySummaryScreen
@@ -96,6 +102,9 @@ fun NyatetDuwitNavHost(
                 onNavigateToTemplates = { navController.navigate(Screen.Templates.route) },
                 onNavigateToMonthlySummary = { navController.navigate(Screen.MonthlySummary.createRoute()) },
                 onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                onNavigateToGoals = { navController.navigate(Screen.Goals.route) },
+                onNavigateToDebts = { navController.navigate(Screen.Debts.route) },
+                onNavigateToCashflowTrend = { navController.navigate(Screen.CashflowTrend.route) },
                 onNavigateToAddTransaction = { navController.navigate(Screen.TransactionForm.createRoute()) },
                 onNavigateToTransactionDetail = { transactionId ->
                     navController.navigate(Screen.TransactionDetail.createRoute(transactionId))
@@ -258,6 +267,61 @@ fun NyatetDuwitNavHost(
 
         composable(Screen.ReminderSettings.route) {
             ReminderSettingsScreen(
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(Screen.Goals.route) {
+            GoalScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onAddGoal = { navController.navigate(Screen.GoalForm.createRoute()) },
+                onEditGoal = { goalId -> navController.navigate(Screen.GoalForm.createRoute(goalId)) },
+            )
+        }
+
+        composable(
+            route = Screen.GoalForm.route,
+            arguments = listOf(navArgument("goalId") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val goalId = backStackEntry.arguments?.getString("goalId")
+            GoalFormScreen(
+                goalId = if (goalId == "null") null else goalId,
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(Screen.Debts.route) {
+            DebtScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onAddDebt = { navController.navigate(Screen.DebtForm.createRoute()) },
+                onDebtClick = { debtId -> navController.navigate(Screen.DebtDetail.createRoute(debtId)) },
+            )
+        }
+
+        composable(
+            route = Screen.DebtForm.route,
+            arguments = listOf(navArgument("debtId") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val debtId = backStackEntry.arguments?.getString("debtId")
+            DebtFormScreen(
+                debtId = if (debtId == "null") null else debtId,
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(
+            route = Screen.DebtDetail.route,
+            arguments = listOf(navArgument("debtId") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val debtId = backStackEntry.arguments?.getString("debtId") ?: return@composable
+            DebtDetailScreen(
+                debtId = debtId,
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(Screen.CashflowTrend.route) {
+            CashflowTrendScreen(
                 onNavigateBack = { navController.popBackStack() },
             )
         }

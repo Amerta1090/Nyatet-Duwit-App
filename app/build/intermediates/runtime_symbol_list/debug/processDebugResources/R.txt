@@ -677,6 +677,7 @@ int drawable notification_tile_bg 0x7f080073
 int drawable notify_panel_notification_icon_bg 0x7f080074
 int drawable tooltip_frame_dark 0x7f080075
 int drawable tooltip_frame_light 0x7f080076
+int drawable widget_bg 0x7f080077
 int id ALT 0x7f090000
 int id CTRL 0x7f090001
 int id FUNCTION 0x7f090002
@@ -868,9 +869,14 @@ int id view_tree_on_back_pressed_dispatcher_owner 0x7f0900bb
 int id view_tree_saved_state_registry_owner 0x7f0900bc
 int id view_tree_view_model_store_owner 0x7f0900bd
 int id visible_removing_fragment_view_tag 0x7f0900be
-int id withText 0x7f0900bf
-int id wrap_content 0x7f0900c0
-int id wrapped_composition_tag 0x7f0900c1
+int id widget_balance 0x7f0900bf
+int id widget_balance_label 0x7f0900c0
+int id widget_empty 0x7f0900c1
+int id widget_recent 0x7f0900c2
+int id widget_title 0x7f0900c3
+int id withText 0x7f0900c4
+int id wrap_content 0x7f0900c5
+int id wrapped_composition_tag 0x7f0900c6
 int integer abc_config_activityDefaultDur 0x7f0a0000
 int integer abc_config_activityShortDur 0x7f0a0001
 int integer cancel_button_image_alpha 0x7f0a0002
@@ -926,6 +932,8 @@ int layout select_dialog_item_material 0x7f0c0026
 int layout select_dialog_multichoice_material 0x7f0c0027
 int layout select_dialog_singlechoice_material 0x7f0c0028
 int layout support_simple_spinner_dropdown_item 0x7f0c0029
+int layout widget_medium 0x7f0c002a
+int layout widget_small 0x7f0c002b
 int mipmap ic_launcher 0x7f0d0000
 int mipmap ic_launcher_foreground 0x7f0d0001
 int mipmap ic_launcher_round 0x7f0d0002
@@ -1056,6 +1064,7 @@ int string tab 0x7f0e007b
 int string template_percent 0x7f0e007c
 int string tooltip_description 0x7f0e007d
 int string tooltip_label 0x7f0e007e
+int string widget_description 0x7f0e007f
 int style AlertDialog_AppCompat 0x7f0f0000
 int style AlertDialog_AppCompat_Light 0x7f0f0001
 int style Animation_AppCompat_Dialog 0x7f0f0002
@@ -1933,3 +1942,4 @@ int styleable ViewStubCompat_android_layout 1
 int styleable ViewStubCompat_android_inflatedId 2
 int xml backup_rules 0x7f110000
 int xml data_extraction_rules 0x7f110001
+int xml nyatetduwit_widget_info 0x7f110002

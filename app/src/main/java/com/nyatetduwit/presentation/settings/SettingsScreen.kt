@@ -4,21 +4,28 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nyatetduwit.NyatetDuwitApp
+import com.nyatetduwit.core.theme.NyatetDuwitColor
 import com.nyatetduwit.core.util.HapticFeedback
 import kotlinx.coroutines.launch
 import java.util.*
@@ -161,6 +168,20 @@ fun SettingsScreen(
                 BalanceToggle(
                     isVisible = uiState.isBalanceVisible,
                     onToggle = { viewModel.toggleBalanceVisibility() },
+                )
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+                AmoledToggle(
+                    isEnabled = uiState.isAmoledDark,
+                    onToggle = { viewModel.toggleAmoledDark() },
+                )
+            }
+
+            SectionHeader("Warna Aksen")
+
+            SettingsCard {
+                AccentColorPicker(
+                    currentColor = uiState.accentColor,
+                    onColorSelected = { viewModel.setAccentColor(it) },
                 )
             }
 
@@ -375,6 +396,64 @@ private fun AutoBackupToggle(isEnabled: Boolean, onToggle: () -> Unit) {
             )
         }
         Switch(checked = isEnabled, onCheckedChange = { onToggle() })
+    }
+}
+
+@Composable
+private fun AmoledToggle(isEnabled: Boolean, onToggle: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column {
+            Text("AMOLED Hitam", style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = if (isEnabled) "Latar belakang hitam pekat" else "Latar belakang abu-abu",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Switch(checked = isEnabled, onCheckedChange = { onToggle() })
+    }
+}
+
+data class AccentColorOption(val name: String, val label: String, val color: Color)
+
+@Composable
+private fun AccentColorPicker(currentColor: String, onColorSelected: (String) -> Unit) {
+    val colors = listOf(
+        AccentColorOption("teal", "Teal", NyatetDuwitColor.teal700),
+        AccentColorOption("gold", "Gold", NyatetDuwitColor.gold700),
+        AccentColorOption("coral", "Coral", NyatetDuwitColor.coral700),
+        AccentColorOption("green", "Green", NyatetDuwitColor.green500),
+    )
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("Pilih warna aksen", style = MaterialTheme.typography.bodyLarge)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            colors.forEach { option ->
+                val isSelected = currentColor == option.name
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(option.color)
+                            .then(
+                                if (isSelected) Modifier.border(3.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+                                else Modifier
+                            )
+                            .clickable { onColorSelected(option.name) },
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(option.label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
     }
 }
 

@@ -7,6 +7,8 @@ import com.nyatetduwit.data.local.NyatetDuwitDatabase
 import com.nyatetduwit.data.local.dao.AccountDao
 import com.nyatetduwit.data.local.dao.BudgetDao
 import com.nyatetduwit.data.local.dao.CategoryDao
+import com.nyatetduwit.data.local.dao.DebtDao
+import com.nyatetduwit.data.local.dao.GoalDao
 import com.nyatetduwit.data.local.dao.RecurringTransactionDao
 import com.nyatetduwit.data.local.dao.TemplateDao
 import com.nyatetduwit.data.local.dao.TransactionDao
@@ -75,6 +77,16 @@ object DatabaseModule {
     @Provides
     fun provideTransactionTagDao(database: NyatetDuwitDatabase): TransactionTagDao {
         return database.transactionTagDao()
+    }
+
+    @Provides
+    fun provideGoalDao(database: NyatetDuwitDatabase): GoalDao {
+        return database.goalDao()
+    }
+
+    @Provides
+    fun provideDebtDao(database: NyatetDuwitDatabase): DebtDao {
+        return database.debtDao()
     }
 
     @Provides

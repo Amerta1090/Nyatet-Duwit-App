@@ -3,6 +3,8 @@ package com.nyatetduwit.core.di
 import com.nyatetduwit.data.repository.AccountRepositoryImpl
 import com.nyatetduwit.data.repository.BudgetRepositoryImpl
 import com.nyatetduwit.data.repository.CategoryRepositoryImpl
+import com.nyatetduwit.data.repository.DebtRepositoryImpl
+import com.nyatetduwit.data.repository.GoalRepositoryImpl
 import com.nyatetduwit.data.repository.RecurringTransactionRepositoryImpl
 import com.nyatetduwit.data.repository.SettingsRepositoryImpl
 import com.nyatetduwit.data.repository.TemplateRepositoryImpl
@@ -12,6 +14,8 @@ import com.nyatetduwit.data.repository.TransactionTagRepositoryImpl
 import com.nyatetduwit.domain.repository.AccountRepository
 import com.nyatetduwit.domain.repository.BudgetRepository
 import com.nyatetduwit.domain.repository.CategoryRepository
+import com.nyatetduwit.domain.repository.DebtRepository
+import com.nyatetduwit.domain.repository.GoalRepository
 import com.nyatetduwit.domain.repository.RecurringTransactionRepository
 import com.nyatetduwit.domain.repository.SettingsRepository
 import com.nyatetduwit.domain.repository.TemplateRepository
@@ -63,4 +67,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindTransactionTagRepository(impl: TransactionTagRepositoryImpl): TransactionTagRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindGoalRepository(impl: GoalRepositoryImpl): GoalRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDebtRepository(impl: DebtRepositoryImpl): DebtRepository
 }

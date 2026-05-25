@@ -17,6 +17,10 @@ import com.nyatetduwit.data.local.dao.BudgetDao;
 import com.nyatetduwit.data.local.dao.BudgetDao_Impl;
 import com.nyatetduwit.data.local.dao.CategoryDao;
 import com.nyatetduwit.data.local.dao.CategoryDao_Impl;
+import com.nyatetduwit.data.local.dao.DebtDao;
+import com.nyatetduwit.data.local.dao.DebtDao_Impl;
+import com.nyatetduwit.data.local.dao.GoalDao;
+import com.nyatetduwit.data.local.dao.GoalDao_Impl;
 import com.nyatetduwit.data.local.dao.RecurringTransactionDao;
 import com.nyatetduwit.data.local.dao.RecurringTransactionDao_Impl;
 import com.nyatetduwit.data.local.dao.TemplateDao;
@@ -59,10 +63,14 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
 
   private volatile TransactionTagDao _transactionTagDao;
 
+  private volatile GoalDao _goalDao;
+
+  private volatile DebtDao _debtDao;
+
   @Override
   @NonNull
   protected SupportSQLiteOpenHelper createOpenHelper(@NonNull final DatabaseConfiguration config) {
-    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(5) {
+    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(6) {
       @Override
       public void createAllTables(@NonNull final SupportSQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS `accounts` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `balance` INTEGER NOT NULL, `icon` TEXT NOT NULL, `color` TEXT NOT NULL, `is_hidden` INTEGER NOT NULL, `order_index` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))");
@@ -76,8 +84,11 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
         db.execSQL("CREATE TABLE IF NOT EXISTS `transaction_tags` (`id` TEXT NOT NULL, `transaction_id` TEXT NOT NULL, `tag_name` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_transaction_tags_transaction_id` ON `transaction_tags` (`transaction_id`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_transaction_tags_tag_name` ON `transaction_tags` (`tag_name`)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `goals` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `target_amount` INTEGER NOT NULL, `current_amount` INTEGER NOT NULL, `deadline` INTEGER, `icon` TEXT NOT NULL, `color` TEXT NOT NULL, `is_active` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `debts` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `person_name` TEXT NOT NULL, `amount` INTEGER NOT NULL, `remaining_amount` INTEGER NOT NULL, `due_date` INTEGER, `notes` TEXT, `is_active` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `debt_payments` (`id` TEXT NOT NULL, `debt_id` TEXT NOT NULL, `amount` INTEGER NOT NULL, `date` INTEGER NOT NULL, `notes` TEXT, PRIMARY KEY(`id`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '156c739fa1100c345edc2fd3ed573b25')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'df15c95893848340e1052fa7c1eb23cb')");
       }
 
       @Override
@@ -90,6 +101,9 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
         db.execSQL("DROP TABLE IF EXISTS `templates`");
         db.execSQL("DROP TABLE IF EXISTS `transaction_splits`");
         db.execSQL("DROP TABLE IF EXISTS `transaction_tags`");
+        db.execSQL("DROP TABLE IF EXISTS `goals`");
+        db.execSQL("DROP TABLE IF EXISTS `debts`");
+        db.execSQL("DROP TABLE IF EXISTS `debt_payments`");
         final List<? extends RoomDatabase.Callback> _callbacks = mCallbacks;
         if (_callbacks != null) {
           for (RoomDatabase.Callback _callback : _callbacks) {
@@ -290,9 +304,64 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
                   + " Expected:\n" + _infoTransactionTags + "\n"
                   + " Found:\n" + _existingTransactionTags);
         }
+        final HashMap<String, TableInfo.Column> _columnsGoals = new HashMap<String, TableInfo.Column>(10);
+        _columnsGoals.put("id", new TableInfo.Column("id", "TEXT", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsGoals.put("name", new TableInfo.Column("name", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsGoals.put("target_amount", new TableInfo.Column("target_amount", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsGoals.put("current_amount", new TableInfo.Column("current_amount", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsGoals.put("deadline", new TableInfo.Column("deadline", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsGoals.put("icon", new TableInfo.Column("icon", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsGoals.put("color", new TableInfo.Column("color", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsGoals.put("is_active", new TableInfo.Column("is_active", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsGoals.put("created_at", new TableInfo.Column("created_at", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsGoals.put("updated_at", new TableInfo.Column("updated_at", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        final HashSet<TableInfo.ForeignKey> _foreignKeysGoals = new HashSet<TableInfo.ForeignKey>(0);
+        final HashSet<TableInfo.Index> _indicesGoals = new HashSet<TableInfo.Index>(0);
+        final TableInfo _infoGoals = new TableInfo("goals", _columnsGoals, _foreignKeysGoals, _indicesGoals);
+        final TableInfo _existingGoals = TableInfo.read(db, "goals");
+        if (!_infoGoals.equals(_existingGoals)) {
+          return new RoomOpenHelper.ValidationResult(false, "goals(com.nyatetduwit.data.local.entity.GoalEntity).\n"
+                  + " Expected:\n" + _infoGoals + "\n"
+                  + " Found:\n" + _existingGoals);
+        }
+        final HashMap<String, TableInfo.Column> _columnsDebts = new HashMap<String, TableInfo.Column>(10);
+        _columnsDebts.put("id", new TableInfo.Column("id", "TEXT", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDebts.put("type", new TableInfo.Column("type", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDebts.put("person_name", new TableInfo.Column("person_name", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDebts.put("amount", new TableInfo.Column("amount", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDebts.put("remaining_amount", new TableInfo.Column("remaining_amount", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDebts.put("due_date", new TableInfo.Column("due_date", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDebts.put("notes", new TableInfo.Column("notes", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDebts.put("is_active", new TableInfo.Column("is_active", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDebts.put("created_at", new TableInfo.Column("created_at", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDebts.put("updated_at", new TableInfo.Column("updated_at", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        final HashSet<TableInfo.ForeignKey> _foreignKeysDebts = new HashSet<TableInfo.ForeignKey>(0);
+        final HashSet<TableInfo.Index> _indicesDebts = new HashSet<TableInfo.Index>(0);
+        final TableInfo _infoDebts = new TableInfo("debts", _columnsDebts, _foreignKeysDebts, _indicesDebts);
+        final TableInfo _existingDebts = TableInfo.read(db, "debts");
+        if (!_infoDebts.equals(_existingDebts)) {
+          return new RoomOpenHelper.ValidationResult(false, "debts(com.nyatetduwit.data.local.entity.DebtEntity).\n"
+                  + " Expected:\n" + _infoDebts + "\n"
+                  + " Found:\n" + _existingDebts);
+        }
+        final HashMap<String, TableInfo.Column> _columnsDebtPayments = new HashMap<String, TableInfo.Column>(5);
+        _columnsDebtPayments.put("id", new TableInfo.Column("id", "TEXT", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDebtPayments.put("debt_id", new TableInfo.Column("debt_id", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDebtPayments.put("amount", new TableInfo.Column("amount", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDebtPayments.put("date", new TableInfo.Column("date", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDebtPayments.put("notes", new TableInfo.Column("notes", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        final HashSet<TableInfo.ForeignKey> _foreignKeysDebtPayments = new HashSet<TableInfo.ForeignKey>(0);
+        final HashSet<TableInfo.Index> _indicesDebtPayments = new HashSet<TableInfo.Index>(0);
+        final TableInfo _infoDebtPayments = new TableInfo("debt_payments", _columnsDebtPayments, _foreignKeysDebtPayments, _indicesDebtPayments);
+        final TableInfo _existingDebtPayments = TableInfo.read(db, "debt_payments");
+        if (!_infoDebtPayments.equals(_existingDebtPayments)) {
+          return new RoomOpenHelper.ValidationResult(false, "debt_payments(com.nyatetduwit.data.local.entity.DebtPaymentEntity).\n"
+                  + " Expected:\n" + _infoDebtPayments + "\n"
+                  + " Found:\n" + _existingDebtPayments);
+        }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "156c739fa1100c345edc2fd3ed573b25", "b0f7c47049fa083272257986eeff0b4b");
+    }, "df15c95893848340e1052fa7c1eb23cb", "4ec3f6eeaa7f8f9333196099484045c4");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;
@@ -303,7 +372,7 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
   protected InvalidationTracker createInvalidationTracker() {
     final HashMap<String, String> _shadowTablesMap = new HashMap<String, String>(0);
     final HashMap<String, Set<String>> _viewTables = new HashMap<String, Set<String>>(0);
-    return new InvalidationTracker(this, _shadowTablesMap, _viewTables, "accounts","categories","transactions","budgets","recurring_transactions","templates","transaction_splits","transaction_tags");
+    return new InvalidationTracker(this, _shadowTablesMap, _viewTables, "accounts","categories","transactions","budgets","recurring_transactions","templates","transaction_splits","transaction_tags","goals","debts","debt_payments");
   }
 
   @Override
@@ -327,6 +396,9 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
       _db.execSQL("DELETE FROM `templates`");
       _db.execSQL("DELETE FROM `transaction_splits`");
       _db.execSQL("DELETE FROM `transaction_tags`");
+      _db.execSQL("DELETE FROM `goals`");
+      _db.execSQL("DELETE FROM `debts`");
+      _db.execSQL("DELETE FROM `debt_payments`");
       super.setTransactionSuccessful();
     } finally {
       super.endTransaction();
@@ -352,6 +424,8 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
     _typeConvertersMap.put(TemplateDao.class, TemplateDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(TransactionSplitDao.class, TransactionSplitDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(TransactionTagDao.class, TransactionTagDao_Impl.getRequiredConverters());
+    _typeConvertersMap.put(GoalDao.class, GoalDao_Impl.getRequiredConverters());
+    _typeConvertersMap.put(DebtDao.class, DebtDao_Impl.getRequiredConverters());
     return _typeConvertersMap;
   }
 
@@ -478,6 +552,34 @@ public final class NyatetDuwitDatabase_Impl extends NyatetDuwitDatabase {
           _transactionTagDao = new TransactionTagDao_Impl(this);
         }
         return _transactionTagDao;
+      }
+    }
+  }
+
+  @Override
+  public GoalDao goalDao() {
+    if (_goalDao != null) {
+      return _goalDao;
+    } else {
+      synchronized(this) {
+        if(_goalDao == null) {
+          _goalDao = new GoalDao_Impl(this);
+        }
+        return _goalDao;
+      }
+    }
+  }
+
+  @Override
+  public DebtDao debtDao() {
+    if (_debtDao != null) {
+      return _debtDao;
+    } else {
+      synchronized(this) {
+        if(_debtDao == null) {
+          _debtDao = new DebtDao_Impl(this);
+        }
+        return _debtDao;
       }
     }
   }

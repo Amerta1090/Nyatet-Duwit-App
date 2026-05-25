@@ -81,6 +81,9 @@ fun DashboardScreen(
     onNavigateToTemplates: () -> Unit,
     onNavigateToMonthlySummary: () -> Unit,
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToGoals: () -> Unit = {},
+    onNavigateToDebts: () -> Unit = {},
+    onNavigateToCashflowTrend: () -> Unit = {},
     onNavigateToAddTransaction: () -> Unit,
     onNavigateToTransactionDetail: (String) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
@@ -260,6 +263,9 @@ fun DashboardScreen(
                         onTemplates = onNavigateToTemplates,
                         onRecurring = onNavigateToRecurring,
                         onCategories = onNavigateToCategories,
+                        onGoals = onNavigateToGoals,
+                        onDebts = onNavigateToDebts,
+                        onCashflowTrend = onNavigateToCashflowTrend,
                     )
                 }
 
@@ -528,6 +534,9 @@ private fun QuickMenuGrid(
     onTemplates: () -> Unit,
     onRecurring: () -> Unit,
     onCategories: () -> Unit,
+    onGoals: () -> Unit = {},
+    onDebts: () -> Unit = {},
+    onCashflowTrend: () -> Unit = {},
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm)) {
         SectionHeader(title = "Menu Cepat", action = null, onAction = {})
@@ -569,6 +578,26 @@ private fun QuickMenuGrid(
             QuickMenuItem(
                 label = "Kategori",
                 onClick = onCategories,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
+        ) {
+            QuickMenuItem(
+                label = "Target",
+                onClick = onGoals,
+                modifier = Modifier.weight(1f),
+            )
+            QuickMenuItem(
+                label = "Utang",
+                onClick = onDebts,
+                modifier = Modifier.weight(1f),
+            )
+            QuickMenuItem(
+                label = "Analisis",
+                onClick = onCashflowTrend,
                 modifier = Modifier.weight(1f),
             )
         }

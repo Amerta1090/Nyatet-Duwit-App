@@ -1,10 +1,14 @@
 package com.nyatetduwit.data.local
 
+import android.content.Context
 import androidx.room.Database
+import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.nyatetduwit.data.local.dao.AccountDao
 import com.nyatetduwit.data.local.dao.BudgetDao
 import com.nyatetduwit.data.local.dao.CategoryDao
+import com.nyatetduwit.data.local.dao.DebtDao
+import com.nyatetduwit.data.local.dao.GoalDao
 import com.nyatetduwit.data.local.dao.RecurringTransactionDao
 import com.nyatetduwit.data.local.dao.TemplateDao
 import com.nyatetduwit.data.local.dao.TransactionDao
@@ -13,6 +17,9 @@ import com.nyatetduwit.data.local.dao.TransactionTagDao
 import com.nyatetduwit.data.local.entity.AccountEntity
 import com.nyatetduwit.data.local.entity.BudgetEntity
 import com.nyatetduwit.data.local.entity.CategoryEntity
+import com.nyatetduwit.data.local.entity.DebtEntity
+import com.nyatetduwit.data.local.entity.DebtPaymentEntity
+import com.nyatetduwit.data.local.entity.GoalEntity
 import com.nyatetduwit.data.local.entity.RecurringTransactionEntity
 import com.nyatetduwit.data.local.entity.TemplateEntity
 import com.nyatetduwit.data.local.entity.TransactionEntity
@@ -29,8 +36,11 @@ import com.nyatetduwit.data.local.entity.TransactionTagEntity
         TemplateEntity::class,
         TransactionSplitEntity::class,
         TransactionTagEntity::class,
+        GoalEntity::class,
+        DebtEntity::class,
+        DebtPaymentEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true
 )
 abstract class NyatetDuwitDatabase : RoomDatabase() {
@@ -42,4 +52,24 @@ abstract class NyatetDuwitDatabase : RoomDatabase() {
     abstract fun templateDao(): TemplateDao
     abstract fun transactionSplitDao(): TransactionSplitDao
     abstract fun transactionTagDao(): TransactionTagDao
+    abstract fun goalDao(): GoalDao
+    abstract fun debtDao(): DebtDao
+
+    companion object {
+        @Volatile
+        private var INSTANCE: NyatetDuwitDatabase? = null
+
+        fun getInstance(context: Context): NyatetDuwitDatabase {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: Room.databaseBuilder(
+                    context.applicationContext,
+                    NyatetDuwitDatabase::class.java,
+                    "nyatetduwit_database"
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
+                    .also { INSTANCE = it }
+            }
+        }
+    }
 }
