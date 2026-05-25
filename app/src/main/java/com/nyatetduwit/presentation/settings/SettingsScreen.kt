@@ -185,6 +185,37 @@ fun SettingsScreen(
                 )
             }
 
+            SectionHeader("Mata Uang")
+
+            SettingsCard {
+                BaseCurrencySelector(
+                    currentCurrency = uiState.baseCurrency,
+                    onCurrencySelected = { viewModel.setBaseCurrency(it) },
+                )
+            }
+
+            SectionHeader("Sinkronisasi Cloud")
+
+            SettingsCard {
+                SyncToggle(
+                    isEnabled = uiState.syncEnabled,
+                    onToggle = { viewModel.toggleSync() },
+                    lastSyncTimestamp = uiState.lastSyncTimestamp,
+                )
+            }
+            if (uiState.syncEnabled) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Button(
+                    onClick = { viewModel.triggerSync() },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !uiState.isLoading,
+                ) {
+                    Icon(Icons.Default.Sync, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(if (uiState.isLoading) "Menyinkronkan..." else "Sinkronkan Sekarang")
+                }
+            }
+
             SectionHeader("Keamanan")
 
             SettingsNavCard(
@@ -410,6 +441,66 @@ private fun AmoledToggle(isEnabled: Boolean, onToggle: () -> Unit) {
             Text("AMOLED Hitam", style = MaterialTheme.typography.bodyLarge)
             Text(
                 text = if (isEnabled) "Latar belakang hitam pekat" else "Latar belakang abu-abu",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Switch(checked = isEnabled, onCheckedChange = { onToggle() })
+    }
+}
+
+@Composable
+private fun BaseCurrencySelector(currentCurrency: String, onCurrencySelected: (String) -> Unit) {
+    val currencies = listOf("IDR" to "IDR (Rp)", "USD" to "USD (\$)", "SGD" to "SGD (S\$)", "MYR" to "MYR (RM)", "JPY" to "JPY (¥)", "EUR" to "EUR (€)", "GBP" to "GBP (£)", "CNY" to "CNY (¥)", "KRW" to "KRW (₩)", "THB" to "THB (฿)")
+    Column {
+        Text("Mata uang dasar", style = MaterialTheme.typography.bodyLarge)
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            currencies.take(5).forEach { (code, label) ->
+                FilterChip(
+                    selected = code == currentCurrency,
+                    onClick = { onCurrencySelected(code) },
+                    label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                )
+            }
+        }
+        Spacer(Modifier.height(4.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            currencies.drop(5).forEach { (code, label) ->
+                FilterChip(
+                    selected = code == currentCurrency,
+                    onClick = { onCurrencySelected(code) },
+                    label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SyncToggle(isEnabled: Boolean, onToggle: () -> Unit, lastSyncTimestamp: Long) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column {
+            Text("Sinkronisasi Cloud", style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = when {
+                    isEnabled && lastSyncTimestamp > 0 -> {
+                        val sdf = java.text.SimpleDateFormat("d MMM HH:mm", java.util.Locale("id"))
+                        "Terakhir: ${sdf.format(java.util.Date(lastSyncTimestamp))}"
+                    }
+                    isEnabled -> "Aktif, menunggu sinkronisasi"
+                    else -> "Nonaktif (data lokal saja)"
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

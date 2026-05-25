@@ -25,6 +25,9 @@ data class AccountEntity(
     @ColumnInfo(name = "color")
     val color: String = "#4F6B4E",
 
+    @ColumnInfo(name = "currency_code")
+    val currencyCode: String = "IDR",
+
     @ColumnInfo(name = "is_hidden")
     val isHidden: Boolean = false,
 
@@ -36,4 +39,13 @@ data class AccountEntity(
 
     @ColumnInfo(name = "updated_at")
     val updatedAt: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "sync_status")
+    val syncStatus: String = "local_only",
+
+    @ColumnInfo(name = "last_synced_at")
+    val lastSyncedAt: Long? = null,
+
+    @ColumnInfo(name = "version")
+    val version: Int = 1,
 )

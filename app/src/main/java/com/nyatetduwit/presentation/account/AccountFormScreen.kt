@@ -98,6 +98,12 @@ fun AccountFormScreen(
                 onColorSelected = viewModel::onColorChange,
             )
 
+            Text("Mata Uang", style = MaterialTheme.typography.labelLarge)
+            CurrencySelector(
+                selectedCurrency = formState.currencyCode,
+                onCurrencySelected = viewModel::onCurrencyChange,
+            )
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -135,6 +141,38 @@ fun AccountFormScreen(
                 }
             },
         )
+    }
+}
+
+@Composable
+private fun CurrencySelector(
+    selectedCurrency: String,
+    onCurrencySelected: (String) -> Unit,
+) {
+    val currencies = listOf(
+        "IDR" to "Rp",
+        "USD" to "$",
+        "SGD" to "S$",
+        "MYR" to "RM",
+        "JPY" to "¥",
+        "EUR" to "€",
+        "GBP" to "£",
+        "CNY" to "¥",
+        "KRW" to "₩",
+        "THB" to "฿",
+    )
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        currencies.forEach { (code, symbol) ->
+            FilterChip(
+                selected = code == selectedCurrency,
+                onClick = { onCurrencySelected(code) },
+                label = { Text("$code ($symbol)") },
+            )
+        }
     }
 }
 

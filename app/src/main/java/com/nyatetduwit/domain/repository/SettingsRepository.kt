@@ -35,4 +35,10 @@ interface SettingsRepository {
     suspend fun setAccentColor(color: String)
     val isAmoledDark: Flow<Boolean>
     suspend fun setAmoledDark(enabled: Boolean)
+    val baseCurrency: Flow<String>
+    suspend fun setBaseCurrency(currency: String)
+    val syncEnabled: Flow<Boolean>
+    suspend fun setSyncEnabled(enabled: Boolean)
+    val lastSyncTimestamp: Flow<Long>
+    suspend fun setLastSyncTimestamp(timestamp: Long)
 }

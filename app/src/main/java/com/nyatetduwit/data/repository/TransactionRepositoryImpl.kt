@@ -178,7 +178,12 @@ class TransactionRepositoryImpl @Inject constructor(
             updatedAt = updatedAt,
             isDeleted = isDeleted,
             deletedAt = deletedAt,
+            currencyCode = currencyCode,
+            exchangeRate = exchangeRate,
             attachmentPath = attachmentPath,
+            syncStatus = syncStatus,
+            lastSyncedAt = lastSyncedAt,
+            version = version,
         )
     }
 
@@ -196,7 +201,12 @@ class TransactionRepositoryImpl @Inject constructor(
             updatedAt = System.currentTimeMillis(),
             isDeleted = isDeleted,
             deletedAt = deletedAt,
+            currencyCode = currencyCode,
+            exchangeRate = exchangeRate,
             attachmentPath = attachmentPath,
+            syncStatus = syncStatus,
+            lastSyncedAt = lastSyncedAt,
+            version = version,
         )
     }
 }

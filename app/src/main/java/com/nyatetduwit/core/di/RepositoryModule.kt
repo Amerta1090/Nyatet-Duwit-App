@@ -1,12 +1,16 @@
 package com.nyatetduwit.core.di
 
+import com.nyatetduwit.core.sync.LocalSyncProvider
+import com.nyatetduwit.core.sync.SyncProvider
 import com.nyatetduwit.data.repository.AccountRepositoryImpl
 import com.nyatetduwit.data.repository.BudgetRepositoryImpl
 import com.nyatetduwit.data.repository.CategoryRepositoryImpl
 import com.nyatetduwit.data.repository.DebtRepositoryImpl
 import com.nyatetduwit.data.repository.GoalRepositoryImpl
+import com.nyatetduwit.data.repository.InvestmentRepositoryImpl
 import com.nyatetduwit.data.repository.RecurringTransactionRepositoryImpl
 import com.nyatetduwit.data.repository.SettingsRepositoryImpl
+import com.nyatetduwit.data.repository.SplitBillRepositoryImpl
 import com.nyatetduwit.data.repository.TemplateRepositoryImpl
 import com.nyatetduwit.data.repository.TransactionRepositoryImpl
 import com.nyatetduwit.data.repository.TransactionSplitRepositoryImpl
@@ -16,8 +20,10 @@ import com.nyatetduwit.domain.repository.BudgetRepository
 import com.nyatetduwit.domain.repository.CategoryRepository
 import com.nyatetduwit.domain.repository.DebtRepository
 import com.nyatetduwit.domain.repository.GoalRepository
+import com.nyatetduwit.domain.repository.InvestmentRepository
 import com.nyatetduwit.domain.repository.RecurringTransactionRepository
 import com.nyatetduwit.domain.repository.SettingsRepository
+import com.nyatetduwit.domain.repository.SplitBillRepository
 import com.nyatetduwit.domain.repository.TemplateRepository
 import com.nyatetduwit.domain.repository.TransactionRepository
 import com.nyatetduwit.domain.repository.TransactionSplitRepository
@@ -75,4 +81,16 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindDebtRepository(impl: DebtRepositoryImpl): DebtRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindInvestmentRepository(impl: InvestmentRepositoryImpl): InvestmentRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSplitBillRepository(impl: SplitBillRepositoryImpl): SplitBillRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSyncProvider(impl: LocalSyncProvider): SyncProvider
 }

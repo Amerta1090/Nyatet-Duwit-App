@@ -13,7 +13,12 @@ data class Transaction(
     val updatedAt: Long,
     val isDeleted: Boolean = false,
     val deletedAt: Long? = null,
+    val currencyCode: String = "IDR",
+    val exchangeRate: Double = 1.0,
     val attachmentPath: String? = null,
+    val syncStatus: String = "local_only",
+    val lastSyncedAt: Long? = null,
+    val version: Int = 1,
 )
 
 enum class TransactionType(val value: String) {

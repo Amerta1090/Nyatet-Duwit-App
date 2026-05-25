@@ -57,4 +57,17 @@ sealed class Screen(val route: String) {
         fun createRoute(debtId: String) = "debt_detail/$debtId"
     }
     data object CashflowTrend : Screen("cashflow_trend")
+    data object Investments : Screen("investments")
+    data object InvestmentForm : Screen("investment_form/{investmentId}") {
+        fun createRoute(investmentId: String? = null) =
+            if (investmentId != null) "investment_form/$investmentId" else "investment_form/null"
+    }
+    data object SplitBills : Screen("split_bills")
+    data object SplitBillForm : Screen("split_bill_form/{billId}") {
+        fun createRoute(billId: String? = null) =
+            if (billId != null) "split_bill_form/$billId" else "split_bill_form/null"
+    }
+    data object SplitBillDetail : Screen("split_bill_detail/{billId}") {
+        fun createRoute(billId: String) = "split_bill_detail/$billId"
+    }
 }

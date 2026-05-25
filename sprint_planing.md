@@ -511,3 +511,56 @@
 > - Jangan commit ke fitur yang tidak bisa selesai dalam 1 sprint — split lebih kecil
 > - Quality > Speed. Better delay 1 minggu daripada release buggy feature.
 > - User feedback > Developer assumption. Test early, test often.
+
+
+
+
+progres
+Goal
+- Implement all V4+ features (Multi-Currency F30, Investment F31, Split Bills F32, AI Insights F33, Cloud Sync F29) for NyatetDuwit Android app.
+Constraints & Preferences
+- Follow existing MVVM + Clean Architecture patterns strictly (Room entities, DAO, Repository, UseCase, Hilt DI, Compose screens)
+- No out-of-scope features, no unnecessary refactors, no schema changes unless required
+- Incremental and maintainable implementation
+- Use destructive DB migration (existing app uses fallbackToDestructiveMigration())
+- All UI text in Indonesian
+- Must compile without breaking existing V1-V3 features
+Progress
+Done
+- Multi-Currency (F30): Added currencyCode to AccountEntity, TransactionEntity, and their domain models; added exchangeRate field to TransactionEntity; created ExchangeRateEntity + ExchangeRateDao; added baseCurrency setting to SettingsRepository + SettingsRepositoryImpl; added currency picker to AccountFormScreen + AccountViewModel; added CurrencySelector composable.
+- Investment Tracking (F31): Created InvestmentEntity, InvestmentDao, Investment domain model (with P&L calculation), InvestmentRepository interface + impl, InvestmentUseCases (CRUD + value update), InvestmentViewModel, InvestmentScreen (list + total portfolio card), InvestmentFormScreen (name, type chips, value, cost basis, notes).
+- Shared/Split Bills (F32): Created SplitBillEntity, SplitBillPersonEntity (with FK cascade), SplitBillDao (bills + persons queries), SplitBill domain model + SplitBillPerson, SplitBillRepository interface + impl, SplitBillUseCases, SplitBillViewModel, SplitBillScreen (list cards), SplitBillFormScreen (title, total, paidBy, dynamic person list), SplitBillDetailScreen (summary, person list, settle/mark paid).
+- AI Insights (F33): Enhanced SmartCategorizationUseCase with learned corrections tracking (time-of-day + amount + day-of-week pattern registry), expanded keyword maps (40+ entries), income pattern matching; enhanced AnomalyDetectionUseCase with configurable sensitivity factor, InsightItem type (SAVING_OPPORTUNITY, INCOME_CHANGE, CONSISTENCY), spending pattern and savings rate insights.
+- Cloud Sync (F29): Created SyncStatus enum, Syncable interface, SyncConfig data class, SyncProvider interface + LocalSyncProvider (stub), SyncManager (singleton with syncAll/forceSync), SyncWorker (HiltWorker with periodic + one-time scheduling, network constraint), added syncStatus/lastSyncedAt/version fields to AccountEntity + TransactionEntity + domain models, added syncEnabled/lastSyncTimestamp settings to SettingsRepository + SettingsRepositoryImpl, added sync toggle + trigger button + base currency selector to SettingsScreen + SettingsViewModel.
+- Navigation & DI: Added Screen routes for Investments, InvestmentForm, SplitBills, SplitBillForm, SplitBillDetail; added composable routes in NyatetDuwitNavHost; added Dashboard QuickMenuGrid items for Investments and Split Bills with navigation callbacks; added DAO providers in DatabaseModule; added Repository + SyncProvider bindings in RepositoryModule; updated NyatetDuwitDatabase (entities list + abstract DAO methods, version 7).
+- Database: Added all new entities to NyatetDuwitDatabase entity list; bumped version from 6 to 7; added abstract DAO accessors for ExchangeRateDao, InvestmentDao, SplitBillDao.
+In Progress
+- Build compilation: Kotlin compilation errors remain (3 "unresolved reference" for ExchangeRateDao, InvestmentDao, SplitBillDao in NyatetDuwitDatabase.kt line 65-67). These DAO files exist, so the errors may be cascading from other compilation issues that have been fixed.
+Blocked
+- KSP/Room annotation processing ("MissingType" for NyatetDuwitDatabase) — likely caused by cascading compilation failures from other errors. The SyncWorker.kt Result ambiguity was fixed, and AnomalyDetectionUseCase InsightItem.severity was fixed.
+Key Decisions
+- Used fallbackToDestructiveMigration() (preexisting setting) — no custom migration logic needed for schema changes.
+- Cloud Sync uses a SyncProvider interface with LocalSyncProvider stub — actual backend implementation deferred.
+- SplitBillPersons use ForeignKey CASCADE to parent SplitBill — follows Room best practice for related entities.
+- Investment entity follows Goal/Debt pattern (same package structure, same CRUD use case pattern).
+- All new screens placed in dedicated presentation subpackages matching existing conventions.
+Next Steps
+1. Fix remaining build errors: The 3 "unresolved reference" errors for ExchangeRateDao, InvestmentDao, SplitBillDao indicate the compiler still can't resolve these types — check if these DAO files have compilation issues that need fixing first.
+2. Verify compilation succeeds with ./gradlew assembleDebug.
+3. Re-check DoD / Acceptance Criteria for all 5 V4+ features.
+4. Ensure no regression to previous sprints.
+Critical Context
+- Build error: NyatetDuwitDatabase.kt:65:37 Unresolved reference 'ExchangeRateDao' (same for InvestmentDao, SplitBillDao) — the DAO files exist but either have compilation errors or the build cascading hasn't resolved yet.
+- Previous fixes applied: SyncWorker.kt Result ambiguity fixed (use androidx.work.ListenableWorker.Result fully qualified), AnomalyDetectionUseCase InsightItem missing severity parameter added.
+- New files: 22 files created; 15 existing files modified.
+- Currency formatting uses existing formatRupiah() in com.nyatetduwit.core.util.AnimationUtils.kt — note this is actually a localized currency formatter despite the "Rupiah" name.
+Relevant Files
+- data/local/NyatetDuwitDatabase.kt: Central DB class, version 7, includes all 15 entities + abstract DAO accessors — current build error site.
+- data/local/dao/ExchangeRateDao.kt, InvestmentDao.kt, SplitBillDao.kt: New DAOs — unresolved reference errors likely cascade from other compile issues.
+- core/worker/SyncWorker.kt: HiltWorker for periodic cloud sync — Result ambiguity was fixed.
+- domain/usecase/transaction/AnomalyDetectionUseCase.kt: Enhanced with InsightItem — severity field was missing and fixed.
+- domain/usecase/transaction/SmartCategorizationUseCase.kt: Enhanced with correction learning + expanded keyword maps.
+- presentation/settings/SettingsViewModel.kt: Added baseCurrency + syncEnabled + lastSyncTimestamp + SyncManager injection.
+- presentation/settings/SettingsScreen.kt: Added BaseCurrencySelector + SyncToggle composables.
+- core/di/RepositoryModule.kt: Added bindings for InvestmentRepository, SplitBillRepository, SyncProvider.
+- core/di/DatabaseModule.kt: Added DAO providers for ExchangeRateDao, InvestmentDao, SplitBillDao.

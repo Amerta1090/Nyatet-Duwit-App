@@ -70,6 +70,7 @@ class AccountViewModel @Inject constructor(
                                     balance = account.balance,
                                     icon = account.icon,
                                     color = account.color,
+                                    currencyCode = account.currencyCode,
                                     isHidden = account.isHidden,
                                 ),
                                 isLoading = false,
@@ -116,6 +117,12 @@ class AccountViewModel @Inject constructor(
         }
     }
 
+    fun onCurrencyChange(currency: String) {
+        _uiState.update {
+            it.copy(formState = it.formState.copy(currencyCode = currency))
+        }
+    }
+
     fun saveAccount(onSuccess: () -> Unit = {}) {
         val formState = _uiState.value.formState
         if (formState.name.isBlank()) {
@@ -132,6 +139,7 @@ class AccountViewModel @Inject constructor(
                     balance = formState.balance,
                     icon = formState.icon,
                     color = formState.color,
+                    currencyCode = formState.currencyCode,
                     isHidden = formState.isHidden,
                     orderIndex = 0,
                     createdAt = if (formState.id.isEmpty()) System.currentTimeMillis() else 0,
@@ -222,5 +230,6 @@ data class AccountFormState(
     val balance: Long = 0L,
     val icon: String = "account_balance_wallet",
     val color: String = "#4F6B4E",
+    val currencyCode: String = "IDR",
     val isHidden: Boolean = false,
 )

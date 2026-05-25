@@ -56,10 +56,14 @@ class AccountRepositoryImpl @Inject constructor(
             balance = balance,
             icon = icon,
             color = color,
+            currencyCode = currencyCode,
             isHidden = isHidden,
             orderIndex = orderIndex,
             createdAt = createdAt,
             updatedAt = updatedAt,
+            syncStatus = syncStatus,
+            lastSyncedAt = lastSyncedAt,
+            version = version,
         )
     }
 
@@ -71,10 +75,14 @@ class AccountRepositoryImpl @Inject constructor(
             balance = balance,
             icon = icon,
             color = color,
+            currencyCode = currencyCode,
             isHidden = isHidden,
             orderIndex = orderIndex,
             createdAt = if (id.isEmpty()) System.currentTimeMillis() else createdAt,
             updatedAt = System.currentTimeMillis(),
+            syncStatus = syncStatus,
+            lastSyncedAt = lastSyncedAt,
+            version = version,
         )
     }
 }

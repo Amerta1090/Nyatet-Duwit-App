@@ -32,6 +32,9 @@ class SettingsRepositoryImpl @Inject constructor(
         val LAST_BACKUP_DATE = longPreferencesKey("last_backup_date")
         val ACCENT_COLOR = stringPreferencesKey("accent_color")
         val AMOLED_DARK = booleanPreferencesKey("amoled_dark")
+        val BASE_CURRENCY = stringPreferencesKey("base_currency")
+        val SYNC_ENABLED = booleanPreferencesKey("sync_enabled")
+        val LAST_SYNC_TIMESTAMP = longPreferencesKey("last_sync_timestamp")
     }
 
     override val isBalanceVisible: Flow<Boolean> = dataStore.data
@@ -140,5 +143,26 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setAmoledDark(enabled: Boolean) {
         dataStore.edit { preferences -> preferences[Keys.AMOLED_DARK] = enabled }
+    }
+
+    override val baseCurrency: Flow<String> = dataStore.data
+        .map { preferences -> preferences[Keys.BASE_CURRENCY] ?: "IDR" }
+
+    override suspend fun setBaseCurrency(currency: String) {
+        dataStore.edit { preferences -> preferences[Keys.BASE_CURRENCY] = currency }
+    }
+
+    override val syncEnabled: Flow<Boolean> = dataStore.data
+        .map { preferences -> preferences[Keys.SYNC_ENABLED] ?: false }
+
+    override suspend fun setSyncEnabled(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[Keys.SYNC_ENABLED] = enabled }
+    }
+
+    override val lastSyncTimestamp: Flow<Long> = dataStore.data
+        .map { preferences -> preferences[Keys.LAST_SYNC_TIMESTAMP] ?: 0L }
+
+    override suspend fun setLastSyncTimestamp(timestamp: Long) {
+        dataStore.edit { preferences -> preferences[Keys.LAST_SYNC_TIMESTAMP] = timestamp }
     }
 }

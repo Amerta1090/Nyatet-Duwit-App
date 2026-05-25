@@ -27,6 +27,11 @@ import com.nyatetduwit.presentation.remindersettings.ReminderSettingsScreen
 import com.nyatetduwit.presentation.settings.AboutScreen
 import com.nyatetduwit.presentation.settings.SettingsScreen
 import com.nyatetduwit.presentation.template.TemplateScreen
+import com.nyatetduwit.presentation.investment.InvestmentFormScreen
+import com.nyatetduwit.presentation.investment.InvestmentScreen
+import com.nyatetduwit.presentation.splitbill.SplitBillDetailScreen
+import com.nyatetduwit.presentation.splitbill.SplitBillFormScreen
+import com.nyatetduwit.presentation.splitbill.SplitBillScreen
 import com.nyatetduwit.presentation.transaction.TransactionDetailScreen
 import com.nyatetduwit.presentation.transaction.TransactionFormScreen
 import com.nyatetduwit.presentation.transaction.TransactionListScreen
@@ -105,6 +110,8 @@ fun NyatetDuwitNavHost(
                 onNavigateToGoals = { navController.navigate(Screen.Goals.route) },
                 onNavigateToDebts = { navController.navigate(Screen.Debts.route) },
                 onNavigateToCashflowTrend = { navController.navigate(Screen.CashflowTrend.route) },
+                onNavigateToInvestments = { navController.navigate(Screen.Investments.route) },
+                onNavigateToSplitBills = { navController.navigate(Screen.SplitBills.route) },
                 onNavigateToAddTransaction = { navController.navigate(Screen.TransactionForm.createRoute()) },
                 onNavigateToTransactionDetail = { transactionId ->
                     navController.navigate(Screen.TransactionDetail.createRoute(transactionId))
@@ -323,6 +330,56 @@ fun NyatetDuwitNavHost(
         composable(Screen.CashflowTrend.route) {
             CashflowTrendScreen(
                 onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(Screen.Investments.route) {
+            InvestmentScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onAddInvestment = { navController.navigate(Screen.InvestmentForm.createRoute()) },
+                onEditInvestment = { id -> navController.navigate(Screen.InvestmentForm.createRoute(id)) },
+            )
+        }
+
+        composable(
+            route = Screen.InvestmentForm.route,
+            arguments = listOf(navArgument("investmentId") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val investmentId = backStackEntry.arguments?.getString("investmentId")
+            InvestmentFormScreen(
+                investmentId = if (investmentId == "null") null else investmentId,
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(Screen.SplitBills.route) {
+            SplitBillScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onAddBill = { navController.navigate(Screen.SplitBillForm.createRoute()) },
+                onBillClick = { id -> navController.navigate(Screen.SplitBillDetail.createRoute(id)) },
+            )
+        }
+
+        composable(
+            route = Screen.SplitBillForm.route,
+            arguments = listOf(navArgument("billId") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val billId = backStackEntry.arguments?.getString("billId")
+            SplitBillFormScreen(
+                billId = if (billId == "null") null else billId,
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(
+            route = Screen.SplitBillDetail.route,
+            arguments = listOf(navArgument("billId") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val billId = backStackEntry.arguments?.getString("billId") ?: return@composable
+            SplitBillDetailScreen(
+                billId = billId,
+                onNavigateBack = { navController.popBackStack() },
+                onEditBill = { id -> navController.navigate(Screen.SplitBillForm.createRoute(id)) },
             )
         }
 

@@ -7,10 +7,14 @@ data class Account(
     val balance: Long,
     val icon: String,
     val color: String,
+    val currencyCode: String = "IDR",
     val isHidden: Boolean,
     val orderIndex: Int,
     val createdAt: Long,
     val updatedAt: Long,
+    val syncStatus: String = "local_only",
+    val lastSyncedAt: Long? = null,
+    val version: Int = 1,
 )
 
 enum class AccountType(val value: String) {

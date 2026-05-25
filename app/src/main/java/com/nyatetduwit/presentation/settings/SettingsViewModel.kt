@@ -3,7 +3,9 @@ package com.nyatetduwit.presentation.settings
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nyatetduwit.core.sync.SyncManager
 import com.nyatetduwit.core.worker.ReminderScheduler
+import com.nyatetduwit.core.worker.SyncWorker
 import com.nyatetduwit.data.local.ExportManager
 import com.nyatetduwit.data.local.PdfExportManager
 import com.nyatetduwit.data.local.RestorePreview
@@ -26,6 +28,9 @@ data class SettingsUiState(
     val isAutoBackupEnabled: Boolean = false,
     val accentColor: String = "teal",
     val isAmoledDark: Boolean = false,
+    val baseCurrency: String = "IDR",
+    val syncEnabled: Boolean = false,
+    val lastSyncTimestamp: Long = 0L,
 )
 
 @HiltViewModel
@@ -35,6 +40,7 @@ class SettingsViewModel @Inject constructor(
     val exportManager: ExportManager,
     val pdfExportManager: PdfExportManager,
     private val reminderScheduler: ReminderScheduler,
+    private val syncManager: SyncManager,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -64,6 +70,21 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             settingsRepository.isAmoledDark.collect { amoled ->
                 _uiState.update { it.copy(isAmoledDark = amoled) }
+            }
+        }
+        viewModelScope.launch {
+            settingsRepository.baseCurrency.collect { currency ->
+                _uiState.update { it.copy(baseCurrency = currency) }
+            }
+        }
+        viewModelScope.launch {
+            settingsRepository.syncEnabled.collect { enabled ->
+                _uiState.update { it.copy(syncEnabled = enabled) }
+            }
+        }
+        viewModelScope.launch {
+            settingsRepository.lastSyncTimestamp.collect { timestamp ->
+                _uiState.update { it.copy(lastSyncTimestamp = timestamp) }
             }
         }
     }
@@ -103,6 +124,32 @@ class SettingsViewModel @Inject constructor(
     fun toggleAmoledDark() {
         viewModelScope.launch {
             settingsRepository.setAmoledDark(!_uiState.value.isAmoledDark)
+        }
+    }
+
+    fun setBaseCurrency(currency: String) {
+        viewModelScope.launch { settingsRepository.setBaseCurrency(currency) }
+    }
+
+    fun toggleSync() {
+        viewModelScope.launch {
+            val newValue = !_uiState.value.syncEnabled
+            settingsRepository.setSyncEnabled(newValue)
+            syncManager.config = syncManager.config.copy(enabled = newValue)
+            if (newValue) {
+                SyncWorker.schedule(context)
+            } else {
+                SyncWorker.cancel(context)
+            }
+        }
+    }
+
+    fun triggerSync() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            syncManager.forceSync()
+            settingsRepository.setLastSyncTimestamp(System.currentTimeMillis())
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 

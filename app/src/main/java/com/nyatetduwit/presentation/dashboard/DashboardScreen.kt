@@ -84,6 +84,8 @@ fun DashboardScreen(
     onNavigateToGoals: () -> Unit = {},
     onNavigateToDebts: () -> Unit = {},
     onNavigateToCashflowTrend: () -> Unit = {},
+    onNavigateToInvestments: () -> Unit = {},
+    onNavigateToSplitBills: () -> Unit = {},
     onNavigateToAddTransaction: () -> Unit,
     onNavigateToTransactionDetail: (String) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
@@ -266,6 +268,8 @@ fun DashboardScreen(
                         onGoals = onNavigateToGoals,
                         onDebts = onNavigateToDebts,
                         onCashflowTrend = onNavigateToCashflowTrend,
+                        onInvestments = onNavigateToInvestments,
+                        onSplitBills = onNavigateToSplitBills,
                     )
                 }
 
@@ -537,6 +541,8 @@ private fun QuickMenuGrid(
     onGoals: () -> Unit = {},
     onDebts: () -> Unit = {},
     onCashflowTrend: () -> Unit = {},
+    onInvestments: () -> Unit = {},
+    onSplitBills: () -> Unit = {},
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm)) {
         SectionHeader(title = "Menu Cepat", action = null, onAction = {})
@@ -545,61 +551,33 @@ private fun QuickMenuGrid(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
         ) {
-            QuickMenuItem(
-                label = "Akun",
-                onClick = onAccounts,
-                modifier = Modifier.weight(1f),
-            )
-            QuickMenuItem(
-                label = "Budget",
-                onClick = onBudgets,
-                modifier = Modifier.weight(1f),
-            )
-            QuickMenuItem(
-                label = "Ringkasan",
-                onClick = onMonthlySummary,
-                modifier = Modifier.weight(1f),
-            )
+            QuickMenuItem(label = "Akun", onClick = onAccounts, modifier = Modifier.weight(1f))
+            QuickMenuItem(label = "Budget", onClick = onBudgets, modifier = Modifier.weight(1f))
+            QuickMenuItem(label = "Ringkasan", onClick = onMonthlySummary, modifier = Modifier.weight(1f))
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
         ) {
-            QuickMenuItem(
-                label = "Template",
-                onClick = onTemplates,
-                modifier = Modifier.weight(1f),
-            )
-            QuickMenuItem(
-                label = "Berulang",
-                onClick = onRecurring,
-                modifier = Modifier.weight(1f),
-            )
-            QuickMenuItem(
-                label = "Kategori",
-                onClick = onCategories,
-                modifier = Modifier.weight(1f),
-            )
+            QuickMenuItem(label = "Template", onClick = onTemplates, modifier = Modifier.weight(1f))
+            QuickMenuItem(label = "Berulang", onClick = onRecurring, modifier = Modifier.weight(1f))
+            QuickMenuItem(label = "Kategori", onClick = onCategories, modifier = Modifier.weight(1f))
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
         ) {
-            QuickMenuItem(
-                label = "Target",
-                onClick = onGoals,
-                modifier = Modifier.weight(1f),
-            )
-            QuickMenuItem(
-                label = "Utang",
-                onClick = onDebts,
-                modifier = Modifier.weight(1f),
-            )
-            QuickMenuItem(
-                label = "Analisis",
-                onClick = onCashflowTrend,
-                modifier = Modifier.weight(1f),
-            )
+            QuickMenuItem(label = "Target", onClick = onGoals, modifier = Modifier.weight(1f))
+            QuickMenuItem(label = "Utang", onClick = onDebts, modifier = Modifier.weight(1f))
+            QuickMenuItem(label = "Analisis", onClick = onCashflowTrend, modifier = Modifier.weight(1f))
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
+        ) {
+            QuickMenuItem(label = "Investasi", onClick = onInvestments, modifier = Modifier.weight(1f))
+            QuickMenuItem(label = "Split Bill", onClick = onSplitBills, modifier = Modifier.weight(1f))
+            QuickMenuItem(label = "Pengaturan", onClick = {}, modifier = Modifier.weight(1f))
         }
     }
 }

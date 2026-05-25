@@ -8,8 +8,11 @@ import com.nyatetduwit.data.local.dao.AccountDao
 import com.nyatetduwit.data.local.dao.BudgetDao
 import com.nyatetduwit.data.local.dao.CategoryDao
 import com.nyatetduwit.data.local.dao.DebtDao
+import com.nyatetduwit.data.local.dao.ExchangeRateDao
 import com.nyatetduwit.data.local.dao.GoalDao
+import com.nyatetduwit.data.local.dao.InvestmentDao
 import com.nyatetduwit.data.local.dao.RecurringTransactionDao
+import com.nyatetduwit.data.local.dao.SplitBillDao
 import com.nyatetduwit.data.local.dao.TemplateDao
 import com.nyatetduwit.data.local.dao.TransactionDao
 import com.nyatetduwit.data.local.dao.TransactionSplitDao
@@ -87,6 +90,21 @@ object DatabaseModule {
     @Provides
     fun provideDebtDao(database: NyatetDuwitDatabase): DebtDao {
         return database.debtDao()
+    }
+
+    @Provides
+    fun provideExchangeRateDao(database: NyatetDuwitDatabase): ExchangeRateDao {
+        return database.exchangeRateDao()
+    }
+
+    @Provides
+    fun provideInvestmentDao(database: NyatetDuwitDatabase): InvestmentDao {
+        return database.investmentDao()
+    }
+
+    @Provides
+    fun provideSplitBillDao(database: NyatetDuwitDatabase): SplitBillDao {
+        return database.splitBillDao()
     }
 
     @Provides

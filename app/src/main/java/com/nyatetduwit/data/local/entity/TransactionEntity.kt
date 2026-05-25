@@ -43,6 +43,21 @@ data class TransactionEntity(
     @ColumnInfo(name = "deleted_at")
     val deletedAt: Long? = null,
 
+    @ColumnInfo(name = "currency_code")
+    val currencyCode: String = "IDR",
+
+    @ColumnInfo(name = "exchange_rate")
+    val exchangeRate: Double = 1.0,
+
     @ColumnInfo(name = "attachment_path")
     val attachmentPath: String? = null,
+
+    @ColumnInfo(name = "sync_status")
+    val syncStatus: String = "local_only",
+
+    @ColumnInfo(name = "last_synced_at")
+    val lastSyncedAt: Long? = null,
+
+    @ColumnInfo(name = "version")
+    val version: Int = 1,
 )
