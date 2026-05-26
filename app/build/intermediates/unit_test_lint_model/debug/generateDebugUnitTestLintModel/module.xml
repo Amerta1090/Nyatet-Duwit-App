@@ -1,0 +1,18 @@
+<lint-module
+    format="1"
+    dir="/home/amerta/NyatetDuwit/app"
+    name=":app"
+    type="APP"
+    maven="NyatetDuwit:app:unspecified"
+    agpVersion="8.9.0"
+    buildFolder="build"
+    bootClassPath="/home/amerta/Android/platforms/android-35/android.jar:/home/amerta/Android/build-tools/35.0.0/core-lambda-stubs.jar"
+    javaSourceLevel="17"
+    compileTarget="android-35">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="debug"/>
+</lint-module>

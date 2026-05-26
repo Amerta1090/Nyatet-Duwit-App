@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.9.0" type="conditional_incidents">
+
+    <incident
+        id="InlinedApi"
+        severity="warning"
+        message="">
+        <fix-data minSdk="26-∞" requiresApi="30-∞"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nyatetduwit/core/util/HapticFeedback.kt"
+            line="15"
+            column="29"
+            startOffset="344"
+            endLine="15"
+            endColumn="60"
+            endOffset="375"/>
+        <map>
+            <entry
+                name="message"
+                string="Field requires API level 30 (current min is %1$s): `android.view.HapticFeedbackConstants#CONFIRM`"/>
+            <api-levels id="minSdk"
+                value="26-∞"/>
+            <entry
+                name="name"
+                string="CONFIRM"/>
+            <entry
+                name="owner"
+                string="android.view.HapticFeedbackConstants"/>
+            <api-levels id="requiresApi"
+                value="30-∞"/>
+        </map>
+    </incident>
+
+    <incident
+        id="InlinedApi"
+        severity="warning"
+        message="">
+        <fix-data minSdk="26-∞" requiresApi="30-∞"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nyatetduwit/core/util/HapticFeedback.kt"
+            line="19"
+            column="29"
+            startOffset="440"
+            endLine="19"
+            endColumn="59"
+            endOffset="470"/>
+        <map>
+            <entry
+                name="message"
+                string="Field requires API level 30 (current min is %1$s): `android.view.HapticFeedbackConstants#REJECT`"/>
+            <api-levels id="minSdk"
+                value="26-∞"/>
+            <entry
+                name="name"
+                string="REJECT"/>
+            <entry
+                name="owner"
+                string="android.view.HapticFeedbackConstants"/>
+            <api-levels id="requiresApi"
+                value="30-∞"/>
+        </map>
+    </incident>
+
+    <incident
+        id="NotificationPermission"
+        severity="error"
+        message="When targeting Android 13 or higher, posting a permission requires holding the `POST_NOTIFICATIONS` permission">
+        <fix-data missing="android.permission.POST_NOTIFICATIONS"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/nyatetduwit/core/worker/ReminderWorker.kt"
+            line="114"
+            column="9"
+            startOffset="3953"
+            endLine="114"
+            endColumn="88"
+            endOffset="4032"/>
+    </incident>
+
+    <incident
+        id="ObsoleteSdkInt"
+        severity="warning"
+        message="Unnecessary; `SDK_INT` is always >= 35">
+        <fix-replace
+            description="Delete tools:targetApi"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*debug*MAIN*sourceProvider*0*manifest*0}"
+                startOffset="751"
+                endOffset="771"/>
+        </fix-replace>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*manifest*0}"
+            line="18"
+            column="9"
+            startOffset="751"
+            endLine="18"
+            endColumn="29"
+            endOffset="771"/>
+        <map>
+            <condition minGE="35-∞"/>
+        </map>
+    </incident>
+
+</incidents>

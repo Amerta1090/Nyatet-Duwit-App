@@ -512,3 +512,40 @@
 > - Quality > Speed. Better delay 1 minggu daripada release buggy feature.
 > - User feedback > Developer assumption. Test early, test often.
 
+
+
+Proyek ini sudah jauh melampaui V1 — sudah mengimplementasikan fitur V1, V2, V3, dan sebagian V4+.
+⚠️ Issues & Improvements
+🔴 Critical (harus diperbaiki sebelum UAT)
+1. Destructive database migration — app/.../NyatetDuwitDatabase.kt:83 menggunakan .fallbackToDestructiveMigration(). Artinya semua data user akan hilang setiap ada perubahan schema. Untuk UAT/user real, ini sangat berbahaya. Harus dibuatkan migration yang proper (Migration objects).
+2. Crash reporting tidak ada — Sprint 7.10 menjadwalkan Firebase Crashlytics (P0) tapi tidak terimplementasi. Wajib ada sebelum rilis ke user real.
+3. Error handling silent — Dua tempat error ditelan tanpa trace:
+- TransactionListViewModel.kt:247 — saveAsTemplate error handling kosong
+- LockScreen.kt:137 — biometric auth onError callback kosong
+🟡 Medium (sangat direkomendasikan)
+4. Test coverage sangat minim — Hanya 1 unit test (GetAccountsUseCaseTest) dari ~140 file. Tidak ada integration/UI test sama sekali.
+5. Empty state dashboard kurang optimal — Empty state ditaruh di bawah item yang selalu muncul (balance Rp 0, summary 0/0, menu grid), jadi user baru tidak langsung melihat call-to-action yang jelas.
+6. Adaptive reminder logic counterintuitive — ReminderWorker.kt:86: user aktif (≥5 hari) mendapat frekuensi lebih tinggi (1 = selalu ingatkan). Seharusnya user aktif dikurangi reminder-nya, bukan ditambah.
+7. Room schema export belum di-generate — schemas/ directory tidak ada. Schema export dikonfigurasi tapi belum pernah menghasilkan file.
+🟢 Minor (nice to have)
+ 8. values-night/ kosong — Tidak ada override dark theme resources untuk XML-based components.
+ 9. strings.xml minimalis — Hanya 2 string resources. Sebagian besar teks hardcoded di Compose.
+10. Unused import — SyncManager.kt import Context tapi tidak dipakai.
+11. ProGuard minimal — Hanya untuk Room, Hilt, Coroutines. Perlu tambahan jika nanti ada library baru.
+✅ Kesimpulan Akhir
+Aspek	Penilaian
+Sprint Coverage	Sprint 0-V3 complete ✅, V4+ partial (no cloud sync, no AI)
+Build	✅ Compiles clean
+Lint	✅ Clean (after fixes applied)
+Tests	⚠️ 1 test only
+APK	Bisa di-build & install
+Siap UAT?	Ya, dengan syarat: destructive migration diperbaiki & crash reporting ditambahkan
+Siap rilis real?	Belum — butuh migration proper, crash reporting, dan error handling yang lebih baik
+3 hal wajib sebelum UAT:
+1. Buat proper Room migration (jangan fallbackToDestructiveMigration)
+2. Tambah Firebase Crashlytics (sesuai Sprint 7.10)
+3. Fix silent error handling di ViewModel & LockScreen
+3 hal sangat direkomendasikan sebelum rilis:
+1. Tambah test coverage (minimal integration test untuk critical flow: input transaksi, onboarding)
+2. Improve empty state dashboard (tampilkan di awal, bukan di akhir LazyColumn)
+3. Fix adaptive reminder logic (user aktif dapat reminder lebih sedikit)

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.9.0" type="partial_results">
+    <map id="NotificationPermission">
+        <entry
+            name="source"
+            boolean="true"/>
+    </map>
+    <map id="UnsafeIntentLaunch">
+            <map id="unprotected">
+                <entry
+                    name="com.nyatetduwit.MainActivity"
+                    boolean="true"/>
+                <entry
+                    name="com.nyatetduwit.widget.NyatetDuwitWidget"
+                    boolean="true"/>
+            </map>
+    </map>
+    <map id="UnusedResources">
+        <location id="R.drawable.ic_launcher_foreground"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable/ic_launcher_foreground.xml"
+            line="2"
+            column="1"
+            startOffset="39"
+            endLine="21"
+            endColumn="10"
+            endOffset="734"/>
+        <location id="R.layout.widget_medium"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_medium.xml"
+            line="2"
+            column="1"
+            startOffset="39"
+            endLine="61"
+            endColumn="16"
+            endOffset="2047"/>
+        <entry
+            name="model"
+            string="color[ic_launcher_background(U)],drawable[ic_launcher_foreground(D),ic_logo(U),widget_bg(U)],id[widget_title(U),widget_balance_label(D),widget_balance(U),widget_empty(U),widget_recent(D)],layout[widget_medium(D),widget_small(U)],mipmap[ic_launcher(U),ic_launcher_round(U),ic_launcher_foreground(U)],string[app_name(U),widget_description(U)],style[Theme_NyatetDuwit(U)],xml[data_extraction_rules(U),backup_rules(U),nyatetduwit_widget_info(U)];9^3,a^3,b^0^d,c^0^d,13^f^a;;;"/>
+    </map>
+
+</incidents>

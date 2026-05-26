@@ -2,6 +2,7 @@ package com.nyatetduwit.presentation.settings
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -28,7 +29,12 @@ fun AboutScreen(
         null
     }
     val versionName = packageInfo?.versionName ?: "1.0"
-    val versionCode = packageInfo?.longVersionCode ?: 1
+    @Suppress("DEPRECATION")
+    val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        packageInfo?.longVersionCode ?: 1
+    } else {
+        packageInfo?.versionCode?.toLong() ?: 1
+    }
 
     Scaffold(
         topBar = {

@@ -1,9 +1,30 @@
 -- Merging decision tree log ---
+provider#androidx.startup.InitializationProvider
+INJECTED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:20:9-29:20
+MERGED from [androidx.work:work-runtime:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/cf7c656bee44f6a9f8f08ff37c38e4c1/transformed/work-runtime-2.10.0/AndroidManifest.xml:29:9-37:20
+MERGED from [androidx.work:work-runtime:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/cf7c656bee44f6a9f8f08ff37c38e4c1/transformed/work-runtime-2.10.0/AndroidManifest.xml:29:9-37:20
+MERGED from [androidx.emoji2:emoji2:1.3.0] /home/amerta/.gradle/caches/8.11.1/transforms/2596614a9e4e2fa4dbae598e65e9851d/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.emoji2:emoji2:1.3.0] /home/amerta/.gradle/caches/8.11.1/transforms/2596614a9e4e2fa4dbae598e65e9851d/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/amerta/.gradle/caches/8.11.1/transforms/5e39524ba2f1b0f05f5b9121f219e065/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/amerta/.gradle/caches/8.11.1/transforms/5e39524ba2f1b0f05f5b9121f219e065/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/amerta/.gradle/caches/8.11.1/transforms/4526ecde785af88cf1209e54872cb883/transformed/profileinstaller-1.3.1/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/amerta/.gradle/caches/8.11.1/transforms/4526ecde785af88cf1209e54872cb883/transformed/profileinstaller-1.3.1/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/amerta/.gradle/caches/8.11.1/transforms/daa070058b06ad97c69edc54b1241a8c/transformed/startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/amerta/.gradle/caches/8.11.1/transforms/daa070058b06ad97c69edc54b1241a8c/transformed/startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
+	tools:node
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:24:13-31
+	android:authorities
+		INJECTED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:22:13-68
+	android:exported
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:23:13-37
+	android:name
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:21:13-67
 manifest
-ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:2:1-41:12
-INJECTED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:2:1-41:12
-INJECTED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:2:1-41:12
-INJECTED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:2:1-41:12
+ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:2:1-53:12
+INJECTED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:2:1-53:12
+INJECTED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:2:1-53:12
+INJECTED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:2:1-53:12
 MERGED from [androidx.biometric:biometric:1.1.0] /home/amerta/.gradle/caches/8.11.1/transforms/01b3bb1c940c3b6118b593fcb88523e9/transformed/biometric-1.1.0/AndroidManifest.xml:17:1-29:12
 MERGED from [androidx.work:work-runtime-ktx:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/e608c6e952e294099d4dc56f12fd235a/transformed/work-runtime-ktx-2.10.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.hilt:hilt-work:1.2.0] /home/amerta/.gradle/caches/8.11.1/transforms/7959c3fee411bda9b7b8ce9ec144cca1/transformed/hilt-work-1.2.0/AndroidManifest.xml:17:1-22:12
@@ -103,9 +124,13 @@ MERGED from [androidx.biometric:biometric:1.1.0] /home/amerta/.gradle/caches/8.1
 MERGED from [androidx.biometric:biometric:1.1.0] /home/amerta/.gradle/caches/8.11.1/transforms/01b3bb1c940c3b6118b593fcb88523e9/transformed/biometric-1.1.0/AndroidManifest.xml:24:5-72
 	android:name
 		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:5:22-69
+uses-permission#android.permission.POST_NOTIFICATIONS
+ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:6:5-77
+	android:name
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:6:22-74
 application
-ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:7:5-39:19
-INJECTED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:7:5-39:19
+ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:8:5-51:19
+INJECTED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:8:5-51:19
 MERGED from [androidx.work:work-runtime:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/cf7c656bee44f6a9f8f08ff37c38e4c1/transformed/work-runtime-2.10.0/AndroidManifest.xml:28:5-143:19
 MERGED from [androidx.work:work-runtime:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/cf7c656bee44f6a9f8f08ff37c38e4c1/transformed/work-runtime-2.10.0/AndroidManifest.xml:28:5-143:19
 MERGED from [androidx.compose.ui:ui-tooling-android:1.7.6] /home/amerta/.gradle/caches/8.11.1/transforms/0671e8ce65aa568f288aa178fdb75e42/transformed/ui-tooling-release/AndroidManifest.xml:22:5-26:19
@@ -128,66 +153,77 @@ MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/amert
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/amerta/.gradle/caches/8.11.1/transforms/e3e6e8650ed4dd0f4bdd91ed004a1788/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
 	android:extractNativeLibs
 		INJECTED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml
+	tools:node
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:19:9-27
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.15.0] /home/amerta/.gradle/caches/8.11.1/transforms/49ab21617426ccd4b82cb3e4dcd4dd01/transformed/core-1.15.0/AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:15:9-35
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:16:9-35
 	android:label
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:13:9-41
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:14:9-41
 	android:fullBackupContent
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:11:9-54
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:12:9-54
 	android:roundIcon
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:14:9-54
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:15:9-54
 	tools:targetApi
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:17:9-29
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:18:9-29
 	android:icon
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:12:9-43
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:13:9-43
 	android:allowBackup
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:9:9-35
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:10:9-35
 	android:theme
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:16:9-49
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:17:9-49
 	android:dataExtractionRules
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:10:9-65
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:11:9-65
 	android:name
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:8:9-39
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:9:9-39
 activity#com.nyatetduwit.MainActivity
-ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:18:9-27:20
+ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:30:9-39:20
 	android:windowSoftInputMode
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:22:13-55
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:34:13-55
 	android:exported
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:20:13-36
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:32:13-36
 	android:theme
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:21:13-53
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:33:13-53
 	android:name
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:19:13-41
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:31:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:23:13-26:29
+ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:35:13-38:29
 action#android.intent.action.MAIN
-ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:24:17-69
+ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:36:17-69
 	android:name
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:24:25-66
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:36:25-66
 category#android.intent.category.LAUNCHER
-ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:25:17-77
+ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:37:17-77
 	android:name
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:25:27-74
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:37:27-74
 receiver#com.nyatetduwit.widget.NyatetDuwitWidget
-ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:29:9-38:20
+ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:41:9-50:20
 	android:exported
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:31:13-36
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:43:13-36
 	android:name
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:30:13-53
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:42:13-53
 intent-filter#action:name:android.appwidget.action.APPWIDGET_UPDATE
-ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:32:13-34:29
+ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:44:13-46:29
 action#android.appwidget.action.APPWIDGET_UPDATE
-ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:33:17-84
+ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:45:17-84
 	android:name
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:33:25-81
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:45:25-81
 meta-data#android.appwidget.provider
-ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:35:13-37:67
+ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:47:13-49:67
 	android:resource
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:37:17-64
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:49:17-64
 	android:name
-		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:36:17-58
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:48:17-58
+meta-data#androidx.work.WorkManagerInitializer
+ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:25:13-28:39
+REJECTED from [androidx.work:work-runtime:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/cf7c656bee44f6a9f8f08ff37c38e4c1/transformed/work-runtime-2.10.0/AndroidManifest.xml:34:13-36:52
+	tools:node
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:28:17-36
+	android:value
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:27:17-49
+	android:name
+		ADDED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml:26:17-68
 uses-sdk
 INJECTED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /home/amerta/NyatetDuwit/app/src/main/AndroidManifest.xml
@@ -382,30 +418,6 @@ uses-permission#android.permission.FOREGROUND_SERVICE
 ADDED from [androidx.work:work-runtime:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/cf7c656bee44f6a9f8f08ff37c38e4c1/transformed/work-runtime-2.10.0/AndroidManifest.xml:26:5-77
 	android:name
 		ADDED from [androidx.work:work-runtime:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/cf7c656bee44f6a9f8f08ff37c38e4c1/transformed/work-runtime-2.10.0/AndroidManifest.xml:26:22-74
-provider#androidx.startup.InitializationProvider
-ADDED from [androidx.work:work-runtime:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/cf7c656bee44f6a9f8f08ff37c38e4c1/transformed/work-runtime-2.10.0/AndroidManifest.xml:29:9-37:20
-MERGED from [androidx.emoji2:emoji2:1.3.0] /home/amerta/.gradle/caches/8.11.1/transforms/2596614a9e4e2fa4dbae598e65e9851d/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
-MERGED from [androidx.emoji2:emoji2:1.3.0] /home/amerta/.gradle/caches/8.11.1/transforms/2596614a9e4e2fa4dbae598e65e9851d/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
-MERGED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/amerta/.gradle/caches/8.11.1/transforms/5e39524ba2f1b0f05f5b9121f219e065/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:24:9-32:20
-MERGED from [androidx.lifecycle:lifecycle-process:2.8.7] /home/amerta/.gradle/caches/8.11.1/transforms/5e39524ba2f1b0f05f5b9121f219e065/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:24:9-32:20
-MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/amerta/.gradle/caches/8.11.1/transforms/4526ecde785af88cf1209e54872cb883/transformed/profileinstaller-1.3.1/AndroidManifest.xml:24:9-32:20
-MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/amerta/.gradle/caches/8.11.1/transforms/4526ecde785af88cf1209e54872cb883/transformed/profileinstaller-1.3.1/AndroidManifest.xml:24:9-32:20
-MERGED from [androidx.startup:startup-runtime:1.1.1] /home/amerta/.gradle/caches/8.11.1/transforms/daa070058b06ad97c69edc54b1241a8c/transformed/startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
-MERGED from [androidx.startup:startup-runtime:1.1.1] /home/amerta/.gradle/caches/8.11.1/transforms/daa070058b06ad97c69edc54b1241a8c/transformed/startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
-	tools:node
-		ADDED from [androidx.work:work-runtime:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/cf7c656bee44f6a9f8f08ff37c38e4c1/transformed/work-runtime-2.10.0/AndroidManifest.xml:33:13-31
-	android:authorities
-		ADDED from [androidx.work:work-runtime:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/cf7c656bee44f6a9f8f08ff37c38e4c1/transformed/work-runtime-2.10.0/AndroidManifest.xml:31:13-68
-	android:exported
-		ADDED from [androidx.work:work-runtime:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/cf7c656bee44f6a9f8f08ff37c38e4c1/transformed/work-runtime-2.10.0/AndroidManifest.xml:32:13-37
-	android:name
-		ADDED from [androidx.work:work-runtime:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/cf7c656bee44f6a9f8f08ff37c38e4c1/transformed/work-runtime-2.10.0/AndroidManifest.xml:30:13-67
-meta-data#androidx.work.WorkManagerInitializer
-ADDED from [androidx.work:work-runtime:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/cf7c656bee44f6a9f8f08ff37c38e4c1/transformed/work-runtime-2.10.0/AndroidManifest.xml:34:13-36:52
-	android:value
-		ADDED from [androidx.work:work-runtime:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/cf7c656bee44f6a9f8f08ff37c38e4c1/transformed/work-runtime-2.10.0/AndroidManifest.xml:36:17-49
-	android:name
-		ADDED from [androidx.work:work-runtime:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/cf7c656bee44f6a9f8f08ff37c38e4c1/transformed/work-runtime-2.10.0/AndroidManifest.xml:35:17-68
 service#androidx.work.impl.background.systemalarm.SystemAlarmService
 ADDED from [androidx.work:work-runtime:2.10.0] /home/amerta/.gradle/caches/8.11.1/transforms/cf7c656bee44f6a9f8f08ff37c38e4c1/transformed/work-runtime-2.10.0/AndroidManifest.xml:39:9-45:35
 	android:enabled
