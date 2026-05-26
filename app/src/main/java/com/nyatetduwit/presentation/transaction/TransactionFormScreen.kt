@@ -30,6 +30,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
@@ -161,7 +163,7 @@ fun TransactionFormScreen(
             TransactionTypeSelector(
                 selectedType = formState.type,
                 onTypeSelected = { viewModel.setType(it) },
-                modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.lg),
+                modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.xl),
             )
 
             if (uiState.templates.isNotEmpty()) {
@@ -169,7 +171,7 @@ fun TransactionFormScreen(
                 TemplateStrip(
                     templates = uiState.templates,
                     onTemplateClick = { viewModel.applyTemplate(it) },
-                    modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.lg),
+                    modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.xl),
                 )
             }
 
@@ -177,16 +179,17 @@ fun TransactionFormScreen(
 
             AmountHero(
                 amount = formState.amount,
-                modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.lg),
+                type = formState.type,
+                modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.xl),
             )
 
-            Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xl))
+            Spacer(modifier = Modifier.height(NyatetDuwitSpacing.lg))
 
             if (formState.type != TransactionType.TRANSFER) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = NyatetDuwitSpacing.lg),
+                        .padding(horizontal = NyatetDuwitSpacing.xl),
                     horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
                 ) {
                     AssistChip(
@@ -239,7 +242,7 @@ fun TransactionFormScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = NyatetDuwitSpacing.lg),
+                        .padding(horizontal = NyatetDuwitSpacing.xl),
                     verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
                 ) {
                     val splitTotal = formState.splits.sumOf { it.amount }
@@ -292,7 +295,7 @@ fun TransactionFormScreen(
                 onTagInputChange = { viewModel.setTagInput(it) },
                 onAddTag = { viewModel.addTag(it) },
                 onRemoveTag = { viewModel.removeTag(it) },
-                modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.lg),
+                modifier = Modifier.padding(horizontal = NyatetDuwitSpacing.xl),
             )
 
             Spacer(modifier = Modifier.weight(0.5f))
@@ -326,7 +329,7 @@ fun TransactionFormScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(NyatetDuwitSpacing.lg),
+                    .padding(NyatetDuwitSpacing.xl),
             ) {
                 Text(
                     text = "Pilih Kategori",
@@ -349,7 +352,7 @@ fun TransactionFormScreen(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.lg))
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xl))
             }
         }
     }
@@ -363,7 +366,7 @@ fun TransactionFormScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(NyatetDuwitSpacing.lg),
+                    .padding(NyatetDuwitSpacing.xl),
             ) {
                 Text(
                     text = if (formState.type == TransactionType.TRANSFER) "Pilih Akun Asal" else "Pilih Akun",
@@ -386,7 +389,7 @@ fun TransactionFormScreen(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.lg))
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xl))
             }
         }
     }
@@ -400,7 +403,7 @@ fun TransactionFormScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(NyatetDuwitSpacing.lg),
+                    .padding(NyatetDuwitSpacing.xl),
             ) {
                 Text(
                     text = "Pilih Akun Tujuan",
@@ -423,7 +426,7 @@ fun TransactionFormScreen(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.lg))
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xl))
             }
         }
     }
@@ -438,7 +441,7 @@ fun TransactionFormScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(NyatetDuwitSpacing.lg),
+                    .padding(NyatetDuwitSpacing.xl),
             ) {
                 Text(
                     text = "Pilih Kategori Split",
@@ -465,7 +468,7 @@ fun TransactionFormScreen(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.lg))
+                Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xl))
             }
         }
     }
@@ -479,7 +482,7 @@ fun TransactionFormScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(NyatetDuwitSpacing.lg),
+                    .padding(NyatetDuwitSpacing.xl),
             ) {
                 Text(
                     text = "Catatan Transaksi",
@@ -545,13 +548,13 @@ private fun SplitRow(
     ) {
         Surface(
             modifier = Modifier
-                .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+                .clip(RoundedCornerShape(NyatetDuwitRadius.sm))
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = ripple(),
                 ) { onCategoryClick() }
                 .padding(NyatetDuwitSpacing.md),
-            shape = RoundedCornerShape(NyatetDuwitRadius.md),
+            shape = RoundedCornerShape(NyatetDuwitRadius.sm),
             color = catColor?.copy(alpha = 0.15f) ?: MaterialTheme.colorScheme.surfaceVariant,
         ) {
             Text(
@@ -601,12 +604,14 @@ private fun CategoryPickerItem(
             color = catColor.copy(alpha = 0.15f),
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = getCategoryIcon(category.icon),
-                    contentDescription = null,
-                    tint = catColor,
-                    modifier = Modifier.size(20.dp),
-                )
+                getCategoryIcon(category.icon)?.let {
+                    Icon(
+                        imageVector = it,
+                        contentDescription = null,
+                        tint = catColor,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
             }
         }
         Spacer(modifier = Modifier.width(NyatetDuwitSpacing.md))
@@ -745,21 +750,31 @@ fun TransactionTypeSelector(
         horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
     ) {
         val types = listOf(
-            TransactionType.EXPENSE to "Pengeluaran",
-            TransactionType.INCOME to "Pemasukan",
-            TransactionType.TRANSFER to "Transfer",
+            TransactionType.EXPENSE to "Pengeluaran" to Icons.AutoMirrored.Filled.TrendingDown,
+            TransactionType.INCOME to "Pemasukan" to Icons.AutoMirrored.Filled.TrendingUp,
+            TransactionType.TRANSFER to "Transfer" to Icons.Default.SwapHoriz,
         )
 
-        types.forEach { (type, label) ->
+        types.forEach { (typeAndLabel, icon) ->
+            val (type, label) = typeAndLabel
             val isSelected = type == selectedType
             val bgColor by animateColorAsState(
                 targetValue = if (isSelected) when (type) {
-                    TransactionType.EXPENSE -> NyatetDuwitColor.red100
-                    TransactionType.INCOME -> NyatetDuwitColor.green100
-                    TransactionType.TRANSFER -> NyatetDuwitColor.gold100
+                    TransactionType.EXPENSE -> NyatetDuwitColor.red50
+                    TransactionType.INCOME -> NyatetDuwitColor.teal50
+                    TransactionType.TRANSFER -> NyatetDuwitColor.amber50
                 } else Color.Transparent,
-                animationSpec = spring(),
+                animationSpec = spring(stiffness = 400f),
                 label = "typeBg",
+            )
+            val borderColor by animateColorAsState(
+                targetValue = if (isSelected) when (type) {
+                    TransactionType.EXPENSE -> NyatetDuwitColor.red500
+                    TransactionType.INCOME -> NyatetDuwitColor.teal500
+                    TransactionType.TRANSFER -> NyatetDuwitColor.amber500
+                } else Color.Transparent,
+                animationSpec = spring(stiffness = 400f),
+                label = "typeBorder",
             )
 
             Box(
@@ -774,19 +789,34 @@ fun TransactionTypeSelector(
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         onTypeSelected(type)
                     }
-                    .padding(vertical = NyatetDuwitSpacing.md + 2.dp),
+                    .padding(vertical = NyatetDuwitSpacing.sm + 2.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isSelected) when (type) {
-                        TransactionType.EXPENSE -> NyatetDuwitColor.red500
-                        TransactionType.INCOME -> NyatetDuwitColor.green500
-                        TransactionType.TRANSFER -> NyatetDuwitColor.gold700
-                    } else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.xxs),
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = if (isSelected) when (type) {
+                            TransactionType.EXPENSE -> NyatetDuwitColor.red500
+                            TransactionType.INCOME -> NyatetDuwitColor.teal500
+                            TransactionType.TRANSFER -> NyatetDuwitColor.amber700
+                        } else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                        color = if (isSelected) when (type) {
+                            TransactionType.EXPENSE -> NyatetDuwitColor.red500
+                            TransactionType.INCOME -> NyatetDuwitColor.teal500
+                            TransactionType.TRANSFER -> NyatetDuwitColor.amber700
+                        } else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }
@@ -795,17 +825,24 @@ fun TransactionTypeSelector(
 @Composable
 fun AmountHero(
     amount: Long,
+    type: TransactionType = TransactionType.EXPENSE,
     modifier: Modifier = Modifier,
 ) {
+    val color = if (amount > 0) when (type) {
+        TransactionType.INCOME -> NyatetDuwitColor.teal500
+        TransactionType.EXPENSE -> NyatetDuwitColor.red500
+        TransactionType.TRANSFER -> MaterialTheme.colorScheme.onSurface
+    } else MaterialTheme.colorScheme.onSurfaceVariant
+
     Box(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = formatRupiah(amount),
-            style = MaterialTheme.typography.displayLarge,
+            style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.Bold,
-            color = if (amount > 0) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+            color = color,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -828,7 +865,7 @@ fun TemplateStrip(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(NyatetDuwitRadius.full))
-                    .background(MaterialTheme.colorScheme.surface)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = ripple(),
@@ -889,7 +926,12 @@ private fun BottomActionBar(
             .fillMaxWidth()
             .clip(RoundedCornerShape(topStart = NyatetDuwitRadius.xl, topEnd = NyatetDuwitRadius.xl))
             .background(MaterialTheme.colorScheme.surface)
-            .padding(NyatetDuwitSpacing.lg),
+            .padding(
+                start = NyatetDuwitSpacing.xl,
+                end = NyatetDuwitSpacing.xl,
+                top = NyatetDuwitSpacing.lg,
+                bottom = NyatetDuwitSpacing.lg,
+            ),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -918,19 +960,19 @@ private fun BottomActionBar(
                 )
             }
             PickerChip(
-                label = if (hasNotes) "Ada catatan" else "Catatan",
+                label = if (hasNotes) "Catatan" else "Catatan",
                 isSelected = hasNotes,
                 onClick = onNotesClick,
                 modifier = Modifier.weight(1f),
             )
         }
 
-        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.md))
+        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.lg))
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
+                .height(50.dp)
                 .clip(RoundedCornerShape(NyatetDuwitRadius.md))
                 .background(
                     if (isEnabled && !isLoading) MaterialTheme.colorScheme.primary
@@ -966,7 +1008,7 @@ private fun BottomActionBar(
                     )
                 }
                 Text(
-                    text = if (isLoading) "Menyimpan..." else "Simpan Transaksi",
+                    text = if (isLoading) "Menyimpan..." else "Simpan",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = if (isEnabled && !isLoading) MaterialTheme.colorScheme.onPrimary
@@ -986,10 +1028,10 @@ private fun PickerChip(
 ) {
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+            .clip(RoundedCornerShape(NyatetDuwitRadius.sm))
             .background(
-                if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                else MaterialTheme.colorScheme.surfaceVariant
             )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
@@ -1000,15 +1042,15 @@ private fun PickerChip(
     ) {
         Icon(
             imageVector = when {
-                label == "Kategori" || label == "Tujuan" -> Icons.Default.Description
+                label == "Kategori" -> Icons.Default.Category
                 label == "Akun" -> Icons.Default.AccountBalanceWallet
-                label == "Catatan" || label == "Ada catatan" -> Icons.Default.Description
+                label == "Catatan" -> Icons.Default.Description
                 else -> Icons.Default.Description
             },
             contentDescription = null,
             tint = if (isSelected) MaterialTheme.colorScheme.primary
             else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(18.dp),
         )
         Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xxs))
         Text(
@@ -1016,6 +1058,8 @@ private fun PickerChip(
             style = MaterialTheme.typography.labelSmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
+            color = if (isSelected) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -1030,6 +1074,6 @@ internal fun getCategoryIcon(iconName: String) = when (iconName) {
     "checkroom" -> Icons.Default.Checkroom
     "card_giftcard" -> Icons.Default.CardGiftcard
     "work" -> Icons.Default.Work
-    "trending_up" -> Icons.Default.TrendingUp
+    "trending_up" -> Icons.AutoMirrored.Filled.TrendingUp
     else -> Icons.Default.Category
 }

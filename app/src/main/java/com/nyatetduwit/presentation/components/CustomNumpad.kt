@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Backspace
+import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,9 +38,8 @@ import androidx.compose.ui.unit.sp
 import com.nyatetduwit.core.theme.NyatetDuwitColor
 import com.nyatetduwit.core.theme.NyatetDuwitRadius
 import com.nyatetduwit.core.theme.NyatetDuwitSpacing
-import com.nyatetduwit.core.util.formatRupiah
 
-private val KeyShape = RoundedCornerShape(14.dp)
+private val KeyShape = RoundedCornerShape(NyatetDuwitRadius.md)
 
 @Composable
 fun CustomNumpad(
@@ -55,18 +54,19 @@ fun CustomNumpad(
 ) {
     val haptic = LocalHapticFeedback.current
     val showPresets = confirmLabel == null
-    val isDark = MaterialTheme.colorScheme.surface == NyatetDuwitColor.gray800
+    val isDark = MaterialTheme.colorScheme.surface == NyatetDuwitColor.gray900
+            || MaterialTheme.colorScheme.surface == NyatetDuwitColor.amoledBlack
 
-    val keypadSurface = if (isDark) {
-        NyatetDuwitColor.gray700.copy(alpha = 0.5f)
+    val keypadBg = if (isDark) {
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
     } else {
-        NyatetDuwitColor.gray100.copy(alpha = 0.5f)
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
     }
 
-    val keyColor = if (isDark) {
-        NyatetDuwitColor.gray700
+    val keyBg = if (isDark) {
+        NyatetDuwitColor.gray750
     } else {
-        NyatetDuwitColor.pureWhite
+        Color.White
     }
 
     val keyTextColor = MaterialTheme.colorScheme.onSurface
@@ -79,8 +79,11 @@ fun CustomNumpad(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(NyatetDuwitRadius.xl))
-            .background(keypadSurface)
-            .padding(top = NyatetDuwitSpacing.lg),
+            .background(keypadBg)
+            .padding(
+                top = NyatetDuwitSpacing.lg,
+                bottom = NyatetDuwitSpacing.sm,
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (showPresets) {
@@ -95,28 +98,26 @@ fun CustomNumpad(
                     val chipBg by animateColorAsState(
                         targetValue = if (isActive) {
                             MaterialTheme.colorScheme.primary
-                        } else if (isDark) {
-                            NyatetDuwitColor.gray700
                         } else {
-                            NyatetDuwitColor.pureWhite
+                            MaterialTheme.colorScheme.surface
                         },
-                        animationSpec = spring(),
+                        animationSpec = spring(stiffness = 400f),
                         label = "chipBg",
                     )
                     val chipTextColor by animateColorAsState(
                         targetValue = if (isActive) {
                             MaterialTheme.colorScheme.onPrimary
                         } else {
-                            keyTextColor
+                            MaterialTheme.colorScheme.onSurface
                         },
-                        animationSpec = spring(),
+                        animationSpec = spring(stiffness = 400f),
                         label = "chipText",
                     )
 
-                    Box(
+                    Column(
                         modifier = Modifier
                             .weight(1f)
-                            .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+                            .clip(RoundedCornerShape(NyatetDuwitRadius.sm))
                             .background(chipBg)
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
@@ -126,7 +127,7 @@ fun CustomNumpad(
                                 onPresetClick(preset)
                             }
                             .padding(vertical = NyatetDuwitSpacing.sm + 2.dp),
-                        contentAlignment = Alignment.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
                             text = formatPreset(preset),
@@ -145,7 +146,8 @@ fun CustomNumpad(
             listOf("1", "2", "3"),
             listOf("4", "5", "6"),
             listOf("7", "8", "9"),
-            listOf("000", "0", null),
+            if (confirmLabel != null) listOf("000", "0", "confirm")
+            else listOf("000", "0", null),
         )
 
         rows.forEach { row ->
@@ -161,9 +163,9 @@ fun CustomNumpad(
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .aspectRatio(1.3f)
+                                    .aspectRatio(1.4f)
                                     .clip(KeyShape)
-                                    .background(keyColor)
+                                    .background(keyBg)
                                     .clickable(
                                         interactionSource = remember { MutableInteractionSource() },
                                         indication = ripple(),
@@ -174,24 +176,27 @@ fun CustomNumpad(
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.Backspace,
+                                    imageVector = Icons.AutoMirrored.Filled.Backspace,
                                     contentDescription = "Hapus",
-                                    modifier = Modifier.size(22.dp),
-                                    tint = keyTextColor.copy(alpha = 0.7f),
+                                    modifier = Modifier.size(20.dp),
+                                    tint = keyTextColor.copy(alpha = 0.6f),
                                 )
                             }
                         }
                         "confirm" -> {
                             val isEnabled = currentAmount > 0
+                            val confirmBg by animateColorAsState(
+                                targetValue = if (isEnabled) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.surfaceVariant,
+                                animationSpec = spring(stiffness = 400f),
+                                label = "confirmBg",
+                            )
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .aspectRatio(1.3f)
+                                    .aspectRatio(1.4f)
                                     .clip(KeyShape)
-                                    .background(
-                                        if (isEnabled) MaterialTheme.colorScheme.primary
-                                        else MaterialTheme.colorScheme.surfaceVariant
-                                    )
+                                    .background(confirmBg)
                                     .clickable(
                                         interactionSource = remember { MutableInteractionSource() },
                                         indication = ripple(),
@@ -204,7 +209,7 @@ fun CustomNumpad(
                             ) {
                                 Text(
                                     text = confirmLabel ?: "",
-                                    style = MaterialTheme.typography.labelLarge,
+                                    style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = if (isEnabled) {
                                         MaterialTheme.colorScheme.onPrimary
@@ -218,9 +223,9 @@ fun CustomNumpad(
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .aspectRatio(1.3f)
+                                    .aspectRatio(1.4f)
                                     .clip(KeyShape)
-                                    .background(keyColor)
+                                    .background(keyBg)
                                     .clickable(
                                         interactionSource = remember { MutableInteractionSource() },
                                         indication = ripple(),
@@ -233,10 +238,10 @@ fun CustomNumpad(
                                 Text(
                                     text = key,
                                     style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Medium,
+                                    fontWeight = FontWeight.Normal,
                                     color = keyTextColor,
                                     textAlign = TextAlign.Center,
-                                    fontSize = if (key == "000") 18.sp else 22.sp,
+                                    fontSize = if (key == "000") 16.sp else 22.sp,
                                 )
                             }
                         }
@@ -248,8 +253,6 @@ fun CustomNumpad(
                 Spacer(modifier = Modifier.height(NyatetDuwitSpacing.sm))
             }
         }
-
-        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.sm + 2.dp))
     }
 }
 
@@ -257,6 +260,15 @@ private fun formatPreset(amount: Long): String {
     return when {
         amount >= 1_000_000 -> "${amount / 1_000_000}jt"
         amount >= 1_000 -> "${amount / 1_000}rb"
-        else -> formatRupiah(amount).replace("Rp ", "")
+        else -> formatRupiahSimple(amount)
+    }
+}
+
+private fun formatRupiahSimple(amount: Long): String {
+    val s = amount.toString()
+    val len = s.length
+    return when {
+        len > 3 -> "${s.substring(0, len - 3)}.${s.substring(len - 3)}"
+        else -> s
     }
 }

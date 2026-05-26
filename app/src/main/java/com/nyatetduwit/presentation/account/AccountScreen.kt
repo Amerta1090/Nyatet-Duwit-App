@@ -1,5 +1,6 @@
 package com.nyatetduwit.presentation.account
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,8 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.nyatetduwit.core.theme.NyatetDuwitRadius
+import com.nyatetduwit.core.theme.NyatetDuwitSpacing
 import com.nyatetduwit.domain.model.Account
 import com.nyatetduwit.domain.model.AccountType
 
@@ -72,12 +78,12 @@ fun AccountScreen(
                 state = lazyListState,
                 modifier = Modifier
                     .padding(paddingValues),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = NyatetDuwitSpacing.lg, vertical = NyatetDuwitSpacing.sm),
+                verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
             ) {
                 item {
                     TotalBalanceCard(totalBalance)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(NyatetDuwitSpacing.sm))
                 }
                 items(accounts, key = { it.id }) { account ->
                     AccountItem(
@@ -144,48 +150,44 @@ private fun AccountItemContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(NyatetDuwitSpacing.lg),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = Icons.Default.DragIndicator,
-                contentDescription = "Reorder",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(24.dp),
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Icon(
                 imageVector = getAccountTypeIcon(account.type),
                 contentDescription = null,
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(28.dp),
                 tint = runCatching {
                     Color(account.color.substring(1).toLong(16) or 0xFF000000L)
                 }.getOrElse { MaterialTheme.colorScheme.primary },
             )
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(NyatetDuwitSpacing.md))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = account.name,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
                 )
                 Text(
                     text = getAccountTypeLabel(account.type),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Text(
                 text = formatRupiah(account.balance),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(NyatetDuwitSpacing.sm))
             IconButton(onClick = onDelete) {
                 Icon(
                     Icons.Default.Delete,
                     contentDescription = "Delete",
                     tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(20.dp),
                 )
             }
         }
@@ -199,20 +201,22 @@ private fun TotalBalanceCard(balance: Long) {
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
         ),
+        shape = RoundedCornerShape(NyatetDuwitRadius.md),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(NyatetDuwitSpacing.lg),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = "Total Saldo",
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xxs))
             Text(
                 text = formatRupiah(balance),
                 style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
         }
@@ -227,32 +231,43 @@ private fun EmptyAccountState(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(32.dp),
+            .padding(NyatetDuwitSpacing.xxxl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Icon(
-            Icons.Default.AccountBalanceWallet,
-            contentDescription = null,
-            modifier = Modifier.size(80.dp),
-            tint = MaterialTheme.colorScheme.outlineVariant,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .clip(RoundedCornerShape(NyatetDuwitRadius.xl))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Default.AccountBalanceWallet,
+                contentDescription = null,
+                modifier = Modifier.size(40.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.lg))
         Text(
             text = "Belum ada akun",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.sm))
         Text(
-            text = "Yuk mulai nyatet! Tambah akun pertama kamu untuk mulai tracking keuangan.",
+            text = "Yuk mulai nyatet! Tambah akun pertama kamu.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(modifier = Modifier.height(24.dp))
-        Button(onClick = onAddAccount) {
-            Icon(Icons.Default.Add, null)
-            Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xxl))
+        Button(
+            onClick = onAddAccount,
+            shape = RoundedCornerShape(NyatetDuwitRadius.md),
+        ) {
+            Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(NyatetDuwitSpacing.sm))
             Text("Tambah Akun")
         }
     }

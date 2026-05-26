@@ -1,9 +1,13 @@
 package com.nyatetduwit.presentation.dashboard
 
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -18,17 +22,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,7 +52,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
@@ -55,7 +66,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.material3.ExperimentalMaterial3Api
 import com.nyatetduwit.core.theme.NyatetDuwitColor
 import com.nyatetduwit.core.theme.NyatetDuwitRadius
 import com.nyatetduwit.core.theme.NyatetDuwitSpacing
@@ -105,7 +115,7 @@ fun DashboardScreen(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(36.dp)
+                                .size(32.dp)
                                 .clip(RoundedCornerShape(NyatetDuwitRadius.sm))
                                 .background(MaterialTheme.colorScheme.primary),
                             contentAlignment = Alignment.Center,
@@ -119,7 +129,7 @@ fun DashboardScreen(
                         }
                         Text(
                             text = "NyatetDuwit",
-                            style = MaterialTheme.typography.titleLarge,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                         )
                     }
@@ -132,6 +142,7 @@ fun DashboardScreen(
                                 else Icons.Default.VisibilityOff,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp),
                             )
                         }
                         IconButton(onClick = {
@@ -142,6 +153,7 @@ fun DashboardScreen(
                                 imageVector = Icons.Default.Settings,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp),
                             )
                         }
                     }
@@ -167,8 +179,8 @@ fun DashboardScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
-                    start = NyatetDuwitSpacing.lg,
-                    end = NyatetDuwitSpacing.lg,
+                    start = NyatetDuwitSpacing.xl,
+                    end = NyatetDuwitSpacing.xl,
                     top = NyatetDuwitSpacing.sm,
                     bottom = 96.dp,
                 ),
@@ -182,55 +194,10 @@ fun DashboardScreen(
                 }
 
                 item(key = "income_expense") {
-                    IncomeExpenseBar(
+                    IncomeExpenseSection(
                         income = uiState.monthlyIncome,
                         expense = uiState.monthlyExpense,
                     )
-                }
-
-                if (uiState.recentTransactions.isNotEmpty()) {
-                    item(key = "recent_header") {
-                        SectionHeader(
-                            title = "Transaksi terakhir",
-                            action = "Lihat semua",
-                            onAction = onNavigateToTransactions,
-                        )
-                    }
-
-                    items(
-                        items = uiState.recentTransactions,
-                        key = { "recent_${it.id}" },
-                    ) { transaction ->
-                        TransactionRow(
-                            transaction = transaction,
-                            onClick = { onNavigateToTransactionDetail(transaction.id) },
-                        )
-                    }
-                }
-
-                if (uiState.topCategories.isNotEmpty()) {
-                    item(key = "top_categories") {
-                        Column(verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm)) {
-                            SectionHeader(title = "Pengeluaran terbesar", action = null, onAction = {})
-
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
-                            ) {
-                                items(uiState.topCategories) { category ->
-                                    TopCategoryPill(item = category)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (uiState.showWeeklyCheckIn && uiState.weeklyCheckIn != null) {
-                    item(key = "weekly_checkin") {
-                        WeeklyCheckInCard(
-                            checkInData = uiState.weeklyCheckIn,
-                            onDismiss = { viewModel.dismissWeeklyCheckIn() },
-                        )
-                    }
                 }
 
                 if (uiState.dailyAllowance != null) {
@@ -246,6 +213,43 @@ fun DashboardScreen(
                     }
                 }
 
+                if (uiState.showWeeklyCheckIn && uiState.weeklyCheckIn != null) {
+                    item(key = "weekly_checkin") {
+                        WeeklyCheckInCard(
+                            checkInData = uiState.weeklyCheckIn,
+                            onDismiss = { viewModel.dismissWeeklyCheckIn() },
+                        )
+                    }
+                }
+
+                if (uiState.recentTransactions.isNotEmpty()) {
+                    item(key = "recent_header") {
+                        SectionHeader(
+                            title = "Transaksi terakhir",
+                            action = "Lihat semua",
+                            onAction = onNavigateToTransactions,
+                        )
+                    }
+                    items(
+                        items = uiState.recentTransactions,
+                        key = { "recent_${it.id}" },
+                    ) { transaction ->
+                        TransactionRow(
+                            transaction = transaction,
+                            onClick = { onNavigateToTransactionDetail(transaction.id) },
+                        )
+                    }
+                }
+
+                if (uiState.topCategories.isNotEmpty()) {
+                    item(key = "top_categories") {
+                        Column(verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm)) {
+                            SectionHeader(title = "Pengeluaran terbesar", action = null, onAction = {})
+                            TopCategoryBars(items = uiState.topCategories)
+                        }
+                    }
+                }
+
                 if (uiState.streakData.currentStreak > 0) {
                     item(key = "progress_feedback") {
                         ProgressFeedbackCard(
@@ -258,7 +262,7 @@ fun DashboardScreen(
                 }
 
                 item(key = "quick_menu") {
-                    QuickMenuGrid(
+                    QuickMenuRow(
                         onAccounts = onNavigateToAccounts,
                         onBudgets = onNavigateToBudgets,
                         onMonthlySummary = onNavigateToMonthlySummary,
@@ -288,42 +292,74 @@ private fun BalanceHero(
     totalBalance: Long,
     isBalanceVisible: Boolean,
 ) {
-    Column(
+    val primary = MaterialTheme.colorScheme.primary
+    val primaryContainer = MaterialTheme.colorScheme.primaryContainer
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
+            .height(180.dp)
             .clip(RoundedCornerShape(NyatetDuwitRadius.lg))
-            .background(MaterialTheme.colorScheme.primary)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(primary, primaryContainer),
+                    startY = 0f,
+                    endY = Float.POSITIVE_INFINITY,
+                )
+            )
             .padding(NyatetDuwitSpacing.xxl),
     ) {
-        Text(
-            text = "Total Saldo",
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
-            fontWeight = FontWeight.Medium,
-        )
-        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.sm))
-        Text(
-            text = if (isBalanceVisible) formatRupiah(totalBalance) else "Rp •••••••",
-            style = MaterialTheme.typography.displaySmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onPrimary,
-            modifier = Modifier.animateContentSize(animationSpec = tween(300)),
-        )
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val w = size.width
+            val h = size.height
+            val path = Path().apply {
+                moveTo(w * 0.7f, 0f)
+                cubicTo(w * 0.85f, h * 0.3f, w * 0.95f, h * 0.1f, w + 40f, h * 0.4f)
+                lineTo(w + 40f, h + 40f)
+                lineTo(-40f, h + 40f)
+                lineTo(-40f, 0f)
+                close()
+            }
+            drawPath(
+                path = path,
+                color = Color.White.copy(alpha = 0.06f),
+            )
+        }
+
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "Total Saldo",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+            )
+            Text(
+                text = if (isBalanceVisible) formatRupiah(totalBalance) else "Rp •••••••",
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 }
 
 @Composable
-private fun IncomeExpenseBar(
+private fun IncomeExpenseSection(
     income: Long,
     expense: Long,
 ) {
     val total = income + expense
-    val expenseRatio = if (total > 0) expense.toFloat() / total else 0f
+    val expenseRatio = if (total > 0) expense.toFloat() / total else 0.5f
     val animatedRatio by animateFloatAsState(
         targetValue = expenseRatio,
         animationSpec = spring(stiffness = 200f),
         label = "ratio",
     )
+    val netSavings = income - expense
 
     Column(
         modifier = Modifier
@@ -335,122 +371,165 @@ private fun IncomeExpenseBar(
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(10.dp)
-                        .clip(CircleShape)
-                        .background(NyatetDuwitColor.teal500),
-                )
-                Spacer(modifier = Modifier.width(NyatetDuwitSpacing.sm))
-                Column {
-                    Text(
-                        text = "Pemasukan",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        text = formatRupiah(income),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = NyatetDuwitColor.teal500,
-                    )
-                }
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(10.dp)
-                        .clip(CircleShape)
-                        .background(NyatetDuwitColor.coral500),
-                )
-                Spacer(modifier = Modifier.width(NyatetDuwitSpacing.sm))
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = "Pengeluaran",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        text = formatRupiah(expense),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = NyatetDuwitColor.coral500,
-                    )
-                }
-            }
+            LabeledAmount(
+                label = "Pemasukan",
+                amount = income,
+                color = NyatetDuwitColor.teal500,
+            )
+            LabeledAmount(
+                label = "Pengeluaran",
+                amount = expense,
+                color = NyatetDuwitColor.red500,
+                alignEnd = true,
+            )
         }
+
         Spacer(modifier = Modifier.height(NyatetDuwitSpacing.md))
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(6.dp)
+                .height(32.dp)
                 .clip(RoundedCornerShape(NyatetDuwitRadius.full))
                 .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.CenterStart,
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth(animatedRatio)
-                    .height(6.dp)
+                    .height(32.dp)
                     .clip(RoundedCornerShape(NyatetDuwitRadius.full))
-                    .background(NyatetDuwitColor.coral500),
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                NyatetDuwitColor.teal400,
+                                NyatetDuwitColor.teal500,
+                                NyatetDuwitColor.coral500,
+                                NyatetDuwitColor.red500,
+                            ),
+                        )
+                    ),
             )
-        }
-        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xxs))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            val netSavings = income - expense
-            val savingsText = if (netSavings >= 0) {
-                "Sisa ${formatRupiah(netSavings)}"
-            } else {
-                "Defisit ${formatRupiah(-netSavings)}"
-            }
+
             Text(
-                text = savingsText,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Medium,
-                color = if (netSavings >= 0) NyatetDuwitColor.teal500 else NyatetDuwitColor.coral500,
+                text = "${(expenseRatio * 100).toInt()}%",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = NyatetDuwitSpacing.md),
             )
-            if (total > 0) {
-                Text(
-                    text = "${(expenseRatio * 100).toInt()}% habis",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
         }
+
+        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.sm))
+
+        Text(
+            text = if (netSavings >= 0) {
+                "Sisa ${formatRupiah(netSavings)} dari total ${formatRupiah(total)}"
+            } else {
+                "Defisit ${formatRupiah(-netSavings)} dari total ${formatRupiah(total)}"
+            },
+            style = MaterialTheme.typography.labelMedium,
+            color = if (netSavings >= 0) NyatetDuwitColor.teal500 else NyatetDuwitColor.red500,
+        )
     }
 }
 
 @Composable
-private fun TopCategoryPill(item: TopCategoryItem) {
-    Column(
-        modifier = Modifier
-            .clip(RoundedCornerShape(NyatetDuwitRadius.md))
-            .background(MaterialTheme.colorScheme.surface)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = ripple(),
-            ) { }
-            .padding(horizontal = NyatetDuwitSpacing.md, vertical = NyatetDuwitSpacing.sm + 2.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(text = item.categoryIcon, style = MaterialTheme.typography.titleLarge)
-        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xxs))
+private fun LabeledAmount(
+    label: String,
+    amount: Long,
+    color: Color,
+    alignEnd: Boolean = false,
+) {
+    val horizontalAlignment = if (alignEnd) Alignment.End else Alignment.Start
+    Column(horizontalAlignment = horizontalAlignment) {
         Text(
-            text = item.categoryName,
+            text = label,
             style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-            maxLines = 1,
-        )
-        Text(
-            text = formatRupiah(item.total),
-            style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        Text(
+            text = formatRupiah(amount),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = color,
+        )
+    }
+}
+
+@Composable
+private fun TopCategoryBars(items: List<TopCategoryItem>) {
+    val maxAmount = items.maxOfOrNull { it.total } ?: 1L
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(NyatetDuwitSpacing.lg),
+        verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.md),
+    ) {
+        items.forEach { item ->
+            val fraction = if (maxAmount > 0) item.total.toFloat() / maxAmount else 0f
+            val animatedFraction by animateFloatAsState(
+                targetValue = fraction,
+                animationSpec = spring(stiffness = 150f),
+                label = "catBar",
+            )
+
+            Column(verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.xs)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = item.categoryIcon,
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+                        Text(
+                            text = item.categoryName,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                    Text(
+                        text = formatRupiah(item.total),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+
+                val catColor = runCatching {
+                    Color(item.categoryColor.substring(1).toLong(16) or 0xFF000000L)
+                }.getOrElse { MaterialTheme.colorScheme.primary }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(NyatetDuwitRadius.full))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(animatedFraction)
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(NyatetDuwitRadius.full))
+                            .background(catColor),
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -462,18 +541,18 @@ private fun TransactionRow(
     val (icon, bgColor, amountColor) = when (transaction.type) {
         TransactionType.INCOME -> Triple(
             "↓",
-            NyatetDuwitColor.green100,
-            NyatetDuwitColor.green500,
+            NyatetDuwitColor.teal50,
+            NyatetDuwitColor.teal500,
         )
         TransactionType.EXPENSE -> Triple(
             "↑",
-            NyatetDuwitColor.red100,
+            NyatetDuwitColor.red50,
             NyatetDuwitColor.red500,
         )
         TransactionType.TRANSFER -> Triple(
             "⇄",
-            NyatetDuwitColor.gold100,
-            MaterialTheme.colorScheme.onSurfaceVariant,
+            NyatetDuwitColor.amber50,
+            NyatetDuwitColor.amber700,
         )
     }
 
@@ -486,19 +565,24 @@ private fun TransactionRow(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple(),
             ) { onClick() }
-            .padding(NyatetDuwitSpacing.lg),
+            .padding(
+                start = NyatetDuwitSpacing.lg,
+                end = NyatetDuwitSpacing.md,
+                top = NyatetDuwitSpacing.sm + 2.dp,
+                bottom = NyatetDuwitSpacing.sm + 2.dp,
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
-                .size(42.dp)
-                .clip(RoundedCornerShape(NyatetDuwitRadius.md))
+                .size(38.dp)
+                .clip(RoundedCornerShape(NyatetDuwitRadius.sm))
                 .background(bgColor),
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = icon,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = amountColor,
             )
@@ -521,63 +605,58 @@ private fun TransactionRow(
             )
         }
 
-        Text(
-            text = formatAmount(transaction),
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            color = amountColor,
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.xs),
+        ) {
+            Text(
+                text = formatAmount(transaction),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = amountColor,
+            )
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                modifier = Modifier.size(16.dp),
+            )
+        }
     }
 }
 
 @Composable
-private fun QuickMenuGrid(
+private fun QuickMenuRow(
     onAccounts: () -> Unit,
     onBudgets: () -> Unit,
     onMonthlySummary: () -> Unit,
     onTemplates: () -> Unit,
     onRecurring: () -> Unit,
     onCategories: () -> Unit,
-    onGoals: () -> Unit = {},
-    onDebts: () -> Unit = {},
-    onCashflowTrend: () -> Unit = {},
-    onInvestments: () -> Unit = {},
-    onSplitBills: () -> Unit = {},
+    onGoals: () -> Unit,
+    onDebts: () -> Unit,
+    onCashflowTrend: () -> Unit,
+    onInvestments: () -> Unit,
+    onSplitBills: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm)) {
-        SectionHeader(title = "Menu Cepat", action = null, onAction = {})
+        SectionHeader(title = "Menu", action = null, onAction = {})
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
         ) {
-            QuickMenuItem(label = "Akun", onClick = onAccounts, modifier = Modifier.weight(1f))
-            QuickMenuItem(label = "Budget", onClick = onBudgets, modifier = Modifier.weight(1f))
-            QuickMenuItem(label = "Ringkasan", onClick = onMonthlySummary, modifier = Modifier.weight(1f))
+            QuickMenuItem(label = "Akun", emoji = "💳", onClick = onAccounts, modifier = Modifier.weight(1f))
+            QuickMenuItem(label = "Budget", emoji = "📊", onClick = onBudgets, modifier = Modifier.weight(1f))
+            QuickMenuItem(label = "Ringkasan", emoji = "📋", onClick = onMonthlySummary, modifier = Modifier.weight(1f))
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
         ) {
-            QuickMenuItem(label = "Template", onClick = onTemplates, modifier = Modifier.weight(1f))
-            QuickMenuItem(label = "Berulang", onClick = onRecurring, modifier = Modifier.weight(1f))
-            QuickMenuItem(label = "Kategori", onClick = onCategories, modifier = Modifier.weight(1f))
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
-        ) {
-            QuickMenuItem(label = "Target", onClick = onGoals, modifier = Modifier.weight(1f))
-            QuickMenuItem(label = "Utang", onClick = onDebts, modifier = Modifier.weight(1f))
-            QuickMenuItem(label = "Analisis", onClick = onCashflowTrend, modifier = Modifier.weight(1f))
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
-        ) {
-            QuickMenuItem(label = "Investasi", onClick = onInvestments, modifier = Modifier.weight(1f))
-            QuickMenuItem(label = "Split Bill", onClick = onSplitBills, modifier = Modifier.weight(1f))
-            QuickMenuItem(label = "Pengaturan", onClick = {}, modifier = Modifier.weight(1f))
+            QuickMenuItem(label = "Template", emoji = "⚡", onClick = onTemplates, modifier = Modifier.weight(1f))
+            QuickMenuItem(label = "Berulang", emoji = "🔄", onClick = onRecurring, modifier = Modifier.weight(1f))
+            QuickMenuItem(label = "Kategori", emoji = "🏷️", onClick = onCategories, modifier = Modifier.weight(1f))
         }
     }
 }
@@ -585,12 +664,13 @@ private fun QuickMenuGrid(
 @Composable
 private fun QuickMenuItem(
     label: String,
+    emoji: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val haptic = LocalHapticFeedback.current
 
-    Box(
+    Row(
         modifier = modifier
             .clip(RoundedCornerShape(NyatetDuwitRadius.md))
             .background(MaterialTheme.colorScheme.surface)
@@ -601,9 +681,14 @@ private fun QuickMenuItem(
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
-            .padding(vertical = NyatetDuwitSpacing.md + 2.dp),
-        contentAlignment = Alignment.Center,
+            .padding(
+                horizontal = NyatetDuwitSpacing.md,
+                vertical = NyatetDuwitSpacing.sm + 2.dp,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.xs),
     ) {
+        Text(text = emoji, style = MaterialTheme.typography.titleSmall)
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
@@ -624,11 +709,23 @@ private fun SectionHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(NyatetDuwitSpacing.sm),
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .height(16.dp)
+                    .clip(RoundedCornerShape(NyatetDuwitRadius.full))
+                    .background(MaterialTheme.colorScheme.primary),
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+            )
+        }
         if (action != null) {
             Text(
                 text = action,
@@ -651,12 +748,12 @@ private fun FAB(onClick: () -> Unit) {
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary,
         shape = RoundedCornerShape(NyatetDuwitRadius.lg),
-        modifier = Modifier.padding(bottom = NyatetDuwitSpacing.lg, end = NyatetDuwitSpacing.sm),
+        modifier = Modifier.padding(bottom = NyatetDuwitSpacing.xl, end = NyatetDuwitSpacing.sm),
     ) {
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = "Tambah transaksi",
-            modifier = Modifier.size(26.dp),
+            modifier = Modifier.size(24.dp),
         )
     }
 }
@@ -668,22 +765,30 @@ private fun EmptyDashboardState(onAddTransaction: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = NyatetDuwitSpacing.xxxl),
+            .padding(vertical = NyatetDuwitSpacing.xxl),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = "📝",
-            style = MaterialTheme.typography.displayMedium,
-        )
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = "📝",
+                style = MaterialTheme.typography.headlineLarge,
+            )
+        }
         Spacer(modifier = Modifier.height(NyatetDuwitSpacing.lg))
         Text(
             text = "Belum ada catatan",
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
         )
-        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.sm))
+        Spacer(modifier = Modifier.height(NyatetDuwitSpacing.xs))
         Text(
-            text = "Yuk mulai! Tap + buat transaksi pertamamu",
+            text = "Yuk mulai! Ketuk + buat transaksi pertamamu",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -699,7 +804,7 @@ private fun EmptyDashboardState(onAddTransaction: () -> Unit) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     onAddTransaction()
                 }
-                .padding(horizontal = NyatetDuwitSpacing.xxl, vertical = NyatetDuwitSpacing.md),
+                .padding(horizontal = NyatetDuwitSpacing.xxl, vertical = NyatetDuwitSpacing.md + 2.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -735,6 +840,6 @@ private fun formatAmount(transaction: Transaction): String = when (transaction.t
 }
 
 private fun formatDateShort(timestamp: Long): String {
-    val sdf = SimpleDateFormat("d MMM HH:mm", Locale("id"))
+    val sdf = SimpleDateFormat("d MMM", Locale("id"))
     return sdf.format(Date(timestamp))
 }
